@@ -25,7 +25,7 @@ import {
 } from "./hooks/lifecycle.js";
 
 export default function register(api: any) {
-  const rawConfig = api.config || {};
+  const rawConfig = api.pluginConfig || api.config || {};
   const config = parseConfig(rawConfig);
   const rateTracker = createRateTracker();
   const failsafe = new LocalFailsafe(config);
@@ -79,14 +79,35 @@ export default function register(api: any) {
 
   // Shared context for all hooks
   let currentSessionId = "default";
-  const agentId = rawConfig.agentId || "unknown";
+
+  // Resolve agent ID: config > workspace path > sessionKey > "unknown"
+  let resolvedAgentId = rawConfig.agentId || "unknown";
+  if (resolvedAgentId === "unknown") {
+    // Extract from workspace path: /.../.openclaw/workspace-<agentId>
+    const cwd = process.cwd();
+    const wsMatch = cwd.match(/workspace-([^/]+)$/);
+    if (wsMatch) resolvedAgentId = wsMatch[1];
+  }
+  let agentIdResolved = resolvedAgentId !== "unknown";
 
   const ctx = {
     get agentId() {
-      return agentId;
+      return resolvedAgentId;
     },
     get sessionId() {
       return currentSessionId;
+    },
+    resolveAgentFromEvent(event: any) {
+      if (agentIdResolved) return;
+      const sk = event?.sessionKey as string | undefined;
+      if (sk && sk.startsWith("agent:")) {
+        // Format: agent:<agentId>:main or agent:<agentId>:subagent:<uuid>
+        const parts = sk.split(":");
+        if (parts.length >= 2 && parts[1]) {
+          resolvedAgentId = parts[1];
+          agentIdResolved = true;
+        }
+      }
     },
     sender,
     rateTracker,

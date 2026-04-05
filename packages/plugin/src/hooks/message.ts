@@ -1,6 +1,7 @@
 import { buildEvent } from "../event-builder.js";
 import type { HttpsSender } from "../transport/https-sender.js";
 import { killState } from "../kill-switch/kill-state.js";
+import { getSubagentInfo } from "../subagent-context.js";
 
 interface MessageContext {
   agentId: string;
@@ -16,14 +17,16 @@ export function createMessageSendingHandler(ctx: MessageContext) {
       return { cancel: true };
     }
 
+    const sub = getSubagentInfo(event, ctx.sessionId);
     const clawnitorEvent = buildEvent({
       agentId: ctx.agentId,
-      sessionId: ctx.sessionId,
+      sessionId: sub.sessionId,
       eventType: "message_sent",
       action: `sending message`,
       target: event.channel || "unknown",
       metadata: {
         raw_snippet: event.text ? String(event.text).slice(0, 500) : undefined,
+        ...(sub.subagentId ? { subagent_id: sub.subagentId } : {}),
       },
       customRedactionPatterns: ctx.redactionPatterns,
     });
@@ -35,13 +38,16 @@ export function createMessageSendingHandler(ctx: MessageContext) {
 
 export function createMessageSentHandler(ctx: MessageContext) {
   return (event: any) => {
+    const sub = getSubagentInfo(event, ctx.sessionId);
     const clawnitorEvent = buildEvent({
       agentId: ctx.agentId,
-      sessionId: ctx.sessionId,
+      sessionId: sub.sessionId,
       eventType: "message_sent",
       action: `message sent`,
       target: event.channel || "unknown",
-      metadata: {},
+      metadata: {
+        ...(sub.subagentId ? { subagent_id: sub.subagentId } : {}),
+      },
       customRedactionPatterns: ctx.redactionPatterns,
     });
 
@@ -51,13 +57,16 @@ export function createMessageSentHandler(ctx: MessageContext) {
 
 export function createMessageReceivedHandler(ctx: MessageContext) {
   return (event: any) => {
+    const sub = getSubagentInfo(event, ctx.sessionId);
     const clawnitorEvent = buildEvent({
       agentId: ctx.agentId,
-      sessionId: ctx.sessionId,
+      sessionId: sub.sessionId,
       eventType: "message_received",
       action: `message received`,
       target: event.channel || "unknown",
-      metadata: {},
+      metadata: {
+        ...(sub.subagentId ? { subagent_id: sub.subagentId } : {}),
+      },
       customRedactionPatterns: ctx.redactionPatterns,
     });
 

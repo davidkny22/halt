@@ -9,6 +9,8 @@ const sections = [
   { id: "rules", label: "Rules & Alerts" },
   { id: "kill-switch", label: "Kill Switch" },
   { id: "anomaly", label: "Anomaly Detection" },
+  { id: "cost-tracking", label: "Cost Tracking" },
+  { id: "decision-traces", label: "Decision Traces" },
   { id: "teams", label: "Teams" },
   { id: "offline", label: "Offline Resilience" },
   { id: "api", label: "API Reference" },
@@ -302,7 +304,7 @@ export default function DocsPage() {
             {[
               {
                 name: "Keyword",
-                desc: "Block actions containing specific strings. Case-insensitive by default.",
+                desc: "Match actions containing specific strings. Block, alert, or both. Case-insensitive by default.",
                 example: `{ "type": "keyword", "keywords": ["rm -rf", "DROP TABLE"], "matchMode": "any" }`,
                 tier: null,
               },
@@ -320,7 +322,7 @@ export default function DocsPage() {
               },
               {
                 name: "Natural Language",
-                desc: "Describe what to block in plain English. Evaluated by Claude Haiku.",
+                desc: "Describe what to monitor in plain English. Block, alert, or both. Evaluated by AI.",
                 example: `{ "type": "nl", "promptText": "Block any action that sends emails to more than 10 recipients" }`,
                 tier: "Pro",
               },
@@ -400,6 +402,42 @@ export default function DocsPage() {
             No configuration needed. Baselines are built from your agent&apos;s actual behavior, not generic thresholds.
           </P>
 
+          {/* ═══════════════ COST TRACKING ═══════════════ */}
+          <SectionHeader id="cost-tracking">Cost Tracking</SectionHeader>
+          <P>
+            Every LLM call and tool use captures cost data from OpenClaw&apos;s native tracking. Clawnitor
+            aggregates this into actionable spend analytics on your dashboard:
+          </P>
+          <ul className="text-xs flex flex-col gap-2 mb-4 ml-4" style={{ color: "var(--color-text-secondary)" }}>
+            <li><strong style={{ color: "var(--color-text)" }}>Per-agent cost cards</strong> — see which agents cost the most, with token counts and event volume</li>
+            <li><strong style={{ color: "var(--color-text)" }}>7-day spend chart</strong> — daily trend visualization with week-over-week comparison</li>
+            <li><strong style={{ color: "var(--color-text)" }}>Top costly events</strong> — your 10 most expensive individual calls ranked, with model and timestamp</li>
+            <li><strong style={{ color: "var(--color-text)" }}>Spend today + trend</strong> — stats row shows today&apos;s spend with a percentage change arrow</li>
+          </ul>
+          <P>
+            Cost data comes from OpenClaw&apos;s native <Code>cost_usd</Code> and <Code>tokens_used</Code> fields
+            in event metadata. Clawnitor does not calculate costs — it uses what OpenClaw reports.
+          </P>
+
+          {/* ═══════════════ DECISION TRACES ═══════════════ */}
+          <SectionHeader id="decision-traces">Decision Traces</SectionHeader>
+          <P>
+            On each agent&apos;s detail page, you can see a visual timeline of recent sessions. Click any
+            session to expand its full decision trace — every tool call, LLM request, and message in order.
+          </P>
+          <ul className="text-xs flex flex-col gap-2 mb-4 ml-4" style={{ color: "var(--color-text-secondary)" }}>
+            <li><strong style={{ color: "var(--color-text)" }}>Session cards</strong> — date, duration, event count, total cost per session</li>
+            <li><strong style={{ color: "var(--color-text)" }}>Expandable timeline</strong> — color-coded dots per event type (tool=sky, LLM=purple, message=green, subagent=yellow)</li>
+            <li><strong style={{ color: "var(--color-text)" }}>Per-call detail</strong> — action name, target, model, cost, severity highlighting</li>
+            <li><strong style={{ color: "var(--color-text)" }}>Subagent attribution</strong> — subagent lifecycle events show their ID with indented positioning</li>
+          </ul>
+          <P>
+            Navigate to <strong>Agents</strong> → click an agent → <strong>Sessions</strong> tab.
+            Sessions are tracked with full lifecycle (active, completed, killed) including duration,
+            event count, and cost. Subagent events are nested within their parent session.
+            Blocked events show a BLOCKED badge with the reason and source rule.
+          </P>
+
           {/* ═══════════════ TEAMS ═══════════════ */}
           <SectionHeader id="teams" badge="Team">Teams</SectionHeader>
           <P>
@@ -447,6 +485,11 @@ export default function DocsPage() {
               { method: "POST", path: "/api/agents/:id/kill", desc: "Kill (pause) agent" },
               { method: "POST", path: "/api/agents/:id/resume", desc: "Resume agent" },
               { method: "GET", path: "/api/stats", desc: "Dashboard stats" },
+              { method: "GET", path: "/api/spend", desc: "Spend analytics (per-agent, per-day, top events)" },
+              { method: "GET", path: "/api/sessions", desc: "List sessions (filter by agent, status)" },
+              { method: "GET", path: "/api/sessions/:id", desc: "Session detail" },
+              { method: "GET", path: "/api/sessions/stats", desc: "Session aggregates (duration p50/p95, plugin versions)" },
+              { method: "GET", path: "/api/agents/:id/sessions", desc: "Agent sessions with events (decision traces)" },
               { method: "GET", path: "/api/saves", desc: "List saves (blocked actions)" },
               { method: "GET", path: "/api/saves/count", desc: "Total save count" },
               { method: "GET", path: "/api/status", desc: "Health check (public)" },

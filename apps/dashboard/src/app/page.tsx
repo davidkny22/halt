@@ -14,7 +14,7 @@ const features = [
     icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
     title: "Smart Rules",
     description:
-      "Threshold, rate, keyword — or just describe what you want in plain English. Clawnitor understands.",
+      "Threshold, rate, keyword — or describe what you want in plain English. Each rule: block, alert, or both. You decide per rule.",
     color: "var(--color-purple)",
   },
   {
@@ -37,6 +37,20 @@ const features = [
     description:
       "Email, Telegram, Discord, SMS. Get notified where you actually look, not where you forget to check.",
     color: "var(--color-yellow)",
+  },
+  {
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
+    title: "Cost Tracking",
+    description:
+      "Per-agent spend breakdowns, 7-day trend charts, and your most expensive calls ranked. Know exactly where your money goes.",
+    color: "var(--color-green)",
+  },
+  {
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+    title: "Decision Traces",
+    description:
+      "Visual timeline of every tool call in a session. See what your agent did, in what order, with cost and model info per call.",
+    color: "var(--color-sky)",
   },
   {
     icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,

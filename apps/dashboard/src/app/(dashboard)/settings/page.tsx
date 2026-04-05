@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { CopyBlock } from "@/components/copy-block";
+import { KeyManager } from "@/components/key-manager";
 
 interface ChannelConfig {
   channel: string;
@@ -486,32 +487,7 @@ export default function SettingsPage() {
             className="p-4 rounded-lg"
             style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}
           >
-            <p className="text-sm font-medium mb-2">API Key</p>
-            {newKey ? (
-              <div>
-                <p className="text-xs mb-2" style={{ color: "var(--color-green)" }}>
-                  New key generated! Save it now — it won&apos;t be shown again.
-                </p>
-                <CopyBlock text={newKey} />
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                <code
-                  className="flex-1 px-3 py-2 rounded text-xs"
-                  style={{ backgroundColor: "var(--color-bg)", fontFamily: "var(--font-mono)" }}
-                >
-                  {keyPrefix}................................
-                </code>
-                <button
-                  onClick={handleRotateKey}
-                  disabled={rotatingKey}
-                  className="px-3 py-2 rounded text-xs font-medium cursor-pointer disabled:opacity-50"
-                  style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}
-                >
-                  {rotatingKey ? "..." : "Rotate"}
-                </button>
-              </div>
-            )}
+            <KeyManager />
           </div>
           <button
             onClick={handleDeleteAccount}

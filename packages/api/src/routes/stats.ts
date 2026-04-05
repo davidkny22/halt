@@ -97,6 +97,20 @@ export async function statsRoutes(app: FastifyInstance) {
         .groupBy(sql`date_trunc('day', ${events.timestamp})`)
         .orderBy(sql`date_trunc('day', ${events.timestamp})`);
 
+      // Errors today (events with error in metadata)
+      const [errorsResult] = await db
+        .select({
+          value: sql<number>`count(*)::int`,
+        })
+        .from(events)
+        .where(
+          and(
+            eq(events.user_id, userId),
+            gte(events.timestamp, todayStart),
+            sql`${events.metadata}->>'error' IS NOT NULL`
+          )
+        );
+
       // Last event timestamp
       const [lastEvent] = await db
         .select({ ts: events.timestamp })
@@ -114,6 +128,7 @@ export async function statsRoutes(app: FastifyInstance) {
       return reply.send({
         events_today: Number(eventsToday),
         alerts_today: Number(alertsToday),
+        errors_today: Number(errorsResult?.value || 0),
         spend_today: Number(spendResult?.value || 0),
         agents_active: Number(agentsActive),
         events_this_week: Number(eventsThisWeek),

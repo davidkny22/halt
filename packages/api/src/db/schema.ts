@@ -63,8 +63,10 @@ export const apiKeys = pgTable("api_keys", {
   user_id: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 64 }).notNull().default("Default"),
   key_hash: text("key_hash").notNull(),
   prefix: varchar("prefix", { length: 16 }).notNull(),
+  last_used_at: timestamp("last_used_at", { withTimezone: true }),
   rotated_at: timestamp("rotated_at", { withTimezone: true }),
   revoked_at: timestamp("revoked_at", { withTimezone: true }),
   created_at: timestamp("created_at", { withTimezone: true })
@@ -123,6 +125,41 @@ export const events = pgTable(
   ]
 );
 
+// ── Sessions ─────────────────────────────────────────────
+
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: varchar("id", { length: 255 }).primaryKey(), // session_id from plugin
+    user_id: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    agent_id: uuid("agent_id")
+      .notNull()
+      .references(() => agents.id, { onDelete: "cascade" }),
+    status: varchar("status", { length: 32 }).notNull().default("active"), // active, completed, killed
+    started_at: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+    ended_at: timestamp("ended_at", { withTimezone: true }),
+    duration_ms: integer("duration_ms"),
+    event_count: integer("event_count").notNull().default(0),
+    total_cost: numeric("total_cost", { precision: 12, scale: 6 }).notNull().default("0"),
+    total_tokens: integer("total_tokens").notNull().default(0),
+    kill_reason: text("kill_reason"),
+    metadata: jsonb("metadata").notNull().default({}), // model, plugin_version, etc.
+    created_at: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updated_at: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("sessions_user_idx").on(table.user_id),
+    index("sessions_agent_idx").on(table.agent_id),
+    index("sessions_started_idx").on(table.started_at),
+  ]
+);
+
 // ── Rules ────────────────────────────────────────────────
 
 export const rules = pgTable("rules", {
@@ -135,6 +172,7 @@ export const rules = pgTable("rules", {
   config: jsonb("config").notNull(),
   enabled: boolean("enabled").notNull().default(true),
   agent_visible: boolean("agent_visible").notNull().default(true),
+  action_mode: varchar("action_mode", { length: 16 }).notNull().default("both"),
   created_at: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

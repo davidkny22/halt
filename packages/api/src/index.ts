@@ -22,6 +22,8 @@ import { publicStatsRoutes } from "./routes/public-stats.js";
 import { betaRoutes } from "./routes/beta.js";
 import { analyticsRoutes } from "./routes/analytics.js";
 import { ruleTemplatesRoutes } from "./routes/rule-templates.js";
+import { spendRoutes } from "./routes/spend.js";
+import { sessionsRoutes } from "./routes/sessions.js";
 import { seedRuleTemplates } from "./db/seed-templates.js";
 import { startEventProcessor } from "./jobs/event-processor.js";
 import { startAlertDelivery } from "./jobs/alert-delivery.js";
@@ -81,6 +83,8 @@ export async function buildApp() {
   await app.register(betaRoutes);
   await app.register(analyticsRoutes);
   await app.register(ruleTemplatesRoutes);
+  await app.register(spendRoutes);
+  await app.register(sessionsRoutes);
 
   // Seed rule templates on first startup
   seedRuleTemplates().catch((err) =>

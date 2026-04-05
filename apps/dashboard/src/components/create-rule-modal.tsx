@@ -12,6 +12,7 @@ interface Props {
 export function CreateRuleModal({ onClose, onCreated }: Props) {
   const [name, setName] = useState("");
   const [ruleType, setRuleType] = useState<"threshold" | "rate" | "keyword" | "nl">("threshold");
+  const [actionMode, setActionMode] = useState<"block" | "alert" | "both">("both");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
 
@@ -74,7 +75,7 @@ export function CreateRuleModal({ onClose, onCreated }: Props) {
       const res = await fetch("/api/rules-action", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "create", name, config }),
+        body: JSON.stringify({ action: "create", name, config, action_mode: actionMode }),
       });
 
       if (!res.ok) {
@@ -140,6 +141,35 @@ export function CreateRuleModal({ onClose, onCreated }: Props) {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-medium block mb-1" style={{ color: "var(--color-text-secondary)" }}>When triggered</label>
+            <div className="flex gap-2">
+              {([
+                { value: "both", label: "Block + Alert" },
+                { value: "block", label: "Block Only" },
+                { value: "alert", label: "Alert Only" },
+              ] as const).map((m) => (
+                <button
+                  key={m.value}
+                  onClick={() => setActionMode(m.value)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer"
+                  style={{
+                    backgroundColor: actionMode === m.value ? "var(--color-coral-soft)" : "var(--color-surface)",
+                    color: actionMode === m.value ? "var(--color-coral)" : "var(--color-text-secondary)",
+                    border: `1px solid ${actionMode === m.value ? "var(--color-coral)" : "var(--color-border)"}`,
+                  }}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-[11px] mt-1" style={{ color: "var(--color-text-tertiary)" }}>
+              {actionMode === "both" && "Blocks the action AND sends you an alert."}
+              {actionMode === "block" && "Silently blocks the action. No notification sent."}
+              {actionMode === "alert" && "Sends you an alert but lets the action proceed."}
+            </p>
           </div>
 
           {ruleType === "threshold" && (
@@ -253,7 +283,7 @@ export function CreateRuleModal({ onClose, onCreated }: Props) {
                 className="w-full px-3 py-2 rounded-lg text-sm resize-none"
                 style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
               />
-              <p className="text-[10px] mt-1" style={{ color: "var(--color-text-tertiary)" }}>
+              <p className="text-[11px] mt-1" style={{ color: "var(--color-text-tertiary)" }}>
                 AI evaluates this against each event batch. Requires Pro plan (up to 5 NL rules).
               </p>
             </div>

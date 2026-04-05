@@ -93,11 +93,11 @@ export default async function SavesPage() {
               <div className="flex-1 min-w-0">
                 <div className="font-medium text-sm mb-1">{save.action_blocked}</div>
                 {save.potential_impact && (
-                  <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>
+                  <div className="text-xs mb-2" style={{ color: "var(--color-text-secondary)" }}>
                     {save.potential_impact}
                   </div>
                 )}
-                <div className="flex items-center gap-3 text-xs" style={{ color: "var(--color-text-tertiary)" }}>
+                <div className="flex items-center gap-3 text-xs flex-wrap" style={{ color: "var(--color-text-tertiary)" }}>
                   <span>
                     {new Date(save.created_at).toLocaleDateString(undefined, {
                       month: "short",
@@ -115,6 +115,16 @@ export default async function SavesPage() {
                   >
                     {save.source === "manual-kill" ? "Manual kill" : "Auto-kill"}
                   </span>
+                  {save.agent_name && (
+                    <span style={{ color: "var(--color-sky)" }}>
+                      {save.agent_name}
+                    </span>
+                  )}
+                  {save.rule_name && (
+                    <span style={{ color: "var(--color-purple)" }}>
+                      Rule: {save.rule_name}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

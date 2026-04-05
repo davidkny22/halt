@@ -71,19 +71,14 @@ export function RulesClient({ rules, tier }: { rules: any[]; tier: string }) {
         </div>
       )}
 
-      <TemplateLibrary />
-
       {rules.length === 0 ? (
         <div
-          className="rounded-lg p-8 text-center"
+          className="rounded-lg p-8 text-center mb-8"
           style={{ border: "1px solid var(--color-border)" }}
         >
           <h2 className="text-lg font-semibold mb-2">No rules yet</h2>
           <p className="text-sm mb-4" style={{ color: "var(--color-text-secondary)" }}>
-            Create your first rule to start getting alerts when your agents do something unexpected.
-          </p>
-          <p className="text-xs" style={{ color: "var(--color-text-tertiary)" }}>
-            Rule types: threshold (spend limits), rate (email flooding), keyword (dangerous commands)
+            Create your first rule or pick from the templates below.
           </p>
         </div>
       ) : (
@@ -121,9 +116,24 @@ export function RulesClient({ rules, tier }: { rules: any[]; tier: string }) {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span style={{ color: rule.enabled ? "var(--color-green)" : "var(--color-text-secondary)" }}>
-                      {rule.enabled ? "Active" : "Disabled"}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span style={{ color: rule.enabled ? "var(--color-green)" : "var(--color-text-secondary)" }}>
+                        {rule.enabled ? "Active" : "Disabled"}
+                      </span>
+                      {rule.enabled && (
+                        <span
+                          className="text-[11px] px-1.5 py-0.5 rounded"
+                          style={{
+                            backgroundColor: "var(--color-surface)",
+                            color: rule.action_mode === "block" ? "var(--color-coral)"
+                              : rule.action_mode === "alert" ? "var(--color-sky)"
+                              : "var(--color-text-tertiary)",
+                          }}
+                        >
+                          {rule.action_mode === "block" ? "Block" : rule.action_mode === "alert" ? "Alert" : "Block + Alert"}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button
@@ -141,6 +151,8 @@ export function RulesClient({ rules, tier }: { rules: any[]; tier: string }) {
           </table>
         </div>
       )}
+
+      <TemplateLibrary defaultExpanded={rules.length === 0} />
 
       {showCreate && (
         <CreateRuleModal

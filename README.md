@@ -27,11 +27,14 @@ Clawnitor hooks into OpenClaw's `before_tool_call`. Every action your agent trie
 
 - **Pre-action kill switch** — 3 layers of defense: server kill state, local failsafe, cached rule evaluation. All run before execution. Auto-kill: agents that trigger repeated rule violations are automatically shut down.
 - **Kill from anywhere** — manual kill switch works from the dashboard, API, or any device. Your agents are under your control wherever you are.
-- **Smart rules** — threshold, rate, keyword, or describe what you want in plain English. AI evaluates NL rules against the event stream.
+- **Smart rules** — threshold, rate, keyword, or describe what you want in plain English. Each rule can block, alert, or both — your choice per rule. AI evaluates NL rules against the event stream.
 - **AI anomaly detection** — 72-hour behavioral baselines. Clawnitor learns what normal looks like, then flags what isn't.
 - **Multi-channel alerts** — email, Telegram, Discord, SMS. Get notified where you actually look.
+- **Cost tracking** — per-agent spend breakdowns, 7-day trend charts, most expensive calls ranked. Know exactly where your money goes.
+- **Decision traces** — visual timeline of every tool call within a session. See what your agent did, in what order, with per-call cost and model info.
+- **Subagent tracking** — subagent spawning/ending captured with attribution. See parent-child relationships in your session timelines.
 - **Offline resilience** — SQLite cache, local failsafe, and cached rules stay active even when the internet isn't.
-- **Cloud dashboard** — real-time activity feed, spend trends, rules manager, saves history, team management.
+- **Cloud dashboard** — expandable activity feed with sorting and time range filters, spend analytics (per-agent, per-tool, per-model), session tracking with lifecycle management, decision traces with subagent nesting, rules manager, saves history, team management.
 
 ## Quick start
 
@@ -79,10 +82,12 @@ OpenClaw Agent                    Clawnitor Backend
 
 | | Free | Pro ($5/mo) | Team ($19/mo) | Enterprise |
 |---|---|---|---|---|
-| Agents | 1 | 3 (+$3/ea) | 10 (+$2/ea) | Unlimited |
-| Rules | 3 pattern | Unlimited + NL | Unlimited + shared | Unlimited |
-| Kill switch | — | Yes | Yes | Yes |
-| AI detection | — | Yes | Yes | Yes |
+| Agents | 1 | 1 (+$3/ea) | 5 (+$2/ea) | Unlimited |
+| Rules | 3 pattern | Unlimited + 5 NL | Unlimited + 20 NL | Unlimited |
+| Kill switch | 1/mo + local failsafe | Unlimited + auto-kill | Unlimited + auto-kill | Unlimited + auto-kill |
+| Cost tracking | Yes | Yes | Yes | Yes |
+| Decision traces | Yes | Yes | Yes | Yes |
+| AI detection | — | 15-min eval | 5-min eval | 5-min eval |
 | Alerts | Email | All channels | All channels | All + webhooks |
 | History | 7 days | 90 days | 1 year | Unlimited |
 | Team members | 2 | 3 | 10 | Unlimited |

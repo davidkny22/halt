@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { eq, and, gte, sql, count } from "drizzle-orm";
 import { getDb } from "../db/client.js";
-import { agents, saves, users } from "../db/schema.js";
+import { agents, saves, users, sessions } from "../db/schema.js";
 import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
 import { sendKill, sendUnkill } from "../ws/kill-server.js";
 import { logAudit } from "./enterprise.js";
@@ -62,6 +62,19 @@ export async function killRoutes(app: FastifyInstance) {
       if (!agent) {
         return reply.status(404).send({ error: "Not Found", message: "Agent not found" });
       }
+
+      // Mark active sessions for this agent as killed
+      await db
+        .update(sessions)
+        .set({
+          status: "killed",
+          kill_reason: reason || "Killed via API",
+          ended_at: new Date(),
+          updated_at: new Date(),
+        })
+        .where(
+          and(eq(sessions.agent_id, agentId), eq(sessions.status, "active"))
+        );
 
       // Send kill via WebSocket
       sendKill(request.userId!, reason || "Killed via API");

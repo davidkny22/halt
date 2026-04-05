@@ -41,12 +41,12 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 const CACHE_KEY = "clw_rule_templates";
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h
 
-export function TemplateLibrary() {
+export function TemplateLibrary({ defaultExpanded = false }: { defaultExpanded?: boolean }) {
   const [templates, setTemplates] = useState<Record<string, RuleTemplate[]>>({});
   const [activeCategory, setActiveCategory] = useState("safety");
   const [installing, setInstalling] = useState<string | null>(null);
   const [installed, setInstalled] = useState<Set<string>>(new Set());
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(defaultExpanded);
   const router = useRouter();
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export function TemplateLibrary() {
   const categoryTemplates = templates[activeCategory] || [];
 
   return (
-    <div className="mb-8">
+    <div className="mt-8">
       <button
         onClick={() => setExpanded(!expanded)}
         className="flex items-center gap-2 mb-4 text-sm font-semibold"
@@ -181,13 +181,13 @@ export function TemplateLibrary() {
                     <h3 className="text-sm font-semibold">{t.name}</h3>
                     <div className="flex gap-1.5 shrink-0 ml-2">
                       <span
-                        className="text-[10px] px-1.5 py-0.5 rounded font-medium"
+                        className="text-[11px] px-1.5 py-0.5 rounded font-medium"
                         style={{ backgroundColor: sev.bg, color: sev.text }}
                       >
                         {t.severity}
                       </span>
                       <span
-                        className="text-[10px] px-1.5 py-0.5 rounded font-medium"
+                        className="text-[11px] px-1.5 py-0.5 rounded font-medium"
                         style={{
                           color: TYPE_COLORS[t.rule_type] || "var(--color-text-secondary)",
                           backgroundColor: `color-mix(in srgb, ${TYPE_COLORS[t.rule_type] || "var(--color-text-secondary)"} 15%, transparent)`,
@@ -208,7 +208,7 @@ export function TemplateLibrary() {
                   <div className="flex items-center justify-between">
                     {t.agent_visible && (
                       <span
-                        className="text-[10px]"
+                        className="text-[11px]"
                         style={{ color: "var(--color-text-tertiary)" }}
                       >
                         Agent sees this rule
@@ -216,7 +216,7 @@ export function TemplateLibrary() {
                     )}
                     {!t.agent_visible && (
                       <span
-                        className="text-[10px]"
+                        className="text-[11px]"
                         style={{ color: "var(--color-text-tertiary)" }}
                       >
                         Silent enforcement

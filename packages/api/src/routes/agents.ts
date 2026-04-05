@@ -1,8 +1,8 @@
 import type { FastifyInstance } from "fastify";
-import { eq, and, count } from "drizzle-orm";
+import { eq, and, count, desc, sql, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "../db/client.js";
-import { agents, baselines, users } from "../db/schema.js";
+import { agents, baselines, users, events } from "../db/schema.js";
 import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
 import { TIER_FEATURES, type Tier } from "@clawnitor/shared";
 
@@ -169,6 +169,88 @@ export async function agentsRoutes(app: FastifyInstance) {
           windowMinutes: agent.auto_kill_window_minutes,
         },
       });
+    },
+  });
+
+  // Recent sessions with events (decision traces)
+  app.get("/api/agents/:id/sessions", {
+    preHandler: [authenticateApiKey],
+    handler: async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const db = getDb();
+
+      // Verify agent belongs to user
+      const [agent] = await db
+        .select()
+        .from(agents)
+        .where(and(eq(agents.id, id), eq(agents.user_id, request.userId!)));
+
+      if (!agent) {
+        return reply.status(404).send({ error: "Agent not found" });
+      }
+
+      // Get recent distinct sessions for this agent
+      const sessionSummaries = await db
+        .select({
+          session_id: events.session_id,
+          started: sql<string>`min(${events.timestamp})::text`,
+          ended: sql<string>`max(${events.timestamp})::text`,
+          event_count: sql<number>`count(*)::int`,
+          cost: sql<number>`COALESCE(SUM((${events.metadata}->>'cost_usd')::numeric), 0)::float`,
+          tokens: sql<number>`COALESCE(SUM((${events.metadata}->>'tokens_used')::int), 0)::int`,
+        })
+        .from(events)
+        .where(
+          and(
+            eq(events.user_id, request.userId!),
+            eq(events.agent_id, id)
+          )
+        )
+        .groupBy(events.session_id)
+        .orderBy(desc(sql`max(${events.timestamp})`))
+        .limit(10);
+
+      // Get all events for these sessions
+      const sessionIds = sessionSummaries.map((s) => s.session_id);
+      if (sessionIds.length === 0) {
+        return reply.send({ sessions: [] });
+      }
+
+      const sessionEvents = await db
+        .select({
+          id: events.id,
+          session_id: events.session_id,
+          event_type: events.event_type,
+          action: events.action,
+          target: events.target,
+          metadata: events.metadata,
+          severity_hint: events.severity_hint,
+          timestamp: events.timestamp,
+        })
+        .from(events)
+        .where(
+          and(
+            eq(events.user_id, request.userId!),
+            eq(events.agent_id, id),
+            inArray(events.session_id, sessionIds)
+          )
+        )
+        .orderBy(events.timestamp);
+
+      // Group events by session
+      const eventsBySession = new Map<string, typeof sessionEvents>();
+      for (const event of sessionEvents) {
+        const sid = event.session_id;
+        if (!eventsBySession.has(sid)) eventsBySession.set(sid, []);
+        eventsBySession.get(sid)!.push(event);
+      }
+
+      const sessions = sessionSummaries.map((s) => ({
+        ...s,
+        events: eventsBySession.get(s.session_id) || [],
+      }));
+
+      return reply.send({ sessions });
     },
   });
 }

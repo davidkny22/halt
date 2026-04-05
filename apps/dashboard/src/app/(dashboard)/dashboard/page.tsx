@@ -1,7 +1,11 @@
 import { ActivityFeed } from "@/components/activity-feed";
 import { SpendChart } from "@/components/spend-chart";
+import { AgentCostCards } from "@/components/agent-cost-cards";
+import { TopEventsTable } from "@/components/top-events-table";
+import { ToolCostCards } from "@/components/tool-cost-cards";
+import { ModelCostCards } from "@/components/model-cost-cards";
 import { CopyBlock } from "@/components/copy-block";
-import { getUserInfo, getStats, getEvents, getSavesCount } from "@/lib/server-api";
+import { getUserInfo, getStats, getEvents, getSavesCount, getSpend } from "@/lib/server-api";
 import Link from "next/link";
 
 function TrendArrow({ trend }: { trend: number }) {
@@ -9,7 +13,7 @@ function TrendArrow({ trend }: { trend: number }) {
   const up = trend > 0;
   return (
     <span
-      className="text-[10px] font-medium ml-1"
+      className="text-[11px] font-medium ml-1"
       style={{ color: up ? "var(--color-coral)" : "var(--color-green)" }}
     >
       {up ? "\u2191" : "\u2193"}{Math.abs(trend)}%
@@ -18,11 +22,12 @@ function TrendArrow({ trend }: { trend: number }) {
 }
 
 export default async function DashboardPage() {
-  const [user, stats, eventsData, savesData] = await Promise.all([
+  const [user, stats, eventsData, savesData, spendData] = await Promise.all([
     getUserInfo(),
     getStats(),
-    getEvents(20),
+    getEvents(100),
     getSavesCount(),
+    getSpend(7),
   ]);
 
   const savesCount = savesData?.count ?? 0;
@@ -30,6 +35,10 @@ export default async function DashboardPage() {
   const spendTrend = (stats as any)?.spend_trend ?? 0;
   const dailySpend = (stats as any)?.daily_spend ?? [];
   const hasEvents = eventsData?.events && eventsData.events.length > 0;
+  const byAgent = spendData?.by_agent ?? [];
+  const byModel = spendData?.by_model ?? [];
+  const byTool = spendData?.by_tool ?? [];
+  const topEvents = spendData?.top_events ?? [];
 
   return (
     <div>
@@ -58,7 +67,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Stats row with trend arrows */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         {[
           { label: "Events Today", value: stats?.events_today ?? 0 },
           {
@@ -75,6 +84,11 @@ export default async function DashboardPage() {
             label: "Alerts Today",
             value: stats?.alerts_today ?? 0,
             color: (stats?.alerts_today ?? 0) > 0 ? "var(--color-yellow)" : undefined,
+          },
+          {
+            label: "Errors Today",
+            value: (stats as any)?.errors_today ?? 0,
+            color: ((stats as any)?.errors_today ?? 0) > 0 ? "var(--color-coral)" : undefined,
           },
         ].map((stat) => (
           <div
@@ -103,11 +117,15 @@ export default async function DashboardPage() {
         >
           <h2 className="text-lg font-semibold mb-2">Welcome to Clawnitor!</h2>
           <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
-            Install the plugin to start monitoring your OpenClaw agents.
+            Two commands to start monitoring your OpenClaw agents.
           </p>
-          <div className="max-w-md mx-auto">
+          <div className="max-w-md mx-auto flex flex-col gap-3">
             <CopyBlock text="openclaw plugins install @clawnitor/plugin" />
+            <CopyBlock text="npx clawnitor init" />
           </div>
+          <p className="text-xs mt-4" style={{ color: "var(--color-text-tertiary)" }}>
+            <code style={{ fontFamily: "var(--font-mono)" }}>clawnitor init</code> handles authentication and API key setup.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -152,10 +170,17 @@ export default async function DashboardPage() {
                 )}
               </div>
             )}
+
+            {/* Top costly events — below feed, same column */}
+            {topEvents.length > 0 && (
+              <div className="mt-6">
+                <TopEventsTable events={topEvents} />
+              </div>
+            )}
           </div>
 
-          {/* Spend chart — right column */}
-          <div>
+          {/* Cost sidebar — right column */}
+          <div className="flex flex-col gap-6">
             {dailySpend.length > 0 ? (
               <SpendChart data={dailySpend} />
             ) : (
@@ -172,6 +197,9 @@ export default async function DashboardPage() {
                 </span>
               </div>
             )}
+            {byAgent.length > 0 && <AgentCostCards agents={byAgent} />}
+            {byModel.length > 0 && <ModelCostCards models={byModel} />}
+            {byTool.length > 0 && <ToolCostCards tools={byTool} />}
           </div>
         </div>
       )}

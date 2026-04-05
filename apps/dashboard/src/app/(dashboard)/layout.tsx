@@ -70,6 +70,7 @@ export default async function DashboardLayout({
 
   // Fetch user info for tier
   let tier = "free";
+  let trialDaysLeft: number | null = null;
   try {
     const INTERNAL_SECRET = process.env.INTERNAL_API_SECRET || "";
     const res = await fetch(
@@ -79,6 +80,11 @@ export default async function DashboardLayout({
     if (res.ok) {
       const data = await res.json();
       tier = data.tier || "free";
+      if (tier === "trial" && data.beta_expires_at) {
+        const expires = new Date(data.beta_expires_at).getTime();
+        const now = Date.now();
+        trialDaysLeft = Math.max(0, Math.ceil((expires - now) / (1000 * 60 * 60 * 24)));
+      }
     }
   } catch {}
 
@@ -133,7 +139,7 @@ export default async function DashboardLayout({
             className="text-xs px-2 py-1 rounded-full font-medium"
             style={{ backgroundColor: colors.bg, color: colors.text }}
           >
-            {tier === "paid" ? "Pro" : tier === "trial" ? "Pro (Trial)" : tierLabel}
+            {tier === "paid" ? "Pro" : tier === "trial" ? `Pro Trial${trialDaysLeft != null ? ` · ${trialDaysLeft}d` : ""}` : tierLabel}
           </span>
           {session?.user?.email && (
             <span className="text-xs" style={{ color: "var(--color-text-tertiary)" }}>

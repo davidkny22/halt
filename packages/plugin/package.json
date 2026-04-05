@@ -1,6 +1,6 @@
 {
   "name": "@clawnitor/plugin",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "OpenClaw plugin for Clawnitor — agent monitoring, alerting, and kill switch",
   "type": "module",
   "main": "./dist/index.js",

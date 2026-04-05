@@ -22,6 +22,7 @@ export const eventMetadataSchema = z.object({
   duration_ms: z.number().optional(),
   error: z.string().optional(),
   raw_snippet: z.string().max(500).optional(),
+  subagent_id: z.string().optional(),
 });
 
 export type EventMetadata = z.infer<typeof eventMetadataSchema>;

@@ -70,25 +70,35 @@ export function createAgentEndHandler(ctx: LifecycleContext) {
 export function createSubagentHandlers(ctx: LifecycleContext) {
   return {
     spawning: (event: any) => {
+      const subagentId = event.subagentId || event.childSessionKey || "unknown";
       const clawnitorEvent = buildEvent({
         agentId: ctx.agentId,
         sessionId: ctx.sessionId,
         eventType: "subagent",
         action: "subagent spawning",
-        target: event.subagentId || "unknown",
-        metadata: {},
+        target: subagentId,
+        metadata: {
+          subagent_id: subagentId,
+          raw_snippet: event.label || event.task
+            ? `${event.label || "subagent"}: ${(event.task || "").slice(0, 450)}`
+            : undefined,
+        },
         customRedactionPatterns: ctx.redactionPatterns,
       });
       ctx.sender.enqueue(clawnitorEvent);
     },
     ended: (event: any) => {
+      const subagentId = event.subagentId || event.childSessionKey || "unknown";
       const clawnitorEvent = buildEvent({
         agentId: ctx.agentId,
         sessionId: ctx.sessionId,
         eventType: "subagent",
         action: "subagent ended",
-        target: event.subagentId || "unknown",
-        metadata: { duration_ms: event.duration },
+        target: subagentId,
+        metadata: {
+          subagent_id: subagentId,
+          duration_ms: event.duration || event.runtimeMs,
+        },
         customRedactionPatterns: ctx.redactionPatterns,
       });
       ctx.sender.enqueue(clawnitorEvent);

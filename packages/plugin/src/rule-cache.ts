@@ -6,6 +6,7 @@ export interface CachedRule {
   rule_type: string;
   config: any;
   enabled: boolean;
+  action_mode?: string; // "block" | "alert" | "both"
 }
 
 interface RuleCheckResult {
@@ -81,8 +82,15 @@ export class RuleCache {
   ): RuleCheckResult {
     const paramsStr = params ? JSON.stringify(params).slice(0, 500) : "";
 
+    // Skip rule evaluation for tool calls that target the Clawnitor backend itself
+    // (e.g., curl commands creating rules with keywords in the config)
+    if (paramsStr.includes("api.clawnitor.io") || paramsStr.includes("/api/rules")) {
+      return { blocked: false };
+    }
+
     for (const rule of this.rules) {
       if (rule.rule_type === "nl") continue; // Can't evaluate locally
+      if (rule.action_mode === "alert") continue; // Alert-only rules don't block
 
       const result = this.evaluateRule(rule, toolName, paramsStr);
       if (result.blocked) {

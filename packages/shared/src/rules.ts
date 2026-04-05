@@ -44,6 +44,9 @@ export const ruleConfigSchema = z.discriminatedUnion("type", [
 
 export type RuleConfig = z.infer<typeof ruleConfigSchema>;
 
+export const ACTION_MODES = ["block", "alert", "both"] as const;
+export type ActionMode = (typeof ACTION_MODES)[number];
+
 export interface Rule {
   id: string;
   user_id: string;
@@ -51,6 +54,7 @@ export interface Rule {
   rule_type: RuleType;
   config: RuleConfig;
   enabled: boolean;
+  action_mode: ActionMode;
   created_at: string;
   updated_at: string;
 }

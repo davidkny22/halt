@@ -5,6 +5,7 @@ import { killState } from "../kill-switch/kill-state.js";
 import type { LocalFailsafe } from "../kill-switch/local-failsafe.js";
 import type { RuleCache } from "../rule-cache.js";
 import type { ViolationTracker } from "../auto-kill.js";
+import { getSubagentInfo } from "../subagent-context.js";
 
 interface ToolCallContext {
   agentId: string;
@@ -19,6 +20,9 @@ interface ToolCallContext {
 
 export function createBeforeToolCallHandler(ctx: ToolCallContext) {
   return (event: any) => {
+    // Resolve agent ID from session key on first event
+    (ctx as any).resolveAgentFromEvent?.(event);
+    const sub = getSubagentInfo(event, ctx.sessionId);
     ctx.rateTracker.record();
     ctx.failsafe.recordToolCall();
 
@@ -32,14 +36,27 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
       target: event.toolName,
     });
 
+    // Build a descriptive action label from tool name + params
+    const toolName = event.toolName || "unknown";
+    const paramHint = event.params?.command
+      ? `: ${String(event.params.command).slice(0, 80)}`
+      : event.params?.url
+      ? `: ${String(event.params.url).slice(0, 80)}`
+      : event.params?.file_path
+      ? `: ${String(event.params.file_path).slice(0, 80)}`
+      : event.params?.action
+      ? `: ${String(event.params.action).slice(0, 80)}`
+      : "";
+
     const clawnitorEvent = buildEvent({
       agentId: ctx.agentId,
-      sessionId: ctx.sessionId,
+      sessionId: sub.sessionId,
       eventType: "tool_use",
-      action: `before: ${event.toolName || "unknown"}`,
-      target: event.toolName || "unknown",
+      action: `${toolName}${paramHint}`,
+      target: toolName,
       metadata: {
-        tool_name: event.toolName,
+        tool_name: toolName,
+        ...(sub.subagentId ? { subagent_id: sub.subagentId } : {}),
         ...(event.params ? { raw_snippet: JSON.stringify(event.params).slice(0, 500) } : {}),
       },
       rateTracker: ctx.rateTracker,
@@ -48,22 +65,40 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
 
     ctx.sender.enqueue(clawnitorEvent);
 
+    // Helper: capture a blocked event
+    const captureBlocked = (reason: string, source: string) => {
+      const blockedEvent = buildEvent({
+        agentId: ctx.agentId,
+        sessionId: sub.sessionId,
+        eventType: "tool_use",
+        action: `BLOCKED: ${toolName}${paramHint}`,
+        target: toolName,
+        metadata: {
+          tool_name: toolName,
+          blocked: true,
+          block_reason: reason,
+          block_source: source,
+          ...(sub.subagentId ? { subagent_id: sub.subagentId } : {}),
+        },
+        rateTracker: ctx.rateTracker,
+        customRedactionPatterns: ctx.redactionPatterns,
+      });
+      ctx.sender.enqueue(blockedEvent);
+    };
+
     // 1. Check kill state (server-triggered)
     if (killState.isKilled()) {
-      return {
-        block: true,
-        blockReason: `Clawnitor: agent paused — ${killState.getReason() || "unknown reason"}`,
-      };
+      const reason = `Clawnitor: agent paused — ${killState.getReason() || "unknown reason"}`;
+      captureBlocked(reason, "kill-state");
+      return { block: true, blockReason: reason };
     }
 
     // 2. Check local failsafe (spend/rate/blocklist)
     const failsafeResult = ctx.failsafe.check(event.toolName || "");
     if (failsafeResult.block) {
+      captureBlocked(failsafeResult.reason, "failsafe");
       killState.setKilled(failsafeResult.reason);
-      return {
-        block: true,
-        blockReason: failsafeResult.reason,
-      };
+      return { block: true, blockReason: failsafeResult.reason };
     }
 
     // 3. Check cached server rules locally (PRE-ACTION for pattern rules)
@@ -72,7 +107,9 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
       event.params
     );
     if (ruleResult.blocked) {
-      // Record violation for auto-kill tracking (don't kill yet — just block this action)
+      captureBlocked(ruleResult.reason || "Rule matched", `rule:${ruleResult.ruleName}`);
+
+      // Record violation for auto-kill tracking
       const autoKillResult = ctx.violationTracker.recordViolation({
         ruleId: ruleResult.ruleName || "unknown",
         ruleName: ruleResult.ruleName || "unknown",
@@ -81,20 +118,12 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
         target: event.toolName || "unknown",
       });
 
-      // If auto-kill threshold reached, escalate to full agent kill
       if (autoKillResult.shouldKill) {
         killState.setKilled(autoKillResult.message);
-        return {
-          block: true,
-          blockReason: autoKillResult.message,
-        };
+        return { block: true, blockReason: autoKillResult.message };
       }
 
-      // Otherwise just block this individual action
-      return {
-        block: true,
-        blockReason: ruleResult.reason,
-      };
+      return { block: true, blockReason: ruleResult.reason };
     }
 
     return undefined;
@@ -103,6 +132,8 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
 
 export function createAfterToolCallHandler(ctx: ToolCallContext) {
   return (event: any) => {
+    const sub = getSubagentInfo(event, ctx.sessionId);
+
     // Track spend for failsafe and rule cache
     if (typeof event.cost === "number") {
       ctx.failsafe.addSpend(event.cost);
@@ -114,18 +145,21 @@ export function createAfterToolCallHandler(ctx: ToolCallContext) {
       });
     }
 
+    const afterToolName = event.toolName || "unknown";
+
     const clawnitorEvent = buildEvent({
       agentId: ctx.agentId,
-      sessionId: ctx.sessionId,
+      sessionId: sub.sessionId,
       eventType: "tool_use",
-      action: `after: ${event.toolName || "unknown"}`,
-      target: event.toolName || "unknown",
+      action: `${afterToolName} completed${event.error ? " (error)" : ""}`,
+      target: afterToolName,
       metadata: {
-        tool_name: event.toolName,
+        tool_name: afterToolName,
         duration_ms: event.duration,
         error: event.error?.message,
         cost_usd: event.cost,
         raw_snippet: event.result ? String(event.result).slice(0, 500) : undefined,
+        ...(sub.subagentId ? { subagent_id: sub.subagentId } : {}),
       },
       rateTracker: ctx.rateTracker,
       customRedactionPatterns: ctx.redactionPatterns,

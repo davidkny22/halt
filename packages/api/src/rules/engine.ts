@@ -7,6 +7,7 @@ export interface RuleWithId {
   id: string;
   name: string;
   config: RuleConfig;
+  action_mode?: string; // "block" | "alert" | "both"
 }
 
 export interface RuleEvalResult {

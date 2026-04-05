@@ -110,6 +110,53 @@ export async function getSaves(limit = 20) {
   return serverFetch<{ saves: any[] }>(`/api/saves?limit=${limit}`);
 }
 
+export async function getSpend(days = 7) {
+  return serverFetch<{
+    period_days: number;
+    total: { cost: number; tokens: number; events: number };
+    by_agent: {
+      agent_id: string;
+      agent_name: string | null;
+      cost: number;
+      tokens: number;
+      event_count: number;
+    }[];
+    by_day: { day: string; cost: number; tokens: number; event_count: number }[];
+    by_session: {
+      session_id: string;
+      agent_name: string | null;
+      cost: number;
+      tokens: number;
+      event_count: number;
+      started: string;
+      ended: string;
+    }[];
+    by_model: {
+      model: string;
+      cost: number;
+      tokens: number;
+      event_count: number;
+    }[];
+    by_tool: {
+      tool_name: string;
+      cost: number;
+      tokens: number;
+      event_count: number;
+    }[];
+    top_events: {
+      id: string;
+      event_type: string;
+      action: string;
+      target: string;
+      cost: number;
+      tokens: number;
+      model: string | null;
+      timestamp: string;
+      agent_name: string | null;
+    }[];
+  }>(`/api/spend?days=${days}`);
+}
+
 export async function getSession() {
   return auth();
 }

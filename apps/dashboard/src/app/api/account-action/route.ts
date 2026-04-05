@@ -36,6 +36,48 @@ export async function POST(request: Request) {
     return Response.json(await res.json(), { status: res.status });
   }
 
+  if (action === "list-keys") {
+    const res = await fetch(`${API_URL}/api/account/keys`, {
+      method: "GET",
+      headers,
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "create-key") {
+    const res = await fetch(`${API_URL}/api/account/keys`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ name: data.name }),
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "rename-key") {
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(data.keyId)) {
+      return Response.json({ error: "Invalid key ID" }, { status: 400 });
+    }
+    const res = await fetch(`${API_URL}/api/account/keys/${data.keyId}`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({ name: data.name }),
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "revoke-key") {
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(data.keyId)) {
+      return Response.json({ error: "Invalid key ID" }, { status: 400 });
+    }
+    const res = await fetch(`${API_URL}/api/account/keys/${data.keyId}`, {
+      method: "DELETE",
+      headers,
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
   if (action === "delete-account") {
     const res = await fetch(`${API_URL}/api/account`, {
       method: "DELETE",

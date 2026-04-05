@@ -7,15 +7,19 @@ import { ruleConfigSchema, MAX_FREE_RULES, TIER_FEATURES, type Tier } from "@cla
 import { z } from "zod";
 import { logAudit } from "./enterprise.js";
 
+const actionModeSchema = z.enum(["block", "alert", "both"]).default("both");
+
 const createRuleBody = z.object({
   name: z.string().min(1).max(255),
   config: ruleConfigSchema,
+  action_mode: actionModeSchema.optional(),
 });
 
 const updateRuleBody = z.object({
   name: z.string().min(1).max(255).optional(),
   config: ruleConfigSchema.optional(),
   enabled: z.boolean().optional(),
+  action_mode: actionModeSchema.optional(),
 });
 
 export async function rulesRoutes(app: FastifyInstance) {
@@ -98,7 +102,7 @@ export async function rulesRoutes(app: FastifyInstance) {
         }
       }
 
-      const { name, config } = parsed.data;
+      const { name, config, action_mode } = parsed.data;
       const [rule] = await db
         .insert(rules)
         .values({
@@ -106,6 +110,7 @@ export async function rulesRoutes(app: FastifyInstance) {
           name,
           rule_type: config.type,
           config,
+          action_mode: action_mode || "both",
         })
         .returning();
 
@@ -137,6 +142,7 @@ export async function rulesRoutes(app: FastifyInstance) {
         updates.rule_type = parsed.data.config.type;
       }
       if (parsed.data.enabled !== undefined) updates.enabled = parsed.data.enabled;
+      if (parsed.data.action_mode) updates.action_mode = parsed.data.action_mode;
 
       const [updated] = await db
         .update(rules)

@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { clawnitorEventSchema } from "@clawnitor/shared";
 import { getDb } from "../db/client.js";
-import { events, agents, baselines } from "../db/schema.js";
+import { events, agents, baselines, sessions } from "../db/schema.js";
 import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
 import { RateLimiter } from "../util/rate-limiter.js";
 import { IdempotencyChecker } from "../util/idempotency.js";
@@ -122,6 +122,54 @@ export async function eventsRoutes(app: FastifyInstance) {
         target: events.id,
       });
 
+      // Upsert sessions — create on first event, update stats on subsequent
+      const sessionMap = new Map<string, { agentDbId: string; events: typeof acceptedEvents }>();
+      for (const event of acceptedEvents) {
+        const sid = event.session_id;
+        const agentDbId = agentIdMap.get(event.agent_id);
+        if (!agentDbId) continue;
+        if (!sessionMap.has(sid)) sessionMap.set(sid, { agentDbId, events: [] });
+        sessionMap.get(sid)!.events.push(event);
+      }
+
+      for (const [sid, { agentDbId, events: sessionEvents }] of sessionMap) {
+        const cost = sessionEvents.reduce((s, e) => s + (e.metadata?.cost_usd || 0), 0);
+        const tokens = sessionEvents.reduce((s, e) => s + (e.metadata?.tokens_used || 0), 0);
+        const isStart = sessionEvents.some((e) => e.action === "session started");
+        const isEnd = sessionEvents.some((e) => e.action === "session ended" || e.action === "agent ended");
+        const duration = sessionEvents.find((e) => e.metadata?.duration_ms)?.metadata?.duration_ms;
+
+        const existing = await db.select().from(sessions).where(eq(sessions.id, sid)).limit(1);
+        if (existing.length === 0) {
+          await db.insert(sessions).values({
+            id: sid,
+            user_id: userId,
+            agent_id: agentDbId,
+            status: isEnd ? "completed" : "active",
+            started_at: new Date(sessionEvents[0].timestamp),
+            ended_at: isEnd ? new Date(sessionEvents[sessionEvents.length - 1].timestamp) : undefined,
+            duration_ms: duration ? Math.round(duration) : undefined,
+            event_count: sessionEvents.length,
+            total_cost: String(cost),
+            total_tokens: tokens,
+            metadata: { plugin_version: sessionEvents[0].plugin_version },
+          }).onConflictDoNothing();
+        } else {
+          const updates: Record<string, unknown> = {
+            event_count: (existing[0].event_count || 0) + sessionEvents.length,
+            total_cost: String(Number(existing[0].total_cost || 0) + cost),
+            total_tokens: (existing[0].total_tokens || 0) + tokens,
+            updated_at: new Date(),
+          };
+          if (isEnd) {
+            updates.status = "completed";
+            updates.ended_at = new Date(sessionEvents[sessionEvents.length - 1].timestamp);
+            if (duration) updates.duration_ms = Math.round(duration);
+          }
+          await db.update(sessions).set(updates).where(eq(sessions.id, sid));
+        }
+      }
+
       // Enqueue for processing (rule evaluation in Phase 2)
       await eventsQueue.add("process", { events: acceptedEvents, userId });
 
@@ -170,8 +218,23 @@ export async function eventsRoutes(app: FastifyInstance) {
       }
 
       const rows = await db
-        .select()
+        .select({
+          id: events.id,
+          user_id: events.user_id,
+          agent_id: events.agent_id,
+          agent_name: agents.name,
+          session_id: events.session_id,
+          event_type: events.event_type,
+          action: events.action,
+          target: events.target,
+          metadata: events.metadata,
+          severity_hint: events.severity_hint,
+          plugin_version: events.plugin_version,
+          timestamp: events.timestamp,
+          created_at: events.created_at,
+        })
         .from(events)
+        .leftJoin(agents, eq(events.agent_id, agents.id))
         .where(and(...conditions))
         .orderBy(desc(events.timestamp))
         .limit(limit)

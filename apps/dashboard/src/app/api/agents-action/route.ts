@@ -47,5 +47,37 @@ export async function POST(request: Request) {
     return Response.json(await res.json(), { status: res.status });
   }
 
+  if (action === "get-sessions") {
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(data.agentId)) {
+      return Response.json({ error: "Invalid agent ID" }, { status: 400 });
+    }
+    // Use real sessions table
+    const res = await fetch(`${API_URL}/api/sessions?agent_id=${data.agentId}&limit=20`, {
+      method: "GET",
+      headers,
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "get-session-events") {
+    // Get events for a specific session (for expanding traces)
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(data.agentId)) {
+      return Response.json({ error: "Invalid agent ID" }, { status: 400 });
+    }
+    const res = await fetch(`${API_URL}/api/agents/${data.agentId}/sessions`, {
+      method: "GET",
+      headers,
+    });
+    const result = await res.json();
+    // Filter to the requested session
+    if (data.sessionId && result.sessions) {
+      const match = result.sessions.find((s: any) => s.session_id === data.sessionId);
+      return Response.json({ events: match?.events || [] }, { status: 200 });
+    }
+    return Response.json(result, { status: res.status });
+  }
+
   return Response.json({ error: "Unknown action" }, { status: 400 });
 }

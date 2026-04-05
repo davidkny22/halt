@@ -34,6 +34,7 @@ export function startEventProcessor() {
           id: r.id,
           name: r.name,
           config: r.config as RuleConfig,
+          action_mode: (r as any).action_mode || "both",
         })
       );
 
@@ -48,26 +49,33 @@ export function startEventProcessor() {
     // Create alert records for triggered rules
     for (const result of triggered) {
       const severity = determineSeverity(result.rule.config);
+      const mode = result.rule.action_mode || "both";
+      const shouldAlert = mode === "alert" || mode === "both";
+      const shouldBlock = mode === "block" || mode === "both";
 
-      const [alert] = await db
-        .insert(alerts)
-        .values({
-          user_id: userId,
-          rule_id: result.rule.id,
-          agent_id: null, // Could be derived from events
-          severity: severity as any,
-          message: `Rule "${result.rule.name}" triggered: ${result.context || "condition met"}`,
-          context: {
-            rule_name: result.rule.name,
-            rule_config: result.rule.config,
-            trigger_context: result.context,
-            event_count: events.length,
-          },
-        })
-        .returning();
+      // Only create alert record if mode includes alerting
+      let alert: any = null;
+      if (shouldAlert) {
+        [alert] = await db
+          .insert(alerts)
+          .values({
+            user_id: userId,
+            rule_id: result.rule.id,
+            agent_id: null,
+            severity: severity as any,
+            message: `Rule "${result.rule.name}" triggered: ${result.context || "condition met"}`,
+            context: {
+              rule_name: result.rule.name,
+              rule_config: result.rule.config,
+              trigger_context: result.context,
+              event_count: events.length,
+            },
+          })
+          .returning();
+      }
 
-      // Auto-kill on critical severity if user has kill switch enabled
-      if (severity === "critical") {
+      // Auto-kill on critical severity if user has kill switch enabled AND mode includes blocking
+      if (severity === "critical" && shouldBlock) {
         const [user] = await db.select().from(users).where(eq(users.id, userId));
         const tier = user?.tier as Tier | undefined;
         if (tier && TIER_FEATURES[tier].killSwitch) {
@@ -106,12 +114,14 @@ export function startEventProcessor() {
         }
       }
 
-      // Enqueue alert for delivery
-      await alertQueue.add("deliver", {
-        alertId: alert.id,
-        userId,
-        severity,
-      });
+      // Enqueue alert for delivery (only if alert was created)
+      if (alert) {
+        await alertQueue.add("deliver", {
+          alertId: alert.id,
+          userId,
+          severity,
+        });
+      }
     }
 
     return { processed: events.length, alerts: triggered.length };

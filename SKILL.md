@@ -14,8 +14,11 @@ Real-time monitoring, smart alerting, and emergency kill switch for your OpenCla
 Clawnitor watches your agents so you don't have to:
 
 - **Event capture** — logs every tool call, LLM request, message, and lifecycle event
-- **Pattern rules** — threshold, rate, and keyword alerts (3 free, unlimited on Pro)
+- **Pattern rules** — threshold, rate, and keyword rules (3 free, unlimited on Pro). Each rule: block, alert, or both.
 - **Kill switch** — instantly pause runaway agents from anywhere. Auto-kill shuts down agents after repeated rule violations.
+- **Cost tracking** — per-agent spend breakdowns, trend charts, most expensive calls
+- **Decision traces** — visual session timelines with lifecycle tracking, subagent nesting, blocked event badges
+- **Subagent tracking** — subagent lifecycle events with parent-child attribution
 - **AI anomaly detection** — behavioral baselines + AI scoring (Pro)
 - **Multi-channel alerts** — email (free), Telegram, Discord, SMS (Pro)
 
