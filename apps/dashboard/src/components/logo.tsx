@@ -2,33 +2,27 @@ export function LogoMark({ size = 32 }: { size?: number }) {
   return (
     <svg
       width={size}
-      height={size * 0.72}
-      viewBox="12 10 56 58"
+      height={size}
+      viewBox="0 0 180 180"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ display: "block", position: "relative", top: "2px" }}
+      style={{ display: "block" }}
     >
+      <defs>
+        <linearGradient id="halt-logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FFB199" />
+          <stop offset="50%" stopColor="#FF6B4A" />
+          <stop offset="100%" stopColor="#CC3311" />
+        </linearGradient>
+      </defs>
       <path
-        d="M20 55 C20 30, 35 15, 40 15"
-        stroke="var(--color-coral)"
-        strokeWidth="7"
-        strokeLinecap="round"
-        fill="none"
+        d="M 28,28 L 28,120 Q 28,140 42,140 L 75,140 L 140,42 L 140,28 Q 140,28 120,28 Z"
+        fill="url(#halt-logo-grad)"
       />
       <path
-        d="M60 55 C60 30, 45 15, 40 15"
-        stroke="var(--color-coral)"
-        strokeWidth="7"
-        strokeLinecap="round"
-        fill="none"
-      />
-      <circle cx="40" cy="42" r="5" fill="var(--color-coral)" />
-      <path
-        d="M25 55 Q40 65, 55 55"
-        stroke="var(--color-coral)"
-        strokeWidth="6"
-        strokeLinecap="round"
-        fill="none"
+        d="M 82,148 L 148,52 L 148,130 Q 148,148 130,148 Z"
+        fill="#FF6B4A"
+        opacity="0.5"
       />
     </svg>
   );
@@ -46,7 +40,7 @@ export function LogoFull({ size = 32 }: { size?: number }) {
           lineHeight: 1,
         }}
       >
-        Halt
+        halt
       </span>
     </div>
   );

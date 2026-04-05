@@ -22,7 +22,7 @@ export default async function SavesPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-1">Saves</h1>
         <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-          Every time Halt blocked a harmful action to protect your agents.
+          Every time halt blocked a harmful action to protect your agents.
         </p>
       </div>
 
@@ -53,7 +53,7 @@ export default async function SavesPage() {
             {count} {count === 1 ? "save" : "saves"}
           </div>
           <div className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-            Halt has blocked {count} harmful {count === 1 ? "action" : "actions"}
+            halt has blocked {count} harmful {count === 1 ? "action" : "actions"}
           </div>
         </div>
       </div>
@@ -72,7 +72,7 @@ export default async function SavesPage() {
           </svg>
           <p className="text-sm font-medium mb-1">No saves yet</p>
           <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
-            When Halt blocks a harmful action, it will appear here.
+            When halt blocks a harmful action, it will appear here.
           </p>
         </div>
       ) : (

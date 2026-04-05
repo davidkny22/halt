@@ -25,16 +25,16 @@ export async function report() {
     const raw = readFileSync(cachePath, "utf-8");
     entries = JSON.parse(raw);
     if (!Array.isArray(entries)) {
-      console.log("\n  No events found. Run an agent with Halt first.\n");
+      console.log("\n  No events found. Run an agent with halt first.\n");
       return;
     }
   } catch {
-    console.log("\n  No events found. Run an agent with Halt first.\n");
+    console.log("\n  No events found. Run an agent with halt first.\n");
     return;
   }
 
   if (entries.length === 0) {
-    console.log("\n  No events found. Run an agent with Halt first.\n");
+    console.log("\n  No events found. Run an agent with halt first.\n");
     return;
   }
 
@@ -78,7 +78,7 @@ export async function report() {
   const newest = new Date(timestamps[timestamps.length - 1]);
 
   console.log(`
-  Halt Local Report
+  halt Local Report
   ${"━".repeat(40)}
   Events captured:     ${totalEvents}
   Shield detections:   ${shieldBlocked.length}${shieldBlocked.length > 0 ? ` (${shieldBySeverity.critical} critical, ${shieldBySeverity.high} high, ${shieldBySeverity.medium} medium)` : ""}

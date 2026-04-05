@@ -122,7 +122,7 @@ const TEMPLATES = [
     category: "cost",
     severity: "medium",
     rule_type: "threshold",
-    config: { field: "token_count", operator: "gt", value: 100000, windowMinutes: 60 },
+    config: { field: "tokens_used", operator: "gt", value: 100000, windowMinutes: 60 },
     agent_visible: false,
   },
 

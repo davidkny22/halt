@@ -23,8 +23,8 @@
     "cli",
     "safety"
   ],
-  "author": "David Kogan",
-  "license": "MIT",
+  "author": "David Kogan <david@halt.dev>",
+  "license": "AGPL-3.0",
   "homepage": "https://halt.dev",
   "repository": {
     "type": "git",

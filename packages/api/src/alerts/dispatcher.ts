@@ -33,7 +33,7 @@ export async function dispatchAlert(data: AlertData): Promise<void> {
   const alertPayload = {
     severity: alert.severity,
     ruleName,
-    triggerSummary: `Halt just saved you. Your agent was blocked because: ${ruleName}. ${triggerContext}`,
+    triggerSummary: `halt just saved you. Your agent was blocked because: ${ruleName}. ${triggerContext}`,
     actionTaken: alert.severity === "critical" ? "Agent paused (kill switch)" : "Alert fired",
     dashboardUrl: "https://app.halt.dev/saves",
   };

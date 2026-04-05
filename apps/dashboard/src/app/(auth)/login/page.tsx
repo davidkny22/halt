@@ -8,7 +8,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-3"><LogoMark size={48} /></div>
-          <h1 className="text-2xl font-bold">Sign in to Halt</h1>
+          <h1 className="text-2xl font-bold">Sign in to halt</h1>
           <p
             style={{ color: "var(--color-text-secondary)" }}
             className="mt-2 text-sm"

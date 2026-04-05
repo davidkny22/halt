@@ -21,7 +21,7 @@ export async function sendSmsAlert(
   try {
     const client = twilio(accountSid, authToken);
     await client.messages.create({
-      body: `🦞 Halt CRITICAL: ${data.ruleName} — ${data.triggerSummary}. Dashboard: ${data.dashboardUrl}`,
+      body: `🦞 halt CRITICAL: ${data.ruleName} — ${data.triggerSummary}. Dashboard: ${data.dashboardUrl}`,
       from,
       to,
     });

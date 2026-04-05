@@ -32,11 +32,11 @@
     "anomaly-detection",
     "observability"
   ],
-  "author": "David Kogan <davidkny22@gmail.com>",
-  "license": "MIT",
+  "author": "David Kogan <david@halt.dev>",
+  "license": "AGPL-3.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/davidkny22/halt-plugin.git"
+    "url": "https://github.com/davidkny22/halt.git"
   },
   "homepage": "https://halt.dev",
   "publishConfig": {

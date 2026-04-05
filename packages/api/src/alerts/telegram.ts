@@ -16,7 +16,7 @@ export async function sendTelegramAlert(
 ): Promise<boolean> {
   const emoji = data.severity === "critical" ? "CRITICAL" : "ALERT";
   const text = [
-    `🦞 Halt ${emoji} [${data.severity.toUpperCase()}]`,
+    `🦞 halt ${emoji} [${data.severity.toUpperCase()}]`,
     `Agent: ${data.agentName || "Unknown"}`,
     `Rule: "${data.ruleName}"`,
     `Triggered: ${data.triggerSummary}`,

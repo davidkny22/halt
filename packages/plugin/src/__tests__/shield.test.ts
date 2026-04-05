@@ -361,7 +361,7 @@ describe("Shield Allowlist", () => {
 // ── Self-Targeting Skip ─────────────────────────────────────
 
 describe("Shield Self-Targeting Skip", () => {
-  it("skips scanning for Halt API calls", () => {
+  it("skips scanning for halt API calls", () => {
     const r = scanner.scanInput("http", {
       url: "https://api.halt.dev/api/rules",
       body: { keywords: ["rm -rf"] },

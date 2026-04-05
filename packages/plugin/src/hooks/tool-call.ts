@@ -90,7 +90,7 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
 
     // 1. Check kill state (server-triggered, per-agent)
     if (killState.isKilled(agentId)) {
-      const reason = `Halt: agent paused — ${killState.getReason(agentId) || "unknown reason"}`;
+      const reason = `halt: agent paused — ${killState.getReason(agentId) || "unknown reason"}`;
       captureBlocked(reason, "kill-state");
       return { block: true, blockReason: reason };
     }

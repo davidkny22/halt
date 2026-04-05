@@ -69,7 +69,7 @@ const TEMPLATES = [
   { id: "tpl-spend-10", name: "Spend cap $10/hour", rule_type: "threshold", config: { field: "cost_usd", operator: "gt", value: 10, windowMinutes: 60 }, action_mode: "block", category: "cost", severity: "high", description: "Blocks when agent spend exceeds $10 in a rolling hour." },
   { id: "tpl-spend-50", name: "Spend cap $50/session", rule_type: "threshold", config: { field: "cost_usd", operator: "gt", value: 50, windowMinutes: 480 }, action_mode: "block", category: "cost", severity: "high", description: "Blocks when total session spend exceeds $50." },
   { id: "tpl-rate-llm", name: "API call rate limit", rule_type: "rate", config: { eventType: "llm_call", maxCount: 30, windowMinutes: 1 }, action_mode: "block", category: "cost", severity: "medium", description: "Blocks when agent makes more than 30 LLM calls per minute." },
-  { id: "tpl-token-budget", name: "Token budget 100K/hour", rule_type: "threshold", config: { field: "token_count", operator: "gt", value: 100000, windowMinutes: 60 }, action_mode: "alert", category: "cost", severity: "medium", description: "Alerts when token usage exceeds 100K tokens in a rolling hour." },
+  { id: "tpl-token-budget", name: "Token budget 100K/hour", rule_type: "threshold", config: { field: "tokens_used", operator: "gt", value: 100000, windowMinutes: 60 }, action_mode: "alert", category: "cost", severity: "medium", description: "Alerts when token usage exceeds 100K tokens in a rolling hour." },
   // Communication
   { id: "tpl-rate-email", name: "Email rate limit", rule_type: "rate", config: { eventType: "tool_use", toolName: "email.send", maxCount: 20, windowMinutes: 5 }, action_mode: "block", category: "communication", severity: "high", description: "Blocks when agent sends more than 20 emails in 5 minutes." },
   { id: "tpl-msg-cap", name: "Message volume cap", rule_type: "rate", config: { eventType: "message_sent", maxCount: 50, windowMinutes: 60 }, action_mode: "block", category: "communication", severity: "medium", description: "Blocks when agent sends more than 50 messages per hour." },
@@ -240,7 +240,7 @@ export async function serve() {
   try {
     await app.listen({ port, host: "127.0.0.1" });
     console.log(`
-  Halt Local Dashboard
+  halt Local Dashboard
   ${"━".repeat(40)}
   Running at http://localhost:${port}
 

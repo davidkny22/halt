@@ -29,11 +29,11 @@ async function sendWelcomeEmail(email: string) {
 
   try {
     await resend.emails.send({
-      from: "David from Halt <david@halt.dev>",
+      from: "David from halt <david@halt.dev>",
       to: email,
-      subject: "Welcome to Halt — your agents are in good hands",
+      subject: "Welcome to halt — your agents are in good hands",
       text: [
-        "Hey! Thanks for signing up for Halt.",
+        "Hey! Thanks for signing up for halt.",
         "",
         "You're now set up with free monitoring for 1 agent — event capture, pattern rules, and a kill switch activation every month.",
         "",
@@ -44,10 +44,10 @@ async function sendWelcomeEmail(email: string) {
         "",
         "If you have a beta invite code, enter it in Settings to unlock 6 months of Pro (AI anomaly detection, NL rules, unlimited kill switch, all alert channels).",
         "",
-        "I built Halt because I kept watching my own agents do things I didn't ask for. If you have feedback, questions, or just want to say hi — reply to this email or use the feedback widget on the dashboard. I read everything.",
+        "I built halt because I kept watching my own agents do things I didn't ask for. If you have feedback, questions, or just want to say hi — reply to this email or use the feedback widget on the dashboard. I read everything.",
         "",
         "— David Kogan",
-        "  Founder, Halt",
+        "  Founder, halt",
         "  halt.dev",
       ].join("\n"),
     });
@@ -212,6 +212,7 @@ export async function authRoutes(app: FastifyInstance) {
         has_key: !!activeKey,
         key_prefix: activeKey?.prefix,
         data_sharing_enabled: user.data_sharing_enabled,
+        rule_visibility: user.rule_visibility,
         beta_code: user.beta_code,
         beta_expires_at: user.beta_expires_at?.toISOString() || null,
         created_at: user.created_at,
@@ -249,7 +250,7 @@ export async function authRoutes(app: FastifyInstance) {
       } else if (github_token) {
         try {
           const ghRes = await fetch("https://api.github.com/user/emails", {
-            headers: { Authorization: `token ${github_token}`, "User-Agent": "Halt" },
+            headers: { Authorization: `token ${github_token}`, "User-Agent": "halt" },
             signal: AbortSignal.timeout(5000),
           });
           if (!ghRes.ok) {
@@ -340,11 +341,11 @@ export async function authRoutes(app: FastifyInstance) {
 
       const resend = new Resend(config.RESEND_API_KEY);
       await resend.emails.send({
-        from: "Halt <login@halt.dev>",
+        from: "halt <login@halt.dev>",
         to: email,
-        subject: "Sign in to Halt CLI",
+        subject: "Sign in to halt CLI",
         html: `
-          <p>Click the link below to sign in to Halt CLI:</p>
+          <p>Click the link below to sign in to halt CLI:</p>
           <p><a href="${verifyUrl}" style="background:#FF6B4A;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Verify Email</a></p>
           <p style="color:#666;font-size:12px;">This link expires in 5 minutes. If you didn't request this, ignore this email.</p>
         `,
@@ -376,7 +377,7 @@ export async function authRoutes(app: FastifyInstance) {
       // Clean up the verify code
       magicLinkTokens.delete(code);
 
-      return reply.type("text/html").send("<h2>Email verified!</h2><p>You can return to your terminal. Halt CLI will continue automatically.</p>");
+      return reply.type("text/html").send("<h2>Email verified!</h2><p>You can return to your terminal. halt CLI will continue automatically.</p>");
     },
   });
 

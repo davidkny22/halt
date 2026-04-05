@@ -1,17 +1,17 @@
 ---
-name: Halt
+name: halt
 description: Agent monitoring, alerting, and kill switch for OpenClaw agents
 homepage: https://halt.dev
 metadata: {"category": "monitoring", "openclaw": {"emoji": "🦞", "requires": {"bins": ["node"]}, "user-invocable": true}}
 ---
 
-# Halt
+# halt
 
 Real-time monitoring, smart alerting, and emergency kill switch for your OpenClaw agents.
 
 ## What it does
 
-Halt watches your agents so you don't have to:
+halt watches your agents so you don't have to:
 
 - **Event capture** — logs every tool call, LLM request, message, and lifecycle event
 - **Shield** — built-in injection detection engine. 140 patterns, 6 categories, 3 severity tiers. Blocks destructive commands, credential theft, prompt injection, and more.

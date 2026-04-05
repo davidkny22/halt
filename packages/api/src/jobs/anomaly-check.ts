@@ -78,11 +78,13 @@ export function startAnomalyCheckWorker() {
           severity,
         });
 
-        // Auto-kill on critical (only if user has kill switch feature)
+        // Auto-kill on critical (only if user has kill switch AND agent has auto-kill enabled)
         if (result.classification === "critical") {
           const [user] = await db.select().from(users).where(eq(users.id, baseline.user_id));
           const tier = (user?.tier || "free") as any;
           if (!TIER_FEATURES[tier as keyof typeof TIER_FEATURES]?.killSwitch) continue;
+          const [agentRecord] = await db.select().from(agents).where(eq(agents.id, baseline.agent_id));
+          if (!agentRecord?.auto_kill_enabled) continue;
           await db
             .update(agents)
             .set({

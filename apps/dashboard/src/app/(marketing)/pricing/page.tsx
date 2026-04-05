@@ -23,7 +23,7 @@ export default function PricingPage() {
             <span className="text-xs ml-1" style={{ color: "var(--color-text-secondary)" }}>/forever</span>
           </div>
           <code className="block text-center px-3 py-2.5 rounded-lg text-[10px] mb-6" style={{ backgroundColor: "var(--color-bg)", border: "1px solid var(--color-border)", fontFamily: "var(--font-mono)", color: "var(--color-coral)" }}>
-            openclaw plugins install
+            openclaw plugins install @halt/plugin
           </code>
           <ul className="flex flex-col gap-2.5 text-xs">
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited agents</li>
@@ -32,7 +32,7 @@ export default function PricingPage() {
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Kill switch + auto-kill</li>
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Spend + rate limits</li>
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Local dashboard</li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> MIT licensed</li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> AGPL-3.0 licensed</li>
           </ul>
         </div>
 

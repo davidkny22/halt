@@ -63,8 +63,21 @@ export default function SettingsPage() {
   const betaExpiresAt = (session as any)?.betaExpiresAt;
   const isPaid = tier !== "free";
 
-  // Load alert channels on mount
+  // Load settings + alert channels on mount
   useEffect(() => {
+    // Hydrate privacy and rule visibility from server
+    fetch("/api/account-action", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "get-settings" }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.data_sharing_enabled !== undefined) setDataSharing(data.data_sharing_enabled);
+        if (data.rule_visibility) setRuleVisibility(data.rule_visibility);
+      })
+      .catch(() => {});
+
     if (isPaid) {
       fetch("/api/account-action", {
         method: "POST",
@@ -379,7 +392,7 @@ export default function SettingsPage() {
                 {savingSharing && <span className="ml-2 text-xs" style={{ color: "var(--color-text-tertiary)" }}>Saving...</span>}
               </p>
               <p className="text-xs mt-1" style={{ color: "var(--color-text-secondary)" }}>
-                Help improve Halt for everyone. We never share raw events, message content, or agent outputs.
+                Help improve halt for everyone. We never share raw events, message content, or agent outputs.
               </p>
             </div>
             <button

@@ -335,7 +335,7 @@ export default function DemoPage() {
             <div className="text-center mb-8">
               <h1 className="text-2xl font-bold mb-2">Watch an AI agent try to break your rules.</h1>
               <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                Halt stops it. Pick a scenario to see how.
+                halt stops it. Pick a scenario to see how.
               </p>
             </div>
 

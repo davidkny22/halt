@@ -40,11 +40,11 @@ if (command === "init") {
   });
 } else {
   console.log(`
-  Halt CLI — Agent monitoring for OpenClaw
+  halt CLI — Agent monitoring for OpenClaw
 
   Commands:
-    init      Set up Halt (authenticate + configure API key)
-    discover  Register all agents from openclaw.json with Halt
+    init      Set up halt (authenticate + configure API key)
+    discover  Register all agents from openclaw.json with halt
     test      Test Shield config and rules against synthetic attacks
     check     Quick Shield reliability score (one line)
     report    View local event summary (offline mode)

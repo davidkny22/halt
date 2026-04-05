@@ -37,11 +37,11 @@ export async function sendAlertEmail(
 
   try {
     await resend.emails.send({
-      from: "Halt <alerts@halt.dev>",
+      from: "halt <alerts@halt.dev>",
       to,
-      subject: `🦞 Halt ${emoji} [${severityLabel}] — ${data.ruleName}`,
+      subject: `🦞 halt ${emoji} [${severityLabel}] — ${data.ruleName}`,
       text: [
-        `🦞 Halt Alert [${severityLabel}]`,
+        `🦞 halt Alert [${severityLabel}]`,
         `Agent: ${data.agentName || "Unknown"}`,
         `Rule: "${data.ruleName}"`,
         `Triggered: ${data.triggerSummary}`,

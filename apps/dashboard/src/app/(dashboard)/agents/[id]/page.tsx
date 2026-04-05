@@ -259,7 +259,7 @@ export default function AgentDetailPage() {
                 >
                   If this agent triggers <strong style={{ color: "var(--color-text)" }}>{threshold} rule violations</strong> within{" "}
                   <strong style={{ color: "var(--color-text)" }}>{windowMinutes} minutes</strong>,
-                  Halt will automatically kill it.
+                  halt will automatically kill it.
                 </div>
               </div>
             )}

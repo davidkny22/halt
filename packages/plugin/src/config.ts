@@ -22,7 +22,7 @@ export function parseConfig(raw: Record<string, unknown>): PluginConfig {
   const apiKey = raw.apiKey as string;
 
   if (!offlineMode && !apiKey) {
-    throw new Error("Halt: apiKey is required. Sign up at https://halt.dev or set offlineMode: true for local-only mode.");
+    throw new Error("halt: apiKey is required. Sign up at https://halt.dev or set offlineMode: true for local-only mode.");
   }
 
   // Parse inline rules for offline mode

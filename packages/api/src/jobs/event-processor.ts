@@ -157,19 +157,18 @@ export function startEventProcessor() {
           .returning();
       }
 
-      // Auto-kill on critical severity if user has kill switch enabled AND mode includes blocking
+      // Auto-kill on critical severity if user has kill switch AND agent has auto-kill enabled
       if (severity === "critical" && shouldBlock) {
         const [user] = await db.select().from(users).where(eq(users.id, userId));
         const tier = user?.tier as Tier | undefined;
         if (tier && TIER_FEATURES[tier].killSwitch) {
-          // Find the triggering agent and pause it
           const agentId = result.agentExtId;
           if (agentId) {
             const [agent] = await db
               .select()
               .from(agents)
               .where(and(eq(agents.user_id, userId), eq(agents.agent_id, agentId)));
-            if (agent) {
+            if (agent && agent.auto_kill_enabled) {
               await db
                 .update(agents)
                 .set({

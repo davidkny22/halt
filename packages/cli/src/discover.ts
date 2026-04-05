@@ -46,7 +46,7 @@ export async function discover() {
   if (toolNames.size > 0) {
     console.log(`  Found ${toolNames.size} tool(s) across agent configs`);
   }
-  console.log("  Registering with Halt...\n");
+  console.log("  Registering with halt...\n");
 
   // 3. Call discover endpoint
   const backendUrl = resolveBackendUrl();

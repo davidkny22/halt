@@ -18,6 +18,19 @@ export async function POST(request: Request) {
     "X-User-Email": session.user.email,
   };
 
+  if (action === "get-settings") {
+    const res = await fetch(`${API_URL}/api/auth/provision`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ email: session.user.email }),
+    });
+    const user = await res.json();
+    return Response.json({
+      data_sharing_enabled: user.data_sharing_enabled ?? false,
+      rule_visibility: user.rule_visibility ?? "per_rule",
+    });
+  }
+
   if (action === "set-rule-visibility") {
     const res = await fetch(`${API_URL}/api/account/rule-visibility`, {
       method: "PUT",

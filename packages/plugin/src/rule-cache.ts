@@ -206,7 +206,7 @@ export class RuleCache {
       return {
         blocked: true,
         ruleName: rule.name,
-        reason: `Halt: Rule "${rule.name}" blocked — keyword match: ${matched.join(", ")}`,
+        reason: `halt: Rule "${rule.name}" blocked — keyword match: ${matched.join(", ")}`,
       };
     }
 
@@ -234,7 +234,7 @@ export class RuleCache {
       return {
         blocked: true,
         ruleName: rule.name,
-        reason: `Halt: Rule "${rule.name}" blocked — ${filtered.length} events in ${config.windowMinutes}min (max: ${maxCount})`,
+        reason: `halt: Rule "${rule.name}" blocked — ${filtered.length} events in ${config.windowMinutes}min (max: ${maxCount})`,
       };
     }
 
@@ -264,7 +264,7 @@ export class RuleCache {
       return {
         blocked: true,
         ruleName: rule.name,
-        reason: `Halt: Rule "${rule.name}" blocked — ${config.field} = ${sum.toFixed(4)} (${config.operator} ${config.value})`,
+        reason: `halt: Rule "${rule.name}" blocked — ${config.field} = ${sum.toFixed(4)} (${config.operator} ${config.value})`,
       };
     }
 
@@ -322,8 +322,8 @@ export class RuleCache {
       : agentRules.filter((r) => r.agent_visible !== false);
     if (visible.length === 0) return null;
 
-    const lines = ["# Halt — Active Monitoring Rules", ""];
-    lines.push("The following rules are enforced by Halt. Violating a rule may result in your action being blocked, an alert being sent to the user, or your session being terminated.");
+    const lines = ["# halt — Active Monitoring Rules", ""];
+    lines.push("The following rules are enforced by halt. Violating a rule may result in your action being blocked, an alert being sent to the user, or your session being terminated.");
     lines.push("");
 
     for (const rule of visible) {

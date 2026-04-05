@@ -7,7 +7,7 @@ import { logger } from "../util/logger.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 
-const CATEGORIZE_PROMPT = `You are Harbor, the friendly support agent for Halt — an agent monitoring and safety product for OpenClaw.
+const CATEGORIZE_PROMPT = `You are the friendly support assistant for halt — an agent monitoring and safety product for OpenClaw.
 
 YOUR KNOWLEDGE BASE:
 

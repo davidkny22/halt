@@ -27,7 +27,7 @@ export default async function AgentsPage() {
         >
           <h2 className="text-lg font-semibold mb-2">No agents yet</h2>
           <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
-            Agents are automatically discovered when the Halt plugin starts. Install the plugin to get started.
+            Agents are automatically discovered when the halt plugin starts. Install the plugin to get started.
           </p>
           <div className="max-w-md mx-auto flex flex-col gap-2">
             <CopyBlock text="openclaw plugins install @halt/plugin" />

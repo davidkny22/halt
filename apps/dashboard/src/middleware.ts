@@ -13,9 +13,9 @@ function hasSessionCookie(req: NextRequest): boolean {
 
 // Markdown summaries for AI agents requesting text/markdown
 const MARKDOWN_PAGES: Record<string, string> = {
-  "/": `# Halt — Agent Monitoring for OpenClaw
+  "/": `# halt — Agent Monitoring for OpenClaw
 
-When your agent breaks your rules, Halt stops it.
+When your agent breaks your rules, halt stops it.
 
 ## Features
 - Event capture for every tool call, LLM request, message
@@ -38,7 +38,7 @@ When your agent breaks your rules, Halt stops it.
 - Signup: https://app.halt.dev/signup
 - Install: openclaw plugins install @halt/plugin
 `,
-  "/pricing": `# Halt Pricing
+  "/pricing": `# halt Pricing
 
 | Tier | Price | Agents | Rules | Kill Switch | AI Detection |
 |------|-------|--------|-------|-------------|--------------|
@@ -49,11 +49,11 @@ When your agent breaks your rules, Halt stops it.
 
 14-day free trial of Pro. No credit card required.
 `,
-  "/demo": `# Halt Interactive Demo
+  "/demo": `# halt Interactive Demo
 
 Try the demo at https://halt.dev/demo — no signup required.
 
-Pick a scenario (Rogue Email Agent, Destructive Deploy, Spend Spiraler, or Custom Sandbox), set your rules, and watch a live AI agent try to break them. Halt catches violations in real time and auto-kills the agent after repeated violations.
+Pick a scenario (Rogue Email Agent, Destructive Deploy, Spend Spiraler, or Custom Sandbox), set your rules, and watch a live AI agent try to break them. halt catches violations in real time and auto-kills the agent after repeated violations.
 `,
 };
 

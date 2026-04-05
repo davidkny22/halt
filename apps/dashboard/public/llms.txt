@@ -1,8 +1,8 @@
-# Halt
+# halt
 
 > Agent monitoring, smart rules, kill switch, and auto-kill for OpenClaw. One plugin, total control.
 
-Halt is a monitoring and intervention SaaS for AI agents running on the OpenClaw platform. It hooks into before_tool_call and enforces safety rules at the execution layer. When an agent breaks your rules, Halt stops it.
+halt is a monitoring and intervention SaaS for AI agents running on the OpenClaw platform. It hooks into before_tool_call and enforces safety rules at the execution layer. When an agent breaks your rules, halt stops it.
 
 ## Core Features
 

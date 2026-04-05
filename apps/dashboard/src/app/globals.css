@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Halt Design System */
+/* halt Design System */
 /* Font: Satoshi (loaded via layout.tsx) */
 /* Dark mode default, light mode via class toggle */
 
@@ -56,4 +56,102 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.2s, color 0.2s;
+}
+
+/* Glass morphism system */
+.glass,
+.glass-heavy,
+.glass-coral {
+  position: relative;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow: hidden;
+}
+
+.glass::before,
+.glass-heavy::before,
+.glass-coral::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Dark mode glass */
+.dark .glass {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.dark .glass::before {
+  background: rgba(255, 255, 255, 0.08);
+}
+.dark .glass:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.dark .glass-heavy {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.dark .glass-coral {
+  background: rgba(255, 107, 74, 0.06);
+  border: 1px solid rgba(255, 107, 74, 0.15);
+  box-shadow: 0 8px 24px rgba(255, 107, 74, 0.08);
+}
+
+/* Light mode glass */
+:root:not(.dark) .glass {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 24px rgba(60, 50, 30, 0.08);
+}
+:root:not(.dark) .glass::before {
+  background: rgba(255, 255, 255, 0.85);
+}
+:root:not(.dark) .glass:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+:root:not(.dark) .glass-heavy {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 12px 32px rgba(60, 50, 30, 0.1);
+}
+
+:root:not(.dark) .glass-coral {
+  background: rgba(212, 83, 26, 0.04);
+  border: 1px solid rgba(212, 83, 26, 0.12);
+  box-shadow: 0 8px 24px rgba(212, 83, 26, 0.06);
+}
+
+/* Scroll reveal animation */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Ambient background blobs */
+.ambient {
+  position: fixed;
+  z-index: -1;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
 }

@@ -29,11 +29,11 @@ async function sendBetaWelcomeEmail(email: string, expiresAt: Date, channel: str
 
   try {
     await resend.emails.send({
-      from: "Halt <hello@halt.dev>",
+      from: "halt <hello@halt.dev>",
       to: email,
-      subject: "You're in! 6 months of Halt Pro, on us.",
+      subject: "You're in! 6 months of halt Pro, on us.",
       text: [
-        "Welcome to the Halt beta!",
+        "Welcome to the halt beta!",
         "",
         "Your account has been upgraded to Pro — free for 6 months.",
         "",
@@ -52,7 +52,7 @@ async function sendBetaWelcomeEmail(email: string, expiresAt: Date, channel: str
         "",
         "We built this to keep your agents safe. Tell us what you think — the feedback widget is on every dashboard page.",
         "",
-        "— David, founder of Halt",
+        "— David, founder of halt",
       ].join("\n"),
     });
   } catch (err) {
@@ -66,14 +66,14 @@ async function sendConsolationEmail(email: string, trialEndsAt: Date) {
 
   try {
     await resend.emails.send({
-      from: "Halt <hello@halt.dev>",
+      from: "halt <hello@halt.dev>",
       to: email,
       subject: "Beta's full — but we've got something for you.",
       text: [
         "All beta spots have been claimed — you just missed it.",
         "",
         "But because you showed up early, we've activated a 30-day extended trial",
-        "of Halt Pro for your account (normally 14 days).",
+        "of halt Pro for your account (normally 14 days).",
         "",
         "What you get for 30 days:",
         "- AI anomaly detection",
@@ -85,7 +85,7 @@ async function sendConsolationEmail(email: string, trialEndsAt: Date) {
         "",
         "Get started: https://app.halt.dev",
         "",
-        "— David, founder of Halt",
+        "— David, founder of halt",
       ].join("\n"),
     });
   } catch (err) {

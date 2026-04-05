@@ -170,7 +170,7 @@ export function ActivityFeed({ events }: { events: Event[] }) {
             className="px-4 py-8 text-center text-sm"
             style={{ color: "var(--color-text-secondary)" }}
           >
-            No events yet. Install the Halt plugin to start monitoring.
+            No events yet. Install the halt plugin to start monitoring.
           </div>
         ) : (
           visible.map((event) => {
@@ -410,7 +410,7 @@ export function ActivityFeed({ events }: { events: Event[] }) {
                         <>
                           <span style={{ color: "var(--color-coral)" }}>Blocked</span>
                           <span className="break-all" style={{ color: "var(--color-coral)" }}>
-                            {event.metadata.block_reason || "Action blocked by Halt"}
+                            {event.metadata.block_reason || "Action blocked by halt"}
                           </span>
                         </>
                       )}

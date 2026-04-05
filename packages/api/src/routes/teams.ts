@@ -207,10 +207,10 @@ export async function teamsRoutes(app: FastifyInstance) {
           const resend = new Resend(resendKey);
           const inviteUrl = `https://app.halt.dev/team?invite=${token}`;
           await resend.emails.send({
-            from: "Halt <login@halt.dev>",
+            from: "halt <login@halt.dev>",
             to: parsed.data.email,
-            subject: "You've been invited to a Halt team",
-            html: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto"><h2 style="color:#FF6B4A">You're invited to join a team on Halt</h2><p>You've been invited as <strong>${parsed.data.role}</strong> to a team on Halt — agent monitoring and safety for OpenClaw.</p><p><a href="${inviteUrl}" style="display:inline-block;background:#FF6B4A;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">Accept Invite</a></p><p style="color:#888;font-size:12px">This invite expires in 7 days.</p></div>`,
+            subject: "You've been invited to a halt team",
+            html: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto"><h2 style="color:#FF6B4A">You're invited to join a team on halt</h2><p>You've been invited as <strong>${parsed.data.role}</strong> to a team on halt — agent monitoring and safety for OpenClaw.</p><p><a href="${inviteUrl}" style="display:inline-block;background:#FF6B4A;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">Accept Invite</a></p><p style="color:#888;font-size:12px">This invite expires in 7 days.</p></div>`,
           });
         }
       } catch (err) {
@@ -257,7 +257,7 @@ export async function teamsRoutes(app: FastifyInstance) {
 
       // Verify the invite email matches the authenticated user
       const [user] = await db.select().from(users).where(eq(users.id, userId));
-      if (!user || user.email !== invite.email) {
+      if (!user || user.email.toLowerCase() !== invite.email.toLowerCase()) {
         return reply.status(403).send({ error: "This invite was sent to a different email address" });
       }
 

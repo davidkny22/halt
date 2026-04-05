@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { StatsRow } from "@/components/stats-row";
 
@@ -24,14 +24,39 @@ type Tab = "overview" | "agents" | "rules" | "members";
 export function TeamClient({
   teamData,
   tier,
+  inviteToken,
 }: {
   teamData: TeamData | { team: null } | null;
   tier: string;
+  inviteToken?: string;
 }) {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [creating, setCreating] = useState(false);
   const [teamName, setTeamName] = useState("");
+  const [inviteStatus, setInviteStatus] = useState<string | null>(null);
   const router = useRouter();
+
+  // Auto-accept invite if token is in URL
+  useEffect(() => {
+    if (!inviteToken) return;
+    setInviteStatus("Accepting invite...");
+    fetch("/api/team-action", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "accept-invite", token: inviteToken }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.joined) {
+          setInviteStatus("Invite accepted! Refreshing...");
+          router.replace("/team");
+          router.refresh();
+        } else {
+          setInviteStatus(data.error || "Failed to accept invite");
+        }
+      })
+      .catch(() => setInviteStatus("Failed to accept invite"));
+  }, [inviteToken, router]);
 
   const hasTeam = teamData && "team" in teamData && teamData.team;
   const isTeamTier = tier === "team" || tier === "paid" || tier === "trial";
@@ -161,7 +186,7 @@ export function TeamClient({
           <StatsRow stats={teamStats} />
           {agents.length === 0 ? (
             <div className="rounded-lg p-6 text-center text-sm" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
-              No agents yet. Team agents appear when members install the Halt plugin.
+              No agents yet. Team agents appear when members install the halt plugin.
             </div>
           ) : (
             <div className="rounded-lg" style={{ border: "1px solid var(--color-border)" }}>

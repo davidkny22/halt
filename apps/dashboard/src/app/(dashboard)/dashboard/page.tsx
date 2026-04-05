@@ -60,7 +60,7 @@ export default async function DashboardPage() {
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
           <span className="text-sm font-medium" style={{ color: "var(--color-green)" }}>
-            Halt has blocked {savesCount} harmful {savesCount === 1 ? "action" : "actions"}
+            halt has blocked {savesCount} harmful {savesCount === 1 ? "action" : "actions"}
           </span>
           <span className="ml-auto text-xs" style={{ color: "var(--color-text-tertiary)" }}>
             View all
@@ -122,7 +122,7 @@ export default async function DashboardPage() {
           className="rounded-lg p-8 text-center"
           style={{ border: "1px solid var(--color-border)" }}
         >
-          <h2 className="text-lg font-semibold mb-2">Welcome to Halt!</h2>
+          <h2 className="text-lg font-semibold mb-2">Welcome to halt!</h2>
           <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
             Two commands to start monitoring your OpenClaw agents.
           </p>

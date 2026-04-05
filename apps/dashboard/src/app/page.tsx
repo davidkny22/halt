@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LogoMark, LogoFull } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { InstallCommand } from "@/components/install-command";
 
 const features = [
   {
@@ -35,7 +36,7 @@ const features = [
     icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`,
     title: "Anomaly Detection",
     description:
-      "72-hour behavioral baseline. Halt learns what normal looks like, then flags what isn't.",
+      "72-hour behavioral baseline. halt learns what normal looks like, then flags what isn't.",
     color: "var(--color-green)",
   },
   {
@@ -92,12 +93,12 @@ const steps = [
 
 const faqs = [
   {
-    q: "What is Halt?",
-    a: "Halt is a monitoring and safety layer for autonomous AI agents running on OpenClaw. It watches everything your agent does, evaluates custom rules, and can instantly pause runaway agents.",
+    q: "What is halt?",
+    a: "halt is a monitoring and safety layer for autonomous AI agents running on OpenClaw. It watches everything your agent does, evaluates custom rules, and can instantly pause runaway agents.",
   },
   {
     q: "How is this different from ClawMetry / SafeClaw / DeadClaw?",
-    a: "Those tools do one thing well — dashboards, security patterns, or emergency kills. Halt is the only product that monitors, sets rules, detects anomalies, blocks actions, AND auto-kills repeat offenders — all in one plugin.",
+    a: "Those tools do one thing well — dashboards, security patterns, or emergency kills. halt is the only product that monitors, sets rules, detects anomalies, blocks actions, AND auto-kills repeat offenders — all in one plugin.",
   },
   {
     q: "Does the kill switch actually work instantly?",
@@ -105,7 +106,7 @@ const faqs = [
   },
   {
     q: "What is auto-kill?",
-    a: "If an agent triggers 3 rule violations within 10 minutes, Halt automatically shuts it down. No human intervention needed. The threshold and window are configurable per agent from your dashboard.",
+    a: "If an agent triggers 3 rule violations within 10 minutes, halt automatically shuts it down. No human intervention needed. The threshold and window are configurable per agent from your dashboard.",
   },
   {
     q: "What happens if your backend goes down?",
@@ -113,7 +114,7 @@ const faqs = [
   },
   {
     q: "Is my data safe?",
-    a: "Secrets are automatically redacted before transmission. Data sharing for improving Halt is opt-in (default OFF). We're a safety company — we default to protecting your data.",
+    a: "Secrets are automatically redacted before transmission. Data sharing for improving halt is opt-in (default OFF). We're a safety company — we default to protecting your data.",
   },
   {
     q: "Can I try the paid features?",
@@ -137,8 +138,8 @@ export default function LandingPage() {
       />
 
       {/* Nav */}
-      <nav className="relative z-10 flex items-center justify-between px-4 sm:px-6 md:px-12 py-4 md:py-5 max-w-7xl mx-auto">
-        <LogoFull size={22} />
+      <nav className="glass relative z-10 flex items-center justify-between px-4 sm:px-6 md:px-8 py-3 md:py-3.5 max-w-5xl mx-auto mt-4 rounded-2xl" style={{ backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
+        <LogoFull size={32} />
         <div className="flex items-center gap-3 sm:gap-4 md:gap-8">
           <a
             href="#features"
@@ -188,31 +189,6 @@ export default function LandingPage() {
 
       {/* ═══════════════ HERO ═══════════════ */}
       <section className="relative z-10 px-6 md:px-12 pt-20 pb-32 max-w-5xl mx-auto text-center">
-        <div
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium mb-8"
-          style={{
-            backgroundColor: "var(--color-coral-soft)",
-            color: "var(--color-coral)",
-            border: "1px solid rgba(255, 107, 74, 0.2)",
-          }}
-        >
-          <span className="relative flex h-2 w-2">
-            <span
-              className="absolute inline-flex h-full w-full rounded-full opacity-75"
-              style={{
-                backgroundColor: "var(--color-coral)",
-                animation:
-                  "ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite",
-              }}
-            />
-            <span
-              className="relative inline-flex rounded-full h-2 w-2"
-              style={{ backgroundColor: "var(--color-coral)" }}
-            />
-          </span>
-          The safety net for OpenClaw agents
-        </div>
-
         <h1
           className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1] mb-6"
           style={{ letterSpacing: "-0.03em" }}
@@ -244,40 +220,26 @@ export default function LandingPage() {
           One plugin, total control.
         </p>
 
-        <code
-          className="inline-block px-6 py-3 rounded-xl text-sm sm:text-base mb-6"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            border: "1px solid var(--color-border)",
-            fontFamily: "var(--font-mono)",
-            color: "var(--color-coral)",
-          }}
-        >
-          openclaw plugins install @halt/plugin
-        </code>
+        <InstallCommand />
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
           <Link
-            href="https://app.halt.dev/signup"
-            className="group px-8 py-4 rounded-xl font-semibold text-white text-base inline-flex items-center justify-center gap-2 transition-all"
+            href="https://github.com/davidkny22/halt"
+            className="group px-8 py-4 rounded-xl font-semibold text-white text-base inline-flex items-center justify-center gap-2 transition-all hover:translate-y-[-1px]"
             style={{
               backgroundColor: "var(--color-coral)",
               boxShadow:
                 "0 0 0 0 rgba(255, 107, 74, 0.4), 0 8px 32px -8px rgba(255, 107, 74, 0.3)",
             }}
           >
-            Start Monitoring Free
+            View on GitHub
             <span className="transition-transform group-hover:translate-x-0.5">
               →
             </span>
           </Link>
           <Link
             href="/demo"
-            className="px-8 py-4 rounded-xl font-semibold text-base inline-flex items-center justify-center gap-2"
-            style={{
-              border: "1px solid var(--color-border)",
-              color: "var(--color-text-secondary)",
-            }}
+            className="glass px-8 py-4 rounded-xl font-semibold text-base inline-flex items-center justify-center gap-2 hover:translate-y-[-1px] transition-all"
           >
             Try Live Demo
           </Link>
@@ -285,9 +247,8 @@ export default function LandingPage() {
 
         {/* Dashboard Preview */}
         <div
-          className="relative mx-auto max-w-4xl rounded-2xl overflow-hidden"
+          className="glass-heavy relative mx-auto max-w-4xl rounded-2xl overflow-hidden"
           style={{
-            border: "1px solid var(--color-border)",
             boxShadow:
               "0 32px 64px -16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03)",
           }}
@@ -320,7 +281,7 @@ export default function LandingPage() {
                 color: "var(--color-text-tertiary)",
               }}
             >
-              halt.dev/dashboard
+              app.halt.dev
             </div>
           </div>
 
@@ -411,7 +372,7 @@ export default function LandingPage() {
             className="text-base max-w-lg mx-auto"
             style={{ color: "var(--color-text-secondary)" }}
           >
-            Dashboards are everywhere. Halt is the only product that monitors,
+            Dashboards are everywhere. halt is the only product that monitors,
             alerts, AND kills your agent before it does damage.
             <br />
             One plugin, total control.
@@ -422,11 +383,7 @@ export default function LandingPage() {
           {features.map((f) => (
             <div
               key={f.title}
-              className="group p-6 rounded-xl transition-all duration-300 hover:translate-y-[-2px]"
-              style={{
-                backgroundColor: "var(--color-surface)",
-                border: "1px solid var(--color-border)",
-              }}
+              className="glass group p-6 rounded-xl transition-all duration-300 hover:translate-y-[-2px]"
             >
               {/* SVG icons are hardcoded constants, not user input — safe to render */}
               <div className="mb-4" style={{ color: f.color }} dangerouslySetInnerHTML={{ __html: f.icon }} />
@@ -463,11 +420,7 @@ export default function LandingPage() {
           {steps.map((s) => (
             <div
               key={s.step}
-              className="flex gap-6 items-start p-6 rounded-xl"
-              style={{
-                backgroundColor: "var(--color-surface)",
-                border: "1px solid var(--color-border)",
-              }}
+              className="glass flex gap-6 items-start p-6 rounded-xl"
             >
               <div
                 className="text-2xl font-bold shrink-0 w-12 h-12 flex items-center justify-center rounded-lg"
@@ -506,12 +459,7 @@ export default function LandingPage() {
       {/* ═══════════════ KILL SWITCH SHOWCASE ═══════════════ */}
       <section className="relative z-10 px-6 md:px-12 py-24 max-w-5xl mx-auto">
         <div
-          className="rounded-2xl p-8 md:p-12 text-center relative overflow-hidden"
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(255, 107, 74, 0.1) 0%, rgba(255, 107, 74, 0.02) 100%)",
-            border: "1px solid rgba(255, 107, 74, 0.15)",
-          }}
+          className="glass glass-coral rounded-2xl p-8 md:p-12 text-center relative overflow-hidden"
         >
           <div className="mb-6 flex justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="64" height="64"><path fill="#DD2E44" d="M12 3l-9 8.985V24l9 9h12l9-9V11.985L24 3z"/><path fill="#CCD6DD" d="M24.827 1H11.173L1 11.156v13.672L11.172 35h13.657L35 24.828V11.156L24.827 1zM33 24l-9 9H12l-9-9V11.985L12 3h12l9 8.985V24z"/></svg>
@@ -520,7 +468,7 @@ export default function LandingPage() {
             When your agent breaks your rules,
             <br />
             <span style={{ color: "var(--color-coral)" }}>
-              Halt stops it.
+              halt stops it.
             </span>
           </h2>
           <p
@@ -528,7 +476,7 @@ export default function LandingPage() {
             style={{ color: "var(--color-text-secondary)" }}
           >
             Other tools send you a notification after your agent deleted
-            the production database. Halt blocks the action{" "}
+            the production database. halt blocks the action{" "}
             <em>before</em> it executes — and if it keeps trying, auto-kill
             shuts it down entirely. No manual intervention. No damage.
           </p>
@@ -596,7 +544,7 @@ export default function LandingPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
           {/* Open Source */}
-          <div className="p-6 rounded-2xl" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
+          <div className="glass p-6 rounded-2xl">
             <h3 className="text-lg font-semibold mb-1">Open Source</h3>
             <p className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>Local, no account</p>
             <div className="mb-5">
@@ -604,7 +552,7 @@ export default function LandingPage() {
               <span className="text-xs ml-1" style={{ color: "var(--color-text-secondary)" }}>/forever</span>
             </div>
             <code className="block text-center px-3 py-2.5 rounded-lg text-[10px] mb-6" style={{ backgroundColor: "var(--color-bg)", border: "1px solid var(--color-border)", fontFamily: "var(--font-mono)", color: "var(--color-coral)" }}>
-              openclaw plugins install
+              openclaw plugins install @halt/plugin
             </code>
             <ul className="flex flex-col gap-2.5 text-xs">
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited agents</li>
@@ -613,15 +561,16 @@ export default function LandingPage() {
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Kill switch + auto-kill</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Spend + rate limits</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Local dashboard</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> MIT licensed</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> AGPL-3.0 licensed</li>
             </ul>
           </div>
 
           {/* Pro */}
-          <div className="p-6 rounded-2xl relative" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-coral)", boxShadow: "0 0 0 1px rgba(255, 107, 74, 0.1), 0 8px 32px -8px rgba(255, 107, 74, 0.15)" }}>
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-semibold text-white" style={{ backgroundColor: "var(--color-coral)" }}>
+          <div className="relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-semibold text-white z-10" style={{ backgroundColor: "var(--color-coral)" }}>
               Recommended
             </div>
+            <div className="glass glass-coral p-6 rounded-2xl" style={{ border: "1px solid var(--color-coral)", boxShadow: "0 0 0 1px rgba(255, 107, 74, 0.1), 0 8px 32px -8px rgba(255, 107, 74, 0.15)" }}>
             <h3 className="text-lg font-semibold mb-1">Pro</h3>
             <p className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>Full protection</p>
             <div className="mb-2">
@@ -645,10 +594,11 @@ export default function LandingPage() {
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 90-day event history</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 14-day free trial</li>
             </ul>
+            </div>
           </div>
 
           {/* Team */}
-          <div className="p-6 rounded-2xl" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
+          <div className="glass p-6 rounded-2xl">
             <h3 className="text-lg font-semibold mb-1">Team</h3>
             <p className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>Scale with your team</p>
             <div className="mb-2">
@@ -673,7 +623,7 @@ export default function LandingPage() {
           </div>
 
           {/* Enterprise */}
-          <div className="p-6 rounded-2xl" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
+          <div className="glass p-6 rounded-2xl">
             <h3 className="text-lg font-semibold mb-1">Enterprise</h3>
             <p className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>Custom everything</p>
             <div className="mb-5">
@@ -708,11 +658,7 @@ export default function LandingPage() {
           {faqs.map((faq) => (
             <div
               key={faq.q}
-              className="p-6 rounded-xl"
-              style={{
-                backgroundColor: "var(--color-surface)",
-                border: "1px solid var(--color-border)",
-              }}
+              className="glass p-6 rounded-xl"
             >
               <h3 className="font-semibold mb-2">{faq.q}</h3>
               <p
@@ -748,23 +694,31 @@ export default function LandingPage() {
             className="text-lg max-w-md mx-auto mb-10"
             style={{ color: "var(--color-text-secondary)" }}
           >
-            Your agents are already running. Halt makes sure they&apos;re
+            Your agents are already running. halt makes sure they&apos;re
             running safely.
           </p>
-          <Link
-            href="https://app.halt.dev/signup"
-            className="group inline-flex items-center gap-2 px-10 py-4 rounded-xl font-semibold text-white text-lg transition-all"
-            style={{
-              backgroundColor: "var(--color-coral)",
-              boxShadow:
-                "0 0 0 0 rgba(255, 107, 74, 0.4), 0 8px 32px -8px rgba(255, 107, 74, 0.3)",
-            }}
-          >
-            Get Started Free
-            <span className="transition-transform group-hover:translate-x-1">
-              →
-            </span>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="https://github.com/davidkny22/halt"
+              className="group inline-flex items-center gap-2 px-10 py-4 rounded-xl font-semibold text-white text-lg transition-all hover:translate-y-[-1px]"
+              style={{
+                backgroundColor: "var(--color-coral)",
+                boxShadow:
+                  "0 0 0 0 rgba(255, 107, 74, 0.4), 0 8px 32px -8px rgba(255, 107, 74, 0.3)",
+              }}
+            >
+              View on GitHub
+              <span className="transition-transform group-hover:translate-x-1">
+                →
+              </span>
+            </Link>
+            <Link
+              href="https://app.halt.dev/signup"
+              className="glass inline-flex items-center gap-2 px-10 py-4 rounded-xl font-semibold text-lg transition-all hover:translate-y-[-1px]"
+            >
+              Start Free Trial
+            </Link>
+          </div>
         </div>
       </section>
 

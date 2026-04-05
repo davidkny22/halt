@@ -4,7 +4,7 @@ import { PageTracker } from "@/components/page-tracker";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Halt — Agent Monitoring for OpenClaw",
+  title: "halt — Agent Monitoring for OpenClaw",
   description:
     "Real-time monitoring, smart rules, AI anomaly detection, kill switch, and auto-kill for your OpenClaw agents. One plugin, total control.",
   icons: {
@@ -12,18 +12,18 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL("https://halt.dev"),
   openGraph: {
-    title: "Halt — Agent Monitoring for OpenClaw",
+    title: "halt — Agent Monitoring for OpenClaw",
     description:
-      "When your agent breaks your rules, Halt stops it. Monitoring, smart rules, kill switch, and auto-kill in one plugin.",
+      "When your agent breaks your rules, halt stops it. Monitoring, smart rules, kill switch, and auto-kill in one plugin.",
     url: "https://halt.dev",
-    siteName: "Halt",
+    siteName: "halt",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Halt — Agent Monitoring for OpenClaw",
+    title: "halt — Agent Monitoring for OpenClaw",
     description:
-      "When your agent breaks your rules, Halt stops it. Monitoring, smart rules, kill switch, and auto-kill in one plugin.",
+      "When your agent breaks your rules, halt stops it. Monitoring, smart rules, kill switch, and auto-kill in one plugin.",
   },
   robots: {
     index: true,
@@ -64,11 +64,11 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "SoftwareApplication",
-              name: "Halt",
+              name: "halt",
               applicationCategory: "DeveloperApplication",
               operatingSystem: "Any",
               description:
-                "Agent monitoring, smart rules, kill switch, and auto-kill for OpenClaw. When your agent breaks your rules, Halt stops it.",
+                "Agent monitoring, smart rules, kill switch, and auto-kill for OpenClaw. When your agent breaks your rules, halt stops it.",
               url: "https://halt.dev",
               offers: [
                 {
@@ -117,10 +117,10 @@ export default function RootLayout({
               mainEntity: [
                 {
                   "@type": "Question",
-                  name: "What is Halt?",
+                  name: "What is halt?",
                   acceptedAnswer: {
                     "@type": "Answer",
-                    text: "Halt is a monitoring and safety layer for autonomous AI agents running on OpenClaw. It watches everything your agent does, evaluates custom rules, and can instantly pause runaway agents.",
+                    text: "halt is a monitoring and safety layer for autonomous AI agents running on OpenClaw. It watches everything your agent does, evaluates custom rules, and can instantly pause runaway agents.",
                   },
                 },
                 {
@@ -128,7 +128,7 @@ export default function RootLayout({
                   name: "What is auto-kill?",
                   acceptedAnswer: {
                     "@type": "Answer",
-                    text: "If an agent triggers 3 rule violations within 10 minutes, Halt automatically shuts it down. No human intervention needed. The threshold and window are configurable per agent from your dashboard.",
+                    text: "If an agent triggers 3 rule violations within 10 minutes, halt automatically shuts it down. No human intervention needed. The threshold and window are configurable per agent from your dashboard.",
                   },
                 },
                 {

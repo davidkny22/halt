@@ -19,7 +19,7 @@ export async function renderAgents(container, selectedId) {
     if (agents.length === 0) {
       const empty = el('div','empty');
       empty.appendChild(el('h2','','No agents yet'));
-      empty.appendChild(el('p','','Run an agent with the Halt plugin to see agents here.'));
+      empty.appendChild(el('p','','Run an agent with the halt plugin to see agents here.'));
       container.appendChild(empty);
       return;
     }

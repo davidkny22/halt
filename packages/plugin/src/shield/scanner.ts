@@ -92,7 +92,7 @@ export class ShieldScanner {
       return EMPTY_RESULT;
     }
 
-    // Self-targeting skip — don't scan Halt's own API calls
+    // Self-targeting skip — don't scan halt's own API calls
     const paramsStr = params ? JSON.stringify(params).slice(0, 2000) : "";
     if (
       paramsStr.includes("api.halt.dev") ||

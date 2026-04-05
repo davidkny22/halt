@@ -42,7 +42,7 @@ async function provisionAndGetKey(email: string, opts?: { githubToken?: string; 
 
 export async function init() {
   console.log(`
-  Halt — Agent monitoring for OpenClaw
+  halt — Agent monitoring for OpenClaw
   by Safer Intelligence Labs
 `);
 
@@ -89,7 +89,7 @@ export async function init() {
   const configPath = writeApiKey(apiKey);
 
   console.log(`
-  Done. Halt is monitoring your agents.
+  Done. halt is monitoring your agents.
 
   Config:     ${configPath}
   Dashboard:  https://app.halt.dev

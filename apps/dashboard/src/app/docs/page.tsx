@@ -177,7 +177,7 @@ export default function DocsPage() {
 
         {/* Content */}
         <main className="flex-1 min-w-0">
-          <h1 className="text-3xl font-bold mb-2">Halt Documentation</h1>
+          <h1 className="text-3xl font-bold mb-2">halt documentation</h1>
           <P>
             Agent monitoring, smart rules, and a kill switch for OpenClaw.
             One plugin. Total control.
@@ -209,7 +209,7 @@ export default function DocsPage() {
 
           <SubHeader>3. Agents are auto-discovered</SubHeader>
           <P>
-            When the plugin starts, it reads your <Code>openclaw.json</Code> and registers all agents with Halt. They appear on your{" "}
+            When the plugin starts, it reads your <Code>openclaw.json</Code> and registers all agents with halt. They appear on your{" "}
             <a href="https://app.halt.dev/agents" style={{ color: "var(--color-coral)" }}>agents page</a> as
             &ldquo;discovered&rdquo; — activate the ones you want to monitor.
           </P>
@@ -227,7 +227,7 @@ export default function DocsPage() {
             style={{ border: "1px solid var(--color-border)" }}
           >
             <ConfigRow name="apiKey" type="string" def="required">
-              Your Halt API key. Starts with <Code>clw_live_</Code>.
+              Your halt API key. Starts with <Code>clw_live_</Code>.
             </ConfigRow>
             <ConfigRow name="backendUrl" type="string" def="https://api.halt.dev">
               Backend API endpoint. Override for self-hosted or development.
@@ -264,7 +264,7 @@ export default function DocsPage() {
 
           {/* ═══════════════ EVENT MONITORING ═══════════════ */}
           <SectionHeader id="monitoring">Event Monitoring</SectionHeader>
-          <P>Halt captures every action your agent takes through OpenClaw&apos;s hooks system.</P>
+          <P>halt captures every action your agent takes through OpenClaw&apos;s hooks system.</P>
 
           <SubHeader>Event types</SubHeader>
           <div
@@ -427,7 +427,7 @@ export default function DocsPage() {
           {/* ═══════════════ ANOMALY DETECTION ═══════════════ */}
           <SectionHeader id="anomaly" badge="Pro">Anomaly Detection</SectionHeader>
           <P>
-            Halt builds a 72-hour behavioral baseline for each agent — typical event rates, tool usage
+            halt builds a 72-hour behavioral baseline for each agent — typical event rates, tool usage
             patterns, cost per session. After the learning period, it flags deviations automatically.
           </P>
           <P>
@@ -437,7 +437,7 @@ export default function DocsPage() {
           {/* ═══════════════ COST TRACKING ═══════════════ */}
           <SectionHeader id="cost-tracking">Cost Tracking</SectionHeader>
           <P>
-            Every LLM call and tool use captures cost data from OpenClaw&apos;s native tracking. Halt
+            Every LLM call and tool use captures cost data from OpenClaw&apos;s native tracking. halt
             aggregates this into actionable spend analytics on your dashboard:
           </P>
           <ul className="text-xs flex flex-col gap-2 mb-4 ml-4" style={{ color: "var(--color-text-secondary)" }}>
@@ -448,7 +448,7 @@ export default function DocsPage() {
           </ul>
           <P>
             Cost data comes from OpenClaw&apos;s native <Code>cost_usd</Code> and <Code>tokens_used</Code> fields
-            in event metadata. Halt does not calculate costs — it uses what OpenClaw reports.
+            in event metadata. halt does not calculate costs — it uses what OpenClaw reports.
           </P>
 
           {/* ═══════════════ DECISION TRACES ═══════════════ */}
@@ -483,7 +483,7 @@ export default function DocsPage() {
           {/* ═══════════════ OFFLINE RESILIENCE ═══════════════ */}
           <SectionHeader id="offline">Offline Resilience</SectionHeader>
           <P>
-            If the Halt backend is unreachable, the plugin keeps working:
+            If the halt backend is unreachable, the plugin keeps working:
           </P>
           <ul className="text-xs flex flex-col gap-2 mb-4 ml-4" style={{ color: "var(--color-text-secondary)" }}>
             <li>Events are cached locally (up to 50MB / 7 days)</li>

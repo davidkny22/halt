@@ -27,5 +27,31 @@ export async function POST(request: Request) {
     return Response.json(await res.json(), { status: res.status });
   }
 
+  if (action === "invite") {
+    const res = await fetch(`${API_URL}/api/teams/${data.teamId}/invite`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ email: data.email, role: data.role || "editor" }),
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "accept-invite") {
+    const res = await fetch(`${API_URL}/api/teams/accept-invite`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ token: data.token }),
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "remove-member") {
+    const res = await fetch(`${API_URL}/api/teams/${data.teamId}/members/${data.memberId}`, {
+      method: "DELETE",
+      headers,
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
   return Response.json({ error: "Unknown action" }, { status: 400 });
 }

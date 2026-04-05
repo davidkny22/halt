@@ -73,7 +73,7 @@ function renderFeed(container, events) {
   if (filtered.length === 0) {
     const empty = el('div','empty');
     empty.appendChild(el('h2','','No events yet'));
-    empty.appendChild(el('p','','Run an agent with the Halt plugin to see events here.'));
+    empty.appendChild(el('p','','Run an agent with the halt plugin to see events here.'));
     empty.appendChild(el('code','','openclaw plugins install @halt/plugin'));
     feed.appendChild(empty);
   } else {

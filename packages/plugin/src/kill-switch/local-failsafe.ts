@@ -47,7 +47,7 @@ export class LocalFailsafe {
     if (this.sessionSpend >= this.config.spendLimit) {
       return {
         block: true,
-        reason: `Halt: Spend limit reached ($${this.sessionSpend.toFixed(2)} >= $${this.config.spendLimit}). Agent paused.`,
+        reason: `halt: Spend limit reached ($${this.sessionSpend.toFixed(2)} >= $${this.config.spendLimit}). Agent paused.`,
       };
     }
 
@@ -56,7 +56,7 @@ export class LocalFailsafe {
     if (callsPerMin >= this.config.rateLimit) {
       return {
         block: true,
-        reason: `Halt: Rate limit reached (${callsPerMin} calls/min >= ${this.config.rateLimit}). Agent paused.`,
+        reason: `halt: Rate limit reached (${callsPerMin} calls/min >= ${this.config.rateLimit}). Agent paused.`,
       };
     }
 
@@ -68,7 +68,7 @@ export class LocalFailsafe {
     if (blocked) {
       return {
         block: true,
-        reason: `Halt: Tool "${toolName}" is blocklisted. Agent paused.`,
+        reason: `halt: Tool "${toolName}" is blocklisted. Agent paused.`,
       };
     }
 

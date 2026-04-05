@@ -13,21 +13,21 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="text-lg font-semibold mb-3" style={{ color: "var(--color-text)" }}>What We Collect</h2>
-          <p><strong style={{ color: "var(--color-text)" }}>Agent event data:</strong> Halt captures tool calls, LLM requests, messages, and lifecycle events from your OpenClaw agents via the Halt plugin. This data powers monitoring, alerting, rule evaluation, and anomaly detection.</p>
+          <p><strong style={{ color: "var(--color-text)" }}>Agent event data:</strong> halt captures tool calls, LLM requests, messages, and lifecycle events from your OpenClaw agents via the halt plugin. This data powers monitoring, alerting, rule evaluation, and anomaly detection.</p>
           <p className="mt-2"><strong style={{ color: "var(--color-text)" }}>Account data:</strong> Email address, name (via GitHub OAuth or email magic link), and billing information (via Stripe).</p>
           <p className="mt-2"><strong style={{ color: "var(--color-text)" }}>Usage data:</strong> Dashboard interactions and feedback submitted through the in-app widget.</p>
-          <p className="mt-2"><strong style={{ color: "var(--color-text)" }}>Auto-kill configuration:</strong> For each agent, Halt stores your auto-kill settings (enabled/disabled, violation threshold, detection window). Violation logs tracking rule breaches that trigger auto-kill are maintained in your workspace and are subject to the same retention policy as event data.</p>
+          <p className="mt-2"><strong style={{ color: "var(--color-text)" }}>Auto-kill configuration:</strong> For each agent, halt stores your auto-kill settings (enabled/disabled, violation threshold, detection window). Violation logs tracking rule breaches that trigger auto-kill are maintained in your workspace and are subject to the same retention policy as event data.</p>
         </section>
 
         <section>
           <h2 className="text-lg font-semibold mb-3" style={{ color: "var(--color-text)" }}>Automatic Secret Redaction</h2>
-          <p>Before any event data leaves your agent, the Halt plugin automatically redacts sensitive information using 25+ built-in patterns: API keys, passwords, tokens, SSH keys, AWS credentials, database connection strings, and OAuth tokens. Raw secrets are <strong style={{ color: "var(--color-text)" }}>never transmitted to or stored on Halt servers</strong>. You can add custom redaction patterns in your plugin configuration.</p>
+          <p>Before any event data leaves your agent, the halt plugin automatically redacts sensitive information using 25+ built-in patterns: API keys, passwords, tokens, SSH keys, AWS credentials, database connection strings, and OAuth tokens. Raw secrets are <strong style={{ color: "var(--color-text)" }}>never transmitted to or stored on halt servers</strong>. You can add custom redaction patterns in your plugin configuration.</p>
         </section>
 
         <section>
           <h2 className="text-lg font-semibold mb-3" style={{ color: "var(--color-text)" }}>Data Sharing</h2>
           <p>Anonymized data sharing is <strong style={{ color: "var(--color-text)" }}>opt-in and off by default</strong>. If enabled, only aggregate patterns are shared (rule trigger frequencies, common tool names, anomaly score distributions). This data may be used to power collective intelligence features such as shared anomaly baselines, community rule libraries, and model improvements. We never share raw events, message content, file contents, or agent outputs. You can toggle this anytime in Settings.</p>
-          <p className="mt-2"><strong style={{ color: "var(--color-text)" }}>Halt does not sell, rent, or trade personal data to third parties.</strong></p>
+          <p className="mt-2"><strong style={{ color: "var(--color-text)" }}>halt does not sell, rent, or trade personal data to third parties.</strong></p>
         </section>
 
         <section>
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
             <li><strong style={{ color: "var(--color-text)" }}>Stripe</strong> — payment processing (billing data only)</li>
             <li><strong style={{ color: "var(--color-text)" }}>Resend</strong> — email delivery for authentication links and alerts (email addresses only)</li>
             <li><strong style={{ color: "var(--color-text)" }}>Google</strong> — primary AI provider for anomaly detection and natural language rule evaluation. Event data is processed in real-time and is not retained by Google after processing.</li>
-            <li><strong style={{ color: "var(--color-text)" }}>OpenAI</strong> — AI fallback provider and feedback categorization. If the primary provider is unavailable, Halt automatically switches to OpenAI. Data is not used for model training.</li>
+            <li><strong style={{ color: "var(--color-text)" }}>OpenAI</strong> — AI fallback provider and feedback categorization. If the primary provider is unavailable, halt automatically switches to OpenAI. Data is not used for model training.</li>
             <li><strong style={{ color: "var(--color-text)" }}>Railway</strong> — database and infrastructure hosting (US region)</li>
             <li><strong style={{ color: "var(--color-text)" }}>GitHub</strong> — OAuth authentication (email address only, no repository access)</li>
           </ul>
@@ -46,7 +46,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="text-lg font-semibold mb-3" style={{ color: "var(--color-text)" }}>Interactive Demo</h2>
-          <p>The <Link href="/demo" style={{ color: "var(--color-coral)" }}>/demo</Link> page does not require login and does not access any real agent data. When you run a demo scenario, your scenario selection and rule configuration are sent to OpenAI to generate simulated agent events. No personal data, real agent events, or account information is included in demo requests. Demo activity is not stored on Halt servers and is not used for model training.</p>
+          <p>The <Link href="/demo" style={{ color: "var(--color-coral)" }}>/demo</Link> page does not require login and does not access any real agent data. When you run a demo scenario, your scenario selection and rule configuration are sent to OpenAI to generate simulated agent events. No personal data, real agent events, or account information is included in demo requests. Demo activity is not stored on halt servers and is not used for model training.</p>
         </section>
 
         <section>
@@ -72,7 +72,7 @@ export default function PrivacyPage() {
           <h2 className="text-lg font-semibold mb-3" style={{ color: "var(--color-text)" }}>Your Rights</h2>
           <p><strong style={{ color: "var(--color-text)" }}>All users:</strong> You can access, correct, export, or delete your data from Settings at any time.</p>
           <p className="mt-2"><strong style={{ color: "var(--color-text)" }}>EU users (GDPR):</strong> You have the right to access, correct, delete, port, and restrict processing of your data. You may opt out of AI-powered features and lodge a complaint with your data protection authority.</p>
-          <p className="mt-2"><strong style={{ color: "var(--color-text)" }}>California users (CCPA):</strong> You have the right to know what data is collected, request deletion, and opt out of data sharing. Halt does not sell personal data.</p>
+          <p className="mt-2"><strong style={{ color: "var(--color-text)" }}>California users (CCPA):</strong> You have the right to know what data is collected, request deletion, and opt out of data sharing. halt does not sell personal data.</p>
           <p className="mt-2">To exercise these rights, email <a href="mailto:privacy@halt.dev" style={{ color: "var(--color-coral)" }}>privacy@halt.dev</a>. We respond within 45 days.</p>
         </section>
 
@@ -85,8 +85,8 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="text-lg font-semibold mb-3" style={{ color: "var(--color-text)" }}>Cookies &amp; Tracking</h2>
-          <p>Halt does not use cookies for tracking, profiling, or marketing. Cookies are used only for session management (login tokens). No third-party analytics or tracking pixels are loaded.</p>
-          <p className="mt-2"><strong style={{ color: "var(--color-text)" }}>Landing page analytics:</strong> Halt collects anonymous page view data on the marketing site (halt.dev) including page path, referrer URL, and inferred country (via request headers). This data is stored in our own database, is not linked to user accounts, and is used solely to understand traffic patterns. No browsing history, device fingerprints, or personal identifiers are collected. Analytics data is retained for 30 days and is not shared with third parties.</p>
+          <p>halt does not use cookies for tracking, profiling, or marketing. Cookies are used only for session management (login tokens). No third-party analytics or tracking pixels are loaded.</p>
+          <p className="mt-2"><strong style={{ color: "var(--color-text)" }}>Landing page analytics:</strong> halt collects anonymous page view data on the marketing site (halt.dev) including page path, referrer URL, and inferred country (via request headers). This data is stored in our own database, is not linked to user accounts, and is used solely to understand traffic patterns. No browsing history, device fingerprints, or personal identifiers are collected. Analytics data is retained for 30 days and is not shared with third parties.</p>
         </section>
 
         <section>
