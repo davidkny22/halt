@@ -4,6 +4,7 @@ import type { RateTracker } from "../severity.js";
 import { killState } from "../kill-switch/kill-state.js";
 import type { LocalFailsafe } from "../kill-switch/local-failsafe.js";
 import type { RuleCache } from "../rule-cache.js";
+import type { ViolationTracker } from "../auto-kill.js";
 
 interface ToolCallContext {
   agentId: string;
@@ -13,6 +14,7 @@ interface ToolCallContext {
   redactionPatterns: string[];
   failsafe: LocalFailsafe;
   ruleCache: RuleCache;
+  violationTracker: ViolationTracker;
 }
 
 export function createBeforeToolCallHandler(ctx: ToolCallContext) {
@@ -70,7 +72,25 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
       event.params
     );
     if (ruleResult.blocked) {
-      killState.setKilled(ruleResult.reason || "Rule triggered");
+      // Record violation for auto-kill tracking (don't kill yet — just block this action)
+      const autoKillResult = ctx.violationTracker.recordViolation({
+        ruleId: ruleResult.ruleName || "unknown",
+        ruleName: ruleResult.ruleName || "unknown",
+        timestamp: Date.now(),
+        action: event.toolName || "unknown",
+        target: event.toolName || "unknown",
+      });
+
+      // If auto-kill threshold reached, escalate to full agent kill
+      if (autoKillResult.shouldKill) {
+        killState.setKilled(autoKillResult.message);
+        return {
+          block: true,
+          blockReason: autoKillResult.message,
+        };
+      }
+
+      // Otherwise just block this individual action
       return {
         block: true,
         blockReason: ruleResult.reason,

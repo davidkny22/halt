@@ -92,11 +92,12 @@ export async function billingRoutes(app: FastifyInstance) {
         case "checkout.session.completed": {
           const session = event.data.object;
           const userId = session.metadata?.userId;
+          const plan = session.metadata?.plan;
           if (userId && session.customer) {
             await db
               .update(users)
               .set({
-                tier: "paid",
+                tier: plan === "team" ? "team" : "paid",
                 stripe_customer_id: session.customer as string,
                 updated_at: new Date(),
               })

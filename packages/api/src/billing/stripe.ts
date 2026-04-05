@@ -14,11 +14,11 @@ export function getStripe(): Stripe | null {
 
 export const PRICE_IDS = {
   pro: {
-    firstAgent: "price_1TB4gUL6FFGNUHLlm9r7MSfH", // $5/mo
+    firstAgent: "price_1TB4gUL6FFGNUHLlm9r7MSfH", // $5/mo (1 agent included)
     additionalAgent: "price_1TB4gaL6FFGNUHLlQfaWbajT", // $3/mo
   },
   team: {
-    base: "price_1TBHA0L6FFGNUHLlEqmpgCAG", // $19/mo (10 agents included)
+    base: "price_1TBHA0L6FFGNUHLlEqmpgCAG", // $19/mo (5 agents included)
     additionalAgent: "price_1TB4gsL6FFGNUHLlIDamGisi", // $2/mo
   },
   // Enterprise: custom pricing (contact sales)

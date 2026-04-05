@@ -31,9 +31,9 @@ export default function PricingPage() {
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Email alerts</li>
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 7-day event history</li>
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 team (2 members)</li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 kill switch activation/mo</li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 manual kill/mo</li>
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Local failsafe (always active)</li>
-            <li className="flex gap-2" style={{ color: "var(--color-text-tertiary)" }}><span>—</span> No AI detection</li>
+            <li className="flex gap-2" style={{ color: "var(--color-text-tertiary)" }}><span>—</span> No auto-kill or AI detection</li>
           </ul>
         </div>
 
@@ -55,13 +55,15 @@ export default function PricingPage() {
             Start Free Trial
           </Link>
           <ul className="flex flex-col gap-2.5 text-xs">
-            <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>3 agents included</strong></li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Unlimited kill switch</strong></li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>1 agent included (+$3/ea)</strong></li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Unlimited kill switch + auto-kill</strong></li>
             <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>AI anomaly detection</strong></li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Natural language rules</strong></li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited rules + 10 shared</li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Up to 5 NL rules</strong></li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited pattern rules + 10 shared</li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 15-min AI evaluation cycle</li>
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> All alert channels</li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 90-day history, 3 members</li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 90-day event history</li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 team (3 members)</li>
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 14-day free trial</li>
           </ul>
         </div>
@@ -82,12 +84,12 @@ export default function PricingPage() {
           </Link>
           <ul className="flex flex-col gap-2.5 text-xs">
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Everything in Pro</li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>10 agents included</strong></li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>5 agents included (+$2/ea)</strong></li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>Up to 20 NL rules</strong></li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>5-min AI evaluation cycle</strong></li>
             <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>10 team members</strong></li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>Full role management</strong></li>
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited shared rules</li>
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1-year event history</li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Priority support</li>
           </ul>
         </div>
 

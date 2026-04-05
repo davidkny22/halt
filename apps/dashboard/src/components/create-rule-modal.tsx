@@ -42,6 +42,20 @@ export function CreateRuleModal({ onClose, onCreated }: Props) {
       return;
     }
 
+    // Validate fields based on rule type
+    if (ruleType === "threshold") {
+      if (isNaN(parseFloat(value)) || parseFloat(value) <= 0) { setError("Value must be a positive number"); return; }
+      if (isNaN(parseInt(windowMinutes)) || parseInt(windowMinutes) <= 0) { setError("Window must be a positive number"); return; }
+    } else if (ruleType === "rate") {
+      if (isNaN(parseInt(maxCount)) || parseInt(maxCount) <= 0) { setError("Max count must be a positive number"); return; }
+      if (isNaN(parseInt(rateWindow)) || parseInt(rateWindow) <= 0) { setError("Window must be a positive number"); return; }
+    } else if (ruleType === "keyword") {
+      const kws = keywords.split(",").map((k) => k.trim()).filter(Boolean);
+      if (kws.length === 0) { setError("Enter at least one keyword"); return; }
+    } else if (ruleType === "nl") {
+      if (!promptText.trim()) { setError("Describe your rule in plain English"); return; }
+    }
+
     setCreating(true);
     setError("");
 
@@ -240,7 +254,7 @@ export function CreateRuleModal({ onClose, onCreated }: Props) {
                 style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
               />
               <p className="text-[10px] mt-1" style={{ color: "var(--color-text-tertiary)" }}>
-                Claude Haiku evaluates this against each event batch. Requires Pro plan.
+                AI evaluates this against each event batch. Requires Pro plan (up to 5 NL rules).
               </p>
             </div>
           )}

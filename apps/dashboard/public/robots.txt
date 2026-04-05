@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /agents
+Disallow: /rules
+Disallow: /alerts
+Disallow: /settings
+Disallow: /onboarding
+Disallow: /api/
+
+Sitemap: https://clawnitor.io/sitemap.xml

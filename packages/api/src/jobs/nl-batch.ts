@@ -1,23 +1,22 @@
-import { createWorker } from "./queue.js";
+import { createQueue, createWorker } from "./queue.js";
 import type { Job } from "bullmq";
 import { getDb } from "../db/client.js";
 import { rules, events, alerts, users } from "../db/schema.js";
 import { eq, and, gte, desc } from "drizzle-orm";
 import { evaluateNLRule } from "../rules/nl-evaluator.js";
-import { isDegraded } from "../ai/haiku-client.js";
-import { TIER_FEATURES, NL_EVAL_INTERVAL_MINUTES, type Tier } from "@clawnitor/shared";
+import { isDegraded } from "../ai/client.js";
+import { TIER_FEATURES, type Tier } from "@clawnitor/shared";
 
 export function startNLBatchWorker() {
+  const alertQueue = createQueue("alerts");
+
   return createWorker("nl-eval", async (job: Job) => {
     if (isDegraded()) {
-      console.warn("Skipping NL evaluation — Haiku API degraded");
+      console.warn("Skipping NL evaluation — AI provider degraded");
       return { skipped: true };
     }
 
     const db = getDb();
-    const windowStart = new Date(
-      Date.now() - NL_EVAL_INTERVAL_MINUTES * 60 * 1000
-    );
 
     // Find all paid users with NL rules
     const allUsers = await db.select().from(users);
@@ -29,7 +28,14 @@ export function startNLBatchWorker() {
     let totalEvaluated = 0;
 
     for (const user of paidUsers) {
-      // Get NL rules for this user
+      const tier = user.tier as Tier;
+      const tierFeatures = TIER_FEATURES[tier];
+
+      // Use tier-specific eval interval for the event window
+      const windowMs = tierFeatures.nlEvalIntervalMinutes * 60 * 1000;
+      const windowStart = new Date(Date.now() - windowMs);
+
+      // Get NL rules for this user, enforce tier cap
       const nlRules = await db
         .select()
         .from(rules)
@@ -43,6 +49,9 @@ export function startNLBatchWorker() {
 
       if (nlRules.length === 0) continue;
 
+      // Only evaluate up to the tier's NL rule limit
+      const cappedRules = nlRules.slice(0, tierFeatures.maxNLRules);
+
       // Get recent events
       const recentEvents = await db
         .select()
@@ -55,8 +64,8 @@ export function startNLBatchWorker() {
 
       if (recentEvents.length === 0) continue;
 
-      // Evaluate each NL rule
-      for (const rule of nlRules) {
+      // Evaluate each NL rule (up to cap)
+      for (const rule of cappedRules) {
         const ruleText = (rule.config as any).promptText || "";
         if (!ruleText) continue;
 
@@ -64,7 +73,7 @@ export function startNLBatchWorker() {
         totalEvaluated++;
 
         if (result.triggered && result.confidence > 0.7) {
-          await db.insert(alerts).values({
+          const [alert] = await db.insert(alerts).values({
             user_id: user.id,
             rule_id: rule.id,
             severity: "elevated",
@@ -74,6 +83,12 @@ export function startNLBatchWorker() {
               confidence: result.confidence,
               explanation: result.explanation,
             },
+          }).returning();
+
+          await alertQueue.add("deliver", {
+            alertId: alert.id,
+            userId: user.id,
+            severity: "elevated",
           });
         }
       }

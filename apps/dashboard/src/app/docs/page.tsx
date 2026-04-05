@@ -185,12 +185,12 @@ export default function DocsPage() {
           <P>Get from zero to monitored in under 2 minutes.</P>
 
           <SubHeader>1. Install the plugin</SubHeader>
-          <CodeBlock title="Terminal">{`npm install @clawnitor/plugin`}</CodeBlock>
+          <CodeBlock title="Terminal">{`openclaw plugins install @clawnitor/plugin`}</CodeBlock>
 
-          <SubHeader>2. Add your API key</SubHeader>
+          <SubHeader>2. Set up (one command)</SubHeader>
+          <CodeBlock title="Terminal">{`npx clawnitor init`}</CodeBlock>
           <P>
-            Sign up at <a href="https://app.clawnitor.io/signup" style={{ color: "var(--color-coral)" }}>app.clawnitor.io</a> to
-            get your API key, then add it to your <Code>openclaw.json</Code>:
+            This handles authentication, API key generation, and config in one command. Or manually: sign up at <a href="https://app.clawnitor.io/signup" style={{ color: "var(--color-coral)" }}>app.clawnitor.io</a>, copy your API key, and add it to your <Code>openclaw.json</Code>:
           </P>
           <CodeBlock title="openclaw.json">{`{
   "plugins": {
@@ -480,9 +480,9 @@ export default function DocsPage() {
             style={{ border: "1px solid var(--color-border)" }}
           >
             {[
-              { tier: "Free", price: "$0", agents: "1", rules: "3 pattern", history: "7 days", extras: "Email alerts, 1 kill/mo, local failsafe, 1 team (2 members)" },
-              { tier: "Pro", price: "$5/mo", agents: "3 (+$3/ea)", rules: "Unlimited + NL", history: "90 days", extras: "Unlimited kill switch, AI detection, all alerts, 14-day trial" },
-              { tier: "Team", price: "$19/mo", agents: "10 (+$2/ea)", rules: "Unlimited + shared", history: "1 year", extras: "10 members, full role management" },
+              { tier: "Free", price: "$0", agents: "1", rules: "3 pattern", history: "7 days", extras: "Email alerts, 1 manual kill/mo, local failsafe, 1 team (2 members)" },
+              { tier: "Pro", price: "$5/mo", agents: "1 (+$3/ea)", rules: "Unlimited pattern + 5 NL", history: "90 days", extras: "Unlimited kill + auto-kill, AI detection (15-min eval), all alerts, 14-day trial" },
+              { tier: "Team", price: "$19/mo", agents: "5 (+$2/ea)", rules: "Unlimited + 20 NL + shared", history: "1 year", extras: "10 members, 5-min eval, auto-kill, full role management" },
               { tier: "Enterprise", price: "Custom", agents: "Unlimited", rules: "Unlimited", history: "Unlimited", extras: "SSO, audit logs, custom webhooks, custom roles" },
             ].map((t) => (
               <div

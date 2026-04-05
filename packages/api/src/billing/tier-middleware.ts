@@ -5,6 +5,7 @@ import { users } from "../db/schema.js";
 import { TIER_FEATURES, type Tier } from "@clawnitor/shared";
 
 const TRIAL_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+const EXTENDED_TRIAL_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days (beta consolation)
 
 export function requireTier(feature: keyof typeof TIER_FEATURES.free) {
   return async function (request: FastifyRequest, reply: FastifyReply) {
@@ -24,11 +25,26 @@ export function requireTier(feature: keyof typeof TIER_FEATURES.free) {
 
     let tier = user.tier as Tier;
 
-    // Check trial expiration
+    // Check trial expiration (30 days for extended beta consolation, 14 days standard)
     if (tier === "trial" && user.trial_started_at) {
+      const duration = user.beta_code === "EXTENDED_TRIAL"
+        ? EXTENDED_TRIAL_DURATION_MS
+        : TRIAL_DURATION_MS;
       const elapsed = Date.now() - user.trial_started_at.getTime();
-      if (elapsed > TRIAL_DURATION_MS) {
+      if (elapsed > duration) {
         // Trial expired — downgrade to free
+        await db
+          .update(users)
+          .set({ tier: "free", updated_at: new Date() })
+          .where(eq(users.id, user.id));
+        tier = "free";
+      }
+    }
+
+    // Check beta expiration
+    if (tier === "paid" && user.beta_code && user.beta_expires_at) {
+      if (Date.now() > user.beta_expires_at.getTime()) {
+        // Beta expired — downgrade to free, keep beta_code for founding member record
         await db
           .update(users)
           .set({ tier: "free", updated_at: new Date() })

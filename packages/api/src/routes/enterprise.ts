@@ -62,13 +62,20 @@ function encrypt(text: string): string {
 }
 
 function decrypt(encrypted: string): string {
-  const [ivHex, encHex] = encrypted.split(":");
-  const iv = Buffer.from(ivHex, "hex");
-  const key = getEncryptionKey();
-  const decipher = createDecipheriv("aes-256-cbc", key, iv);
-  let decrypted = decipher.update(encHex, "hex", "utf8");
-  decrypted += decipher.final("utf8");
-  return decrypted;
+  try {
+    const parts = encrypted.split(":");
+    if (parts.length !== 2) throw new Error("Invalid encrypted format");
+    const [ivHex, encHex] = parts;
+    const iv = Buffer.from(ivHex, "hex");
+    const key = getEncryptionKey();
+    const decipher = createDecipheriv("aes-256-cbc", key, iv);
+    let decrypted = decipher.update(encHex, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+    return decrypted;
+  } catch {
+    console.error("SSO secret decryption failed");
+    return "";
+  }
 }
 
 // ── Routes ────────────────────────────────────────────────
@@ -389,6 +396,16 @@ export async function enterpriseRoutes(app: FastifyInstance) {
       const { enabled } = request.body as { enabled: boolean };
       const db = getDb();
       const userId = request.userId!;
+
+      // Enforce enterprise tier
+      const [user] = await db
+        .select({ tier: users.tier })
+        .from(users)
+        .where(eq(users.id, userId));
+
+      if (!TIER_FEATURES[(user?.tier || "free") as Tier]?.sso) {
+        return reply.status(403).send({ error: "SSO requires an Enterprise plan" });
+      }
 
       const teamResults = await db
         .select()

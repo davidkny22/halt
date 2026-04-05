@@ -168,6 +168,7 @@ export async function teamsRoutes(app: FastifyInstance) {
 
       // Enforce member limit based on team owner's tier
       const [team] = await db.select().from(teams).where(eq(teams.id, teamId));
+      if (!team) return reply.status(404).send({ error: "Team not found" });
       const [owner] = await db.select().from(users).where(eq(users.id, team.owner_id));
       const ownerTier = (owner?.tier || "free") as Tier;
       const maxMembers = TIER_FEATURES[ownerTier]?.maxTeamMembers || 2;
@@ -238,6 +239,12 @@ export async function teamsRoutes(app: FastifyInstance) {
         return reply.status(410).send({ error: "Invite expired" });
       }
 
+      // Verify the invite email matches the authenticated user
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user || user.email !== invite.email) {
+        return reply.status(403).send({ error: "This invite was sent to a different email address" });
+      }
+
       // Add user to team
       await db.insert(teamMembers).values({
         team_id: invite.team_id,
@@ -288,6 +295,7 @@ export async function teamsRoutes(app: FastifyInstance) {
         .from(teams)
         .where(eq(teams.id, teamId));
 
+      if (!team) return reply.status(404).send({ error: "Team not found" });
       if (team.owner_id === memberId) {
         return reply.status(400).send({ error: "Cannot remove team owner" });
       }
@@ -476,7 +484,7 @@ export async function teamsRoutes(app: FastifyInstance) {
         active_agents: activeAgents,
         paused_agents: pausedAgents,
         learning_agents: learningAgents,
-        max_agents: team.max_agents,
+        max_agents: team?.max_agents ?? 10,
         member_count: members.length,
       });
     },

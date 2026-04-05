@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreateRuleModal } from "@/components/create-rule-modal";
+import { TemplateLibrary } from "@/components/template-library";
 
 const typeColors: Record<string, string> = {
   threshold: "var(--color-coral)",
@@ -69,6 +70,8 @@ export function RulesClient({ rules, tier }: { rules: any[]; tier: string }) {
           <strong>Upgrade to Pro</strong> for unlimited rules + natural language rules
         </div>
       )}
+
+      <TemplateLibrary />
 
       {rules.length === 0 ? (
         <div

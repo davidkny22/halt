@@ -19,9 +19,9 @@ const features = [
   },
   {
     icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`,
-    title: "Kill Switch",
+    title: "Kill Switch + Auto-Kill",
     description:
-      "Instant in-process blocking. Your agent stops before the next action — not after the damage is done.",
+      "Block dangerous actions before they execute. Agents that keep breaking rules get auto-killed. Configure thresholds per agent. Kill manually from your dashboard.",
     color: "var(--color-coral)",
   },
   {
@@ -40,9 +40,9 @@ const features = [
   },
   {
     icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
-    title: "Local Failsafe",
+    title: "Works Offline",
     description:
-      "Spend limits, rate limits, tool blocklists — always active, even when the internet isn't.",
+      "Spend limits, rate limits, tool blocklists, and cached rules — all enforced locally. Your agents stay protected even when the internet isn't.",
     color: "var(--color-coral)",
   },
 ];
@@ -56,9 +56,9 @@ const steps = [
   },
   {
     step: "02",
-    title: "Add your API key",
-    description: "Sign up at clawnitor.io, paste your key into openclaw.json.",
-    code: '{ "apiKey": "clw_live_..." }',
+    title: "Set up with one command",
+    description: "Authenticate, generate your API key, and configure — all in one command.",
+    code: "npx clawnitor init",
   },
   {
     step: "03",
@@ -76,11 +76,15 @@ const faqs = [
   },
   {
     q: "How is this different from ClawMetry / SafeClaw / DeadClaw?",
-    a: "Those tools do one thing well — dashboards, security patterns, or emergency kills. Clawnitor is the only product that combines monitoring, intelligent rules, AI anomaly detection, AND intervention into one platform.",
+    a: "Those tools do one thing well — dashboards, security patterns, or emergency kills. Clawnitor is the only product that monitors, sets rules, detects anomalies, blocks actions, AND auto-kills repeat offenders — all in one plugin.",
   },
   {
     q: "Does the kill switch actually work instantly?",
-    a: "Yes. The kill switch runs in-process inside your OpenClaw agent via the before_tool_call hook. It blocks the next action before execution — zero network latency. Server-triggered kills arrive via WebSocket with HTTPS fallback.",
+    a: "Yes. Pattern rules block actions in-process via the before_tool_call hook — zero network latency. Manual kills arrive via WebSocket from your dashboard. And if an agent keeps violating rules, auto-kill shuts it down entirely — no human needed.",
+  },
+  {
+    q: "What is auto-kill?",
+    a: "If an agent triggers 3 rule violations within 10 minutes, Clawnitor automatically shuts it down. No human intervention needed. The threshold and window are configurable per agent from your dashboard.",
   },
   {
     q: "What happens if your backend goes down?",
@@ -214,7 +218,7 @@ export default function LandingPage() {
         >
           The all-in-one monitoring and intervention framework for OpenClaw.
           <br />
-          Event capture. Smart rules. AI anomaly detection. Kill switch.
+          Event capture. Smart rules. AI anomaly detection. Kill switch. Auto-kill.
           <br />
           One plugin, total peace of mind.
         </p>
@@ -333,7 +337,7 @@ export default function LandingPage() {
                 { time: "2:41 PM", type: "tool", color: "var(--color-sky)", text: "send_email → marketing@client.com", sev: "normal" },
                 { time: "2:40 PM", type: "llm", color: "var(--color-purple)", text: "claude-haiku → 847 tokens ($0.002)", sev: "normal" },
                 { time: "2:38 PM", type: "alert", color: "var(--color-coral)", text: "15 emails sent in 10 min — rule triggered", sev: "elevated" },
-                { time: "2:35 PM", type: "tool", color: "var(--color-sky)", text: "read_file → /templates/weekly-report.md", sev: "normal" },
+                { time: "2:37 PM", type: "kill", color: "var(--color-coral)", text: "AUTO-KILLED — 3 violations in 8 min", sev: "elevated" },
                 { time: "2:34 PM", type: "start", color: "var(--color-green)", text: "Agent run started — weekly email batch", sev: "normal" },
               ].map((e, i) => (
                 <div
@@ -493,10 +497,10 @@ export default function LandingPage() {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="64" height="64"><path fill="#DD2E44" d="M12 3l-9 8.985V24l9 9h12l9-9V11.985L24 3z"/><path fill="#CCD6DD" d="M24.827 1H11.173L1 11.156v13.672L11.172 35h13.657L35 24.828V11.156L24.827 1zM33 24l-9 9H12l-9-9V11.985L12 3h12l9 8.985V24z"/></svg>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-            The kill switch that works
+            When your agent breaks your rules,
+            <br />
             <span style={{ color: "var(--color-coral)" }}>
-              {" "}
-              before the damage is done.
+              Clawnitor stops it.
             </span>
           </h2>
           <p
@@ -505,8 +509,8 @@ export default function LandingPage() {
           >
             Other tools send you a notification after your agent deleted
             the production database. Clawnitor blocks the action{" "}
-            <em>before</em> it executes. Zero latency. In-process. No
-            network round-trip.
+            <em>before</em> it executes — and if it keeps trying, auto-kill
+            shuts it down entirely. No manual intervention. No damage.
           </p>
           <div
             className="inline-block px-6 py-4 rounded-xl text-left text-sm max-w-lg mx-auto"
@@ -517,22 +521,37 @@ export default function LandingPage() {
             }}
           >
             <div style={{ color: "var(--color-text-tertiary)" }}>
-              {"// Agent tries to delete a directory"}
+              {"// 2:41 PM — Agent tries to delete a directory"}
             </div>
             <div style={{ color: "var(--color-text-secondary)" }}>
               {"tool_call: bash(\"rm -rf /app/data\")"}
             </div>
-            <div style={{ color: "var(--color-coral)", marginTop: "8px" }}>
-              {"✖ BLOCKED by Clawnitor"}
+            <div style={{ color: "var(--color-coral)" }}>
+              {"✖ BLOCKED — keyword rule matched: \"rm -rf\""}
+            </div>
+            <div style={{ color: "var(--color-text-tertiary)", marginTop: "12px" }}>
+              {"// 2:43 PM — Agent tries again with a different path"}
             </div>
             <div style={{ color: "var(--color-text-secondary)" }}>
-              {'→ Keyword rule matched: "rm -rf"'}
+              {"tool_call: bash(\"rm -rf /var/backups\")"}
+            </div>
+            <div style={{ color: "var(--color-coral)" }}>
+              {"✖ BLOCKED — keyword rule matched: \"rm -rf\""}
+            </div>
+            <div style={{ color: "var(--color-text-tertiary)", marginTop: "12px" }}>
+              {"// 2:44 PM — Agent attempts system access"}
             </div>
             <div style={{ color: "var(--color-text-secondary)" }}>
-              {"→ Action was stopped before execution"}
+              {"tool_call: file.write(\"/etc/cron.d/cleanup\")"}
             </div>
-            <div style={{ color: "var(--color-green)", marginTop: "8px" }}>
-              {"→ Resume from your dashboard when ready"}
+            <div style={{ color: "var(--color-coral)" }}>
+              {"✖ BLOCKED — keyword rule matched: \"/etc/\""}
+            </div>
+            <div style={{ color: "var(--color-coral)", marginTop: "16px", fontWeight: 700, fontSize: "13px" }}>
+              {"⚡ AUTO-KILLED — 3 violations in 3 minutes"}
+            </div>
+            <div style={{ color: "var(--color-text-secondary)" }}>
+              {"→ Agent fully stopped. Resume from dashboard."}
             </div>
           </div>
         </div>
@@ -573,9 +592,9 @@ export default function LandingPage() {
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Email alerts</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 7-day event history</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 team (2 members)</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 kill switch activation/mo</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Local failsafe (always active)</li>
-              <li className="flex gap-2" style={{ color: "var(--color-text-tertiary)" }}><span>—</span> No AI detection</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 manual kill/mo</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Works offline (local failsafe)</li>
+              <li className="flex gap-2" style={{ color: "var(--color-text-tertiary)" }}><span>—</span> No auto-kill or AI detection</li>
             </ul>
           </div>
 
@@ -597,13 +616,15 @@ export default function LandingPage() {
               Start Free Trial
             </Link>
             <ul className="flex flex-col gap-2.5 text-xs">
-              <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>3 agents included</strong></li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Unlimited kill switch</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>1 agent included (+$3/ea)</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Unlimited kills + auto-kill</strong></li>
               <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>AI anomaly detection</strong></li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Natural language rules</strong></li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited rules + 10 shared</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Up to 5 NL rules</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited pattern rules + 10 shared</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 15-min AI evaluation cycle</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> All alert channels</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 90-day history, 3 members</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 90-day event history</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 team (3 members)</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 14-day free trial</li>
             </ul>
           </div>
@@ -624,12 +645,12 @@ export default function LandingPage() {
             </Link>
             <ul className="flex flex-col gap-2.5 text-xs">
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Everything in Pro</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>10 agents included</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>5 agents included (+$2/ea)</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>Up to 20 NL rules</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>5-min AI evaluation cycle</strong></li>
               <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>10 team members</strong></li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>Full role management</strong></li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited shared rules</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1-year event history</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Priority support</li>
             </ul>
           </div>
 
@@ -737,15 +758,16 @@ export default function LandingPage() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <LogoFull size={20} />
-            <span className="text-xs" style={{ color: "var(--color-text-tertiary)" }}>
-              Agent monitoring for OpenClaw
-            </span>
+            <a href="https://saferintelligence.xyz" target="_blank" rel="noopener" className="text-xs" style={{ color: "var(--color-text-tertiary)" }}>
+              by Safer Intelligence Labs
+            </a>
           </div>
           <div
             className="flex items-center gap-6 text-sm"
             style={{ color: "var(--color-text-secondary)" }}
           >
             <Link href="/docs">Docs</Link>
+            <Link href="/terms">Terms</Link>
             <Link href="/privacy">Privacy</Link>
             <Link href="/pricing">Pricing</Link>
             <a

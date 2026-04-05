@@ -46,6 +46,8 @@ export const users = pgTable("users", {
     .default(false),
   stripe_customer_id: varchar("stripe_customer_id", { length: 255 }),
   trial_started_at: timestamp("trial_started_at", { withTimezone: true }),
+  beta_expires_at: timestamp("beta_expires_at", { withTimezone: true }),
+  beta_code: varchar("beta_code", { length: 32 }),
   created_at: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -81,6 +83,11 @@ export const agents = pgTable("agents", {
   agent_id: varchar("agent_id", { length: 255 }).notNull(),
   status: agentStatusEnum("status").notNull().default("active"),
   kill_reason: text("kill_reason"),
+  auto_kill_enabled: boolean("auto_kill_enabled").notNull().default(true),
+  auto_kill_threshold: integer("auto_kill_threshold").notNull().default(3),
+  auto_kill_window_minutes: integer("auto_kill_window_minutes")
+    .notNull()
+    .default(10),
   created_at: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -127,10 +134,27 @@ export const rules = pgTable("rules", {
   rule_type: varchar("rule_type", { length: 32 }).notNull(),
   config: jsonb("config").notNull(),
   enabled: boolean("enabled").notNull().default(true),
+  agent_visible: boolean("agent_visible").notNull().default(true),
   created_at: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
   updated_at: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// ── Rule Templates ──────────────────────────────────────
+
+export const ruleTemplates = pgTable("rule_templates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  category: varchar("category", { length: 32 }).notNull(),
+  severity: varchar("severity", { length: 16 }).notNull(),
+  rule_type: varchar("rule_type", { length: 32 }).notNull(),
+  config: jsonb("config").notNull(),
+  agent_visible: boolean("agent_visible").notNull().default(true),
+  created_at: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
 });
@@ -349,6 +373,63 @@ export const alertChannels = pgTable("alert_channels", {
     .notNull()
     .defaultNow(),
   updated_at: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// ── Feedback ─────────────────────────────────────────────
+
+export const feedback = pgTable("feedback", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  user_id: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+  user_email: text("user_email"),
+  message: text("message").notNull(),
+  category: varchar("category", { length: 32 }),
+  sentiment: varchar("sentiment", { length: 16 }),
+  ai_summary: text("ai_summary"),
+  page: text("page"),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// ── Page Views (lightweight analytics) ──────────────────
+
+export const pageViews = pgTable("page_views", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  path: varchar("path", { length: 255 }).notNull(),
+  referrer: varchar("referrer", { length: 500 }),
+  country: varchar("country", { length: 2 }),
+  user_agent: varchar("user_agent", { length: 500 }),
+  session_id: varchar("session_id", { length: 36 }),
+  device_type: varchar("device_type", { length: 10 }), // mobile, tablet, desktop
+  created_at: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// ── Beta Invite Codes ───────────────────────────────────
+
+export const betaCodes = pgTable("beta_codes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  code: varchar("code", { length: 32 }).notNull().unique(),
+  channel: varchar("channel", { length: 32 }).notNull(), // "discord" | "reddit"
+  max_redemptions: integer("max_redemptions").notNull().default(1),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const betaRedemptions = pgTable("beta_redemptions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  code_id: uuid("code_id")
+    .notNull()
+    .references(() => betaCodes.id, { onDelete: "cascade" }),
+  user_id: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  channel: varchar("channel", { length: 32 }).notNull(),
+  redeemed_at: timestamp("redeemed_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
 });

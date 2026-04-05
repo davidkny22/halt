@@ -19,7 +19,7 @@
     "@clawnitor/shared": "workspace:*",
     "@fastify/cors": "^11",
     "@fastify/websocket": "^11",
-    "bcrypt": "^5",
+    "bcrypt": "^6.0.0",
     "bullmq": "^5",
     "dotenv": "^16",
     "drizzle-orm": "^0.39",

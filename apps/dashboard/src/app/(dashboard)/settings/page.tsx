@@ -45,6 +45,9 @@ export default function SettingsPage() {
   const [newKey, setNewKey] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [upgrading, setUpgrading] = useState(false);
+  const [betaCode, setBetaCode] = useState("");
+  const [betaResult, setBetaResult] = useState<{ success?: boolean; message?: string } | null>(null);
+  const [redeemingBeta, setRedeemingBeta] = useState(false);
 
   // Alert channel state
   const [channels, setChannels] = useState<Record<string, ChannelConfig>>({});
@@ -54,6 +57,7 @@ export default function SettingsPage() {
 
   const tier = (session as any)?.tier || "free";
   const keyPrefix = (session as any)?.apiKeyPrefix || "clw_live_";
+  const betaExpiresAt = (session as any)?.betaExpiresAt;
   const isPaid = tier !== "free";
 
   // Load alert channels on mount
@@ -101,6 +105,25 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleRedeemBeta() {
+    if (!betaCode.trim()) return;
+    setRedeemingBeta(true);
+    setBetaResult(null);
+    try {
+      const result = await callAction("redeem-beta-code", { code: betaCode.trim() });
+      setBetaResult(result);
+      if (result.success) {
+        setBetaCode("");
+        window.location.reload();
+        return;
+      }
+    } catch {
+      setBetaResult({ message: "Something went wrong. Try again." });
+    } finally {
+      setRedeemingBeta(false);
+    }
+  }
+
   async function handleToggleDataSharing() {
     setSavingSharing(true);
     const newValue = !dataSharing;
@@ -135,9 +158,15 @@ export default function SettingsPage() {
   }
 
   async function handleStartTrial() {
-    const result = await callAction("start-trial");
-    if (result.tier === "trial") {
-      router.refresh();
+    try {
+      const result = await callAction("start-trial");
+      if (result.tier === "trial") {
+        router.refresh();
+      } else if (result.error) {
+        alert(result.error === "Trial already used" ? "You've already used your free trial." : result.error);
+      }
+    } catch {
+      alert("Failed to start trial. Please try again.");
     }
   }
 
@@ -371,9 +400,19 @@ export default function SettingsPage() {
                 <span style={{ color: "var(--color-coral)" }}>
                   {tier === "paid" ? "Pro" : tier === "trial" ? "Pro (Trial)" : tier.charAt(0).toUpperCase() + tier.slice(1)}
                 </span>
+                {betaExpiresAt && tier === "paid" && (
+                  <span className="text-xs ml-2" style={{ color: "var(--color-text-tertiary)" }}>
+                    (free until {new Date(betaExpiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })})
+                  </span>
+                )}
+                {tier === "paid" && !betaExpiresAt && (
+                  <span className="text-xs ml-2" style={{ color: "var(--color-text-tertiary)" }}>
+                    (renews monthly)
+                  </span>
+                )}
               </p>
               <p className="text-xs mt-1" style={{ color: "var(--color-text-secondary)" }}>
-                {tier === "free" ? "Upgrade to Pro for kill switch, AI detection, and more." : tier === "trial" ? "Your trial gives you full Pro access." : "Manage your subscription via Stripe."}
+                {tier === "free" ? "Upgrade to Pro for kill switch, AI detection, and more." : tier === "trial" ? "Your trial gives you full Pro access." : betaExpiresAt ? "You're a founding beta tester. When your beta ends, lock in $5/mo forever." : "Manage your subscription via Stripe."}
               </p>
             </div>
             {tier === "free" && (
@@ -387,6 +426,46 @@ export default function SettingsPage() {
               </button>
             )}
           </div>
+
+          {/* Beta code redemption */}
+          {(tier === "free" || tier === "trial") && (
+            <div className="mt-3 pt-3" style={{ borderTop: "1px solid var(--color-border)" }}>
+              <p className="text-xs font-medium mb-2">Have a beta invite code?</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={betaCode}
+                  onChange={(e) => setBetaCode(e.target.value.toUpperCase())}
+                  placeholder="CLAW-XXXX-XXXX"
+                  maxLength={14}
+                  className="flex-1 px-3 py-2 rounded-lg text-xs"
+                  style={{
+                    backgroundColor: "var(--color-bg)",
+                    border: "1px solid var(--color-border)",
+                    color: "var(--color-text)",
+                    fontFamily: "var(--font-mono)",
+                    letterSpacing: "0.05em",
+                  }}
+                />
+                <button
+                  onClick={handleRedeemBeta}
+                  disabled={redeemingBeta || !betaCode.trim()}
+                  className="text-xs px-4 py-2 rounded-lg font-semibold text-white cursor-pointer disabled:opacity-50"
+                  style={{ backgroundColor: "var(--color-green)" }}
+                >
+                  {redeemingBeta ? "..." : "Redeem"}
+                </button>
+              </div>
+              {betaResult && (
+                <p
+                  className="text-xs mt-2"
+                  style={{ color: betaResult.success ? "var(--color-green)" : "var(--color-coral)" }}
+                >
+                  {betaResult.message}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </section>
 

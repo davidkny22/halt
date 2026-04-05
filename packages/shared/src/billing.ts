@@ -4,6 +4,8 @@ export type Tier = (typeof TIERS)[number];
 export interface TierFeatures {
   maxRules: number;
   maxAgents: number;
+  maxNLRules: number;
+  nlEvalIntervalMinutes: number;
   maxTeamMembers: number;
   maxTeams: number;
   maxSharedRules: number;
@@ -25,6 +27,8 @@ export const TIER_FEATURES: Record<Tier, TierFeatures> = {
   free: {
     maxRules: 3,
     maxAgents: 1,
+    maxNLRules: 0,
+    nlEvalIntervalMinutes: 15,
     maxTeamMembers: 2,
     maxTeams: 1,
     maxSharedRules: 0,
@@ -43,7 +47,9 @@ export const TIER_FEATURES: Record<Tier, TierFeatures> = {
   },
   trial: {
     maxRules: Infinity,
-    maxAgents: 3,
+    maxAgents: 1,
+    maxNLRules: 5,
+    nlEvalIntervalMinutes: 15,
     maxTeamMembers: 3,
     maxTeams: 1,
     maxSharedRules: 10,
@@ -62,7 +68,9 @@ export const TIER_FEATURES: Record<Tier, TierFeatures> = {
   },
   paid: {
     maxRules: Infinity,
-    maxAgents: 3,
+    maxAgents: 1,
+    maxNLRules: 5,
+    nlEvalIntervalMinutes: 15,
     maxTeamMembers: 3,
     maxTeams: 1,
     maxSharedRules: 10,
@@ -81,7 +89,9 @@ export const TIER_FEATURES: Record<Tier, TierFeatures> = {
   },
   team: {
     maxRules: Infinity,
-    maxAgents: 10,
+    maxAgents: 5,
+    maxNLRules: 20,
+    nlEvalIntervalMinutes: 5,
     maxTeamMembers: 10,
     maxTeams: 1,
     maxSharedRules: Infinity,
@@ -101,6 +111,8 @@ export const TIER_FEATURES: Record<Tier, TierFeatures> = {
   enterprise: {
     maxRules: Infinity,
     maxAgents: Infinity,
+    maxNLRules: Infinity,
+    nlEvalIntervalMinutes: 5,
     maxTeamMembers: Infinity,
     maxTeams: Infinity,
     maxSharedRules: Infinity,

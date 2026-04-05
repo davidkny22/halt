@@ -42,8 +42,6 @@ export async function killServerRoutes(app: FastifyInstance) {
         }
 
         // First message must be the API key
-        clearTimeout(authTimeout);
-
         try {
           const parsed = JSON.parse(msg);
           const apiKey = parsed.apiKey || parsed.key || msg;
@@ -58,6 +56,8 @@ export async function killServerRoutes(app: FastifyInstance) {
           return;
         }
 
+        // Only clear timeout after successful auth
+        clearTimeout(authTimeout);
         authenticated = true;
 
         // Enforce per-user connection limit

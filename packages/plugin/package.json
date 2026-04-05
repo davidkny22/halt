@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@clawnitor/shared": "workspace:^",
+    "@clawnitor/cli": "workspace:^",
     "better-sqlite3": "^11"
   },
   "devDependencies": {

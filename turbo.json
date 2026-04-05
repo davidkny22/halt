@@ -3,15 +3,13 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**", ".next/**"]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
-    "test": {
-      "dependsOn": ["build"]
-    },
+    "test": {},
     "lint": {},
     "typecheck": {
       "dependsOn": ["^build"]

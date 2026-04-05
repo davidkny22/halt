@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { auth } from "@/auth";
 import { getUserInfo } from "@/lib/server-api";
 import { CopyBlock, CopyMultiBlock } from "@/components/copy-block";
@@ -38,8 +39,45 @@ export default async function OnboardingPage() {
       const data = await res.json();
       apiKey = data.api_key || null;
       keyPrefix = data.key_prefix;
+
     }
   } catch {}
+
+  // Auto-redeem beta code if one was stored during signup
+  let betaResult: { success?: boolean; type?: string; message?: string } | null = null;
+  const cookieStore = await cookies();
+  const pendingCode = cookieStore.get("pending_beta_code")?.value;
+  if (pendingCode) {
+    try {
+      const res = await fetch(`${API_URL}/api/beta/redeem`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Internal-Secret": INTERNAL_SECRET,
+          "X-User-Email": session.user.email,
+        },
+        body: JSON.stringify({ code: pendingCode }),
+        cache: "no-store",
+      });
+      if (res.ok) {
+        betaResult = await res.json();
+      }
+    } catch {}
+    // Clear cookie after redemption attempt (success or fail — don't retry stale codes)
+    cookieStore.delete("pending_beta_code");
+  }
+
+  // Send welcome email for new users — skip if beta email was already sent
+  if (apiKey && !betaResult?.success) {
+    fetch(`${API_URL}/api/auth/welcome`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Internal-Secret": INTERNAL_SECRET,
+      },
+      body: JSON.stringify({ email: session.user.email }),
+    }).catch(() => {});
+  }
 
   const keyDisplay = apiKey || `${keyPrefix || "clw_live_"}...`;
 
@@ -60,9 +98,31 @@ export default async function OnboardingPage() {
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold mb-2">Welcome to Clawnitor!</h1>
         <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-          Two steps. Two minutes. Full agent monitoring.
+          {apiKey ? "Two steps to full agent monitoring." : "You're all set. Your API key is already configured."}
         </p>
       </div>
+
+      {/* Beta activation banner */}
+      {betaResult?.success && (
+        <div
+          className="p-4 rounded-xl mb-6"
+          style={{
+            background: "linear-gradient(135deg, rgba(255, 107, 74, 0.1) 0%, rgba(255, 107, 74, 0.03) 100%)",
+            border: "1px solid rgba(255, 107, 74, 0.2)",
+          }}
+        >
+          <p className="text-sm font-semibold" style={{ color: "var(--color-coral)" }}>
+            {betaResult.type === "beta"
+              ? "Beta access activated! 6 months of Pro, on us."
+              : "Extended trial activated! 30 days of Pro."}
+          </p>
+          <p className="text-xs mt-1" style={{ color: "var(--color-text-secondary)" }}>
+            {betaResult.type === "beta"
+              ? "You're a founding member. When your beta ends, you'll lock in $5/mo forever."
+              : "All 50 beta spots were claimed, but you showed up early — enjoy the extended trial."}
+          </p>
+        </div>
+      )}
 
       {/* API Key — prominent, copyable */}
       {apiKey && (
@@ -113,6 +173,22 @@ export default async function OnboardingPage() {
         </div>
         <CopyMultiBlock text={configJson} />
       </div>
+
+      {/* Beta code prompt (only if not already redeemed via magic link) */}
+      {!betaResult?.success && (
+        <div
+          className="p-4 rounded-xl mb-6"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+          }}
+        >
+          <p className="text-sm font-semibold mb-1">Have a beta invite code?</p>
+          <p className="text-xs mb-0" style={{ color: "var(--color-text-secondary)" }}>
+            Go to <a href="/settings" style={{ color: "var(--color-coral)", textDecoration: "underline" }}>Settings</a> and enter your code in the Billing section to unlock 6 months of free Pro.
+          </p>
+        </div>
+      )}
 
       <a
         href="/dashboard"

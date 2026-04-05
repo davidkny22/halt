@@ -43,6 +43,10 @@ export async function POST(request: Request) {
   }
 
   if (action === "delete-webhook") {
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(body.webhookId)) {
+      return Response.json({ error: "Invalid webhook ID" }, { status: 400 });
+    }
     const res = await fetch(`${API_URL}/api/webhooks/${body.webhookId}`, {
       method: "DELETE",
       headers,

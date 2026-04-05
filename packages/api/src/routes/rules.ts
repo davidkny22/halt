@@ -3,7 +3,7 @@ import { eq, and, count } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import { rules, users } from "../db/schema.js";
 import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
-import { ruleConfigSchema, MAX_FREE_RULES } from "@clawnitor/shared";
+import { ruleConfigSchema, MAX_FREE_RULES, TIER_FEATURES, type Tier } from "@clawnitor/shared";
 import { z } from "zod";
 import { logAudit } from "./enterprise.js";
 
@@ -52,7 +52,10 @@ export async function rulesRoutes(app: FastifyInstance) {
         .from(users)
         .where(eq(users.id, userId));
 
-      if (user.tier === "free") {
+      const tier = (user.tier || "free") as Tier;
+      const tierFeatures = TIER_FEATURES[tier];
+
+      if (tier === "free") {
         const [{ value: ruleCount }] = await db
           .select({ value: count() })
           .from(rules)
@@ -63,6 +66,35 @@ export async function rulesRoutes(app: FastifyInstance) {
             error: "Upgrade Required",
             message: `Free tier is limited to ${MAX_FREE_RULES} rules. Upgrade to Pro for unlimited rules.`,
           });
+        }
+      }
+
+      // Enforce NL rule cap per tier
+      if (parsed.data.config.type === "nl") {
+        if (!tierFeatures.nlRules) {
+          return reply.status(403).send({
+            error: "Upgrade Required",
+            message: "NL rules require a Pro plan or higher.",
+          });
+        }
+
+        if (tierFeatures.maxNLRules !== Infinity) {
+          const [{ value: nlCount }] = await db
+            .select({ value: count() })
+            .from(rules)
+            .where(
+              and(
+                eq(rules.user_id, userId),
+                eq(rules.rule_type, "nl")
+              )
+            );
+
+          if (nlCount >= tierFeatures.maxNLRules) {
+            return reply.status(403).send({
+              error: "Limit Reached",
+              message: `Your plan allows up to ${tierFeatures.maxNLRules} NL rules. Upgrade for more.`,
+            });
+          }
         }
       }
 

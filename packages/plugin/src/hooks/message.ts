@@ -11,6 +11,11 @@ interface MessageContext {
 
 export function createMessageSendingHandler(ctx: MessageContext) {
   return (event: any) => {
+    // Check kill state BEFORE enqueueing — don't log blocked messages as sent
+    if (killState.isKilled()) {
+      return { cancel: true };
+    }
+
     const clawnitorEvent = buildEvent({
       agentId: ctx.agentId,
       sessionId: ctx.sessionId,
@@ -24,12 +29,6 @@ export function createMessageSendingHandler(ctx: MessageContext) {
     });
 
     ctx.sender.enqueue(clawnitorEvent);
-
-    // Block outbound messages when killed
-    if (killState.isKilled()) {
-      return { cancel: true };
-    }
-
     return undefined;
   };
 }

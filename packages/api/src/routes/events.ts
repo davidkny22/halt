@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { clawnitorEventSchema } from "@clawnitor/shared";
 import { getDb } from "../db/client.js";
-import { events, agents } from "../db/schema.js";
+import { events, agents, baselines } from "../db/schema.js";
 import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
 import { RateLimiter } from "../util/rate-limiter.js";
 import { IdempotencyChecker } from "../util/idempotency.js";
@@ -85,15 +85,26 @@ export async function eventsRoutes(app: FastifyInstance) {
                 agent_id: event.agent_id,
               })
               .returning();
+
+            await db.insert(baselines).values({
+              user_id: userId,
+              agent_id: newAgent.id,
+              profile: {},
+              status: "learning",
+            });
+
             agentIdMap.set(event.agent_id, newAgent.id);
           }
         }
       }
 
-      // Insert events (filter out events whose agents weren't registered due to limit)
-      const rows = unique
-        .filter((e) => agentIdMap.has(e.agent_id))
-        .map((e) => ({
+      // Keep only events tied to known/registered agents
+      const acceptedEvents = unique.filter((e) => agentIdMap.has(e.agent_id));
+      if (acceptedEvents.length === 0) {
+        return reply.send({ accepted: 0, kill_state: { killed: false } });
+      }
+
+      const rows = acceptedEvents.map((e) => ({
         id: e.event_id,
         user_id: userId,
         agent_id: agentIdMap.get(e.agent_id)!,
@@ -107,10 +118,12 @@ export async function eventsRoutes(app: FastifyInstance) {
         timestamp: new Date(e.timestamp),
       }));
 
-      await db.insert(events).values(rows);
+      await db.insert(events).values(rows).onConflictDoNothing({
+        target: events.id,
+      });
 
       // Enqueue for processing (rule evaluation in Phase 2)
-      await eventsQueue.add("process", { events: unique, userId });
+      await eventsQueue.add("process", { events: acceptedEvents, userId });
 
       // Check kill state — if any agent is paused, report it
       const agentDbIds = [...new Set([...agentIdMap.values()])];
@@ -131,7 +144,7 @@ export async function eventsRoutes(app: FastifyInstance) {
       }
 
       return reply.send({
-        accepted: unique.length,
+        accepted: acceptedEvents.length,
         kill_state: { killed, reason: killReason },
       });
     },

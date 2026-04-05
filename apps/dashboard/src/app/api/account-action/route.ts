@@ -31,6 +31,7 @@ export async function POST(request: Request) {
     const res = await fetch(`${API_URL}/api/account/rotate-key`, {
       method: "POST",
       headers,
+      body: JSON.stringify({}),
     });
     return Response.json(await res.json(), { status: res.status });
   }
@@ -56,6 +57,7 @@ export async function POST(request: Request) {
     const res = await fetch(`${API_URL}/api/billing/start-trial`, {
       method: "POST",
       headers,
+      body: JSON.stringify({}),
     });
     return Response.json(await res.json(), { status: res.status });
   }
@@ -69,6 +71,10 @@ export async function POST(request: Request) {
   }
 
   if (action === "save-alert-channel") {
+    const ALLOWED_CHANNELS = ["telegram", "discord", "sms"];
+    if (!ALLOWED_CHANNELS.includes(data.channel)) {
+      return Response.json({ error: "Invalid channel" }, { status: 400 });
+    }
     const res = await fetch(`${API_URL}/api/account/alert-channels/${data.channel}`, {
       method: "PUT",
       headers,
@@ -78,9 +84,39 @@ export async function POST(request: Request) {
   }
 
   if (action === "remove-alert-channel") {
+    const ALLOWED_CHANNELS = ["telegram", "discord", "sms"];
+    if (!ALLOWED_CHANNELS.includes(data.channel)) {
+      return Response.json({ error: "Invalid channel" }, { status: 400 });
+    }
     const res = await fetch(`${API_URL}/api/account/alert-channels/${data.channel}`, {
       method: "DELETE",
       headers,
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "redeem-beta-code") {
+    const res = await fetch(`${API_URL}/api/beta/redeem`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ code: data.code }),
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "beta-status") {
+    const res = await fetch(`${API_URL}/api/beta/status`, {
+      method: "GET",
+      headers,
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "submit-feedback") {
+    const res = await fetch(`${API_URL}/api/feedback`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ message: data.message, page: data.page }),
     });
     return Response.json(await res.json(), { status: res.status });
   }

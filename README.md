@@ -25,8 +25,9 @@ Clawnitor hooks into OpenClaw's `before_tool_call`. Every action your agent trie
 
 ## What it does
 
-- **Pre-action kill switch** — 3 layers of defense: server kill state, local failsafe, cached rule evaluation. All run before execution.
-- **Smart rules** — threshold, rate, keyword, or describe what you want in plain English. Claude Haiku evaluates NL rules against the event stream.
+- **Pre-action kill switch** — 3 layers of defense: server kill state, local failsafe, cached rule evaluation. All run before execution. Auto-kill: agents that trigger repeated rule violations are automatically shut down.
+- **Kill from anywhere** — manual kill switch works from the dashboard, API, or any device. Your agents are under your control wherever you are.
+- **Smart rules** — threshold, rate, keyword, or describe what you want in plain English. AI evaluates NL rules against the event stream.
 - **AI anomaly detection** — 72-hour behavioral baselines. Clawnitor learns what normal looks like, then flags what isn't.
 - **Multi-channel alerts** — email, Telegram, Discord, SMS. Get notified where you actually look.
 - **Offline resilience** — SQLite cache, local failsafe, and cached rules stay active even when the internet isn't.
@@ -35,10 +36,13 @@ Clawnitor hooks into OpenClaw's `before_tool_call`. Every action your agent trie
 ## Quick start
 
 ```bash
-npm install @clawnitor/plugin
+openclaw plugins install @clawnitor/plugin
+npx clawnitor init
 ```
 
-Add to your `openclaw.json`:
+That's it. `clawnitor init` handles authentication, API key generation, and config — all in one command.
+
+**Or manually:** sign up at [clawnitor.io](https://clawnitor.io), copy your API key, and add it to your `openclaw.json`:
 
 ```json
 {
@@ -53,8 +57,6 @@ Add to your `openclaw.json`:
   }
 }
 ```
-
-Sign up at [clawnitor.io](https://clawnitor.io) to get your API key. Events appear on your dashboard in real-time.
 
 ## How it works
 
@@ -97,7 +99,7 @@ OpenClaw Agent                    Clawnitor Backend
 
 ## Tech stack
 
-Fastify, Drizzle ORM, PostgreSQL, BullMQ, Redis, Next.js 15, Tailwind CSS, Auth.js, Stripe, Claude Haiku, Resend. Monorepo via pnpm + Turborepo.
+Fastify, Drizzle ORM, PostgreSQL, BullMQ, Redis, Next.js 15, Tailwind CSS, Auth.js, Stripe, Gemini 2.5 Flash-Lite, Resend. Monorepo via pnpm + Turborepo.
 
 ## License
 

@@ -1,5 +1,6 @@
 import { getAgents } from "@/lib/server-api";
 import { CopyBlock } from "@/components/copy-block";
+import Link from "next/link";
 
 const statusColors: Record<string, string> = {
   active: "var(--color-green)",
@@ -26,16 +27,18 @@ export default async function AgentsPage() {
           <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
             Agents are automatically registered when the Clawnitor plugin sends its first event.
           </p>
-          <div className="max-w-md mx-auto">
+          <div className="max-w-md mx-auto flex flex-col gap-2">
             <CopyBlock text="openclaw plugins install @clawnitor/plugin" />
+            <CopyBlock text="npx clawnitor init" />
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {agents.map((agent: any) => (
-            <div
+            <Link
               key={agent.id}
-              className="p-5 rounded-lg"
+              href={`/agents/${agent.id}`}
+              className="p-5 rounded-lg block transition-all hover:scale-[1.02]"
               style={{
                 backgroundColor: "var(--color-surface)",
                 border: "1px solid var(--color-border)",
@@ -61,7 +64,7 @@ export default async function AgentsPage() {
                   Paused: {agent.kill_reason}
                 </p>
               )}
-            </div>
+            </Link>
           ))}
         </div>
       )}

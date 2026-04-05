@@ -17,11 +17,23 @@ import { statsRoutes } from "./routes/stats.js";
 import { accountRoutes } from "./routes/account.js";
 import { enterpriseRoutes } from "./routes/enterprise.js";
 import { savesRoutes } from "./routes/saves.js";
+import { feedbackRoutes } from "./routes/feedback.js";
 import { publicStatsRoutes } from "./routes/public-stats.js";
+import { betaRoutes } from "./routes/beta.js";
+import { analyticsRoutes } from "./routes/analytics.js";
+import { ruleTemplatesRoutes } from "./routes/rule-templates.js";
+import { seedRuleTemplates } from "./db/seed-templates.js";
 import { startEventProcessor } from "./jobs/event-processor.js";
 import { startAlertDelivery } from "./jobs/alert-delivery.js";
 import { startUsageSyncWorker } from "./jobs/usage-sync.js";
+import { startBaselineUpdateWorker } from "./jobs/baseline-update.js";
+import { startAnomalyCheckWorker } from "./jobs/anomaly-check.js";
+import { startNLBatchWorker } from "./jobs/nl-batch.js";
 import { createQueue } from "./jobs/queue.js";
+import {
+  ANOMALY_CHECK_INTERVAL_MINUTES,
+  NL_EVAL_INTERVAL_MINUTES,
+} from "@clawnitor/shared";
 
 export async function buildApp() {
   const app = Fastify({
@@ -64,7 +76,16 @@ export async function buildApp() {
   await app.register(accountRoutes);
   await app.register(enterpriseRoutes);
   await app.register(savesRoutes);
+  await app.register(feedbackRoutes);
   await app.register(publicStatsRoutes);
+  await app.register(betaRoutes);
+  await app.register(analyticsRoutes);
+  await app.register(ruleTemplatesRoutes);
+
+  // Seed rule templates on first startup
+  seedRuleTemplates().catch((err) =>
+    console.error("Failed to seed rule templates:", err.message)
+  );
 
   // Health check
   app.get("/health", async () => ({ status: "ok" }));
@@ -80,12 +101,39 @@ async function main() {
   startEventProcessor();
   startAlertDelivery();
   startUsageSyncWorker();
+  startBaselineUpdateWorker();
+  startAnomalyCheckWorker();
+  startNLBatchWorker();
 
   // Schedule usage sync every hour
   const usageSyncQueue = createQueue("usage-sync");
   await usageSyncQueue.upsertJobScheduler("usage-sync-hourly", {
     every: 60 * 60 * 1000, // 1 hour
   }, { name: "sync" });
+
+  // Refresh baseline profiles every hour
+  const baselineQueue = createQueue("baseline-update");
+  await baselineQueue.upsertJobScheduler(
+    "baseline-update-hourly",
+    { every: 60 * 60 * 1000 },
+    { name: "run" }
+  );
+
+  // Run anomaly checks on the configured cadence
+  const anomalyQueue = createQueue("anomaly-check");
+  await anomalyQueue.upsertJobScheduler(
+    "anomaly-check-recurring",
+    { every: ANOMALY_CHECK_INTERVAL_MINUTES * 60 * 1000 },
+    { name: "run" }
+  );
+
+  // Run NL rule evaluation on the configured cadence
+  const nlEvalQueue = createQueue("nl-eval");
+  await nlEvalQueue.upsertJobScheduler(
+    "nl-eval-recurring",
+    { every: NL_EVAL_INTERVAL_MINUTES * 60 * 1000 },
+    { name: "run" }
+  );
 
   await app.listen({ port: config.PORT, host: "0.0.0.0" });
 }

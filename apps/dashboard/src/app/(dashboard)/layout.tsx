@@ -1,27 +1,12 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { LogoFull } from "@/components/logo";
 import { auth } from "@/auth";
 import { SignOutButton } from "@/components/sign-out-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getSavesCount } from "@/lib/server-api";
-
-function NavIcon({ d, size = 16 }: { d: string; size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "6px" }}
-    >
-      <path d={d} />
-    </svg>
-  );
-}
+import { FeedbackWidget } from "@/components/feedback-widget";
+import { DashboardNav } from "@/components/dashboard-nav";
 
 const navItems = [
   {
@@ -79,22 +64,23 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
+  if (!session?.user?.email) {
+    redirect("/login");
+  }
 
   // Fetch user info for tier
   let tier = "free";
-  if (session?.user?.email) {
-    try {
-      const INTERNAL_SECRET = process.env.INTERNAL_API_SECRET || "";
-      const res = await fetch(
-        `${API_URL}/api/auth/me?email=${encodeURIComponent(session.user.email)}`,
-        { cache: "no-store", headers: { "X-Internal-Secret": INTERNAL_SECRET } }
-      );
-      if (res.ok) {
-        const data = await res.json();
-        tier = data.tier || "free";
-      }
-    } catch {}
-  }
+  try {
+    const INTERNAL_SECRET = process.env.INTERNAL_API_SECRET || "";
+    const res = await fetch(
+      `${API_URL}/api/auth/me?email=${encodeURIComponent(session.user.email)}`,
+      { cache: "no-store", headers: { "X-Internal-Secret": INTERNAL_SECRET } }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      tier = data.tier || "free";
+    }
+  } catch {}
 
   // Fetch saves count
   const savesData = await getSavesCount();
@@ -116,26 +102,16 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen flex flex-col">
       <header
-        className="flex items-center justify-between px-6 py-3"
+        className="grid grid-cols-[1fr_auto_1fr] items-center px-6 py-3"
         style={{ borderBottom: "1px solid var(--color-border)" }}
       >
         <Link href="/dashboard">
           <LogoFull size={22} />
         </Link>
-        <nav className="flex gap-6">
-          {allNavItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-sm font-medium transition-colors hover:opacity-80 flex items-center"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
-              <NavIcon d={item.icon} />
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="flex items-center gap-3">
+        <div className="flex justify-center">
+          <DashboardNav items={allNavItems} />
+        </div>
+        <div className="flex items-center gap-3 justify-end">
           {savesCount > 0 && (
             <Link
               href="/saves"
@@ -172,6 +148,8 @@ export default async function DashboardLayout({
       <main className="flex-1 px-6 py-6 max-w-7xl mx-auto w-full">
         {children}
       </main>
+
+      <FeedbackWidget />
     </div>
   );
 }

@@ -7,22 +7,28 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/drizzle-adapter": "^1.11.1",
     "@clawnitor/shared": "workspace:*",
-    "next": "^15",
+    "@tailwindcss/postcss": "^4",
+    "drizzle-orm": "^0.39.3",
+    "next": "^15.5.13",
+    "next-auth": "5.0.0-beta.30",
+    "postgres": "^3.4.8",
     "react": "^19",
     "react-dom": "^19",
-    "next-auth": "5.0.0-beta.30",
-    "tailwindcss": "^4",
-    "@tailwindcss/postcss": "^4"
+    "resend": "^6.9.3",
+    "tailwindcss": "^4"
   },
   "devDependencies": {
-    "typescript": "^5.7",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "postcss": "^8"
+    "eslint": "^9.39.4",
+    "eslint-config-next": "15.5.13",
+    "postcss": "^8",
+    "typescript": "^5.7"
   }
 }

@@ -4,15 +4,18 @@ import { getDb } from "../db/client.js";
 import { baselines, events, alerts, agents, users } from "../db/schema.js";
 import { eq, and, gte, desc } from "drizzle-orm";
 import { scoreAnomaly } from "../ai/anomaly-scorer.js";
-import { isDegraded } from "../ai/haiku-client.js";
+import { isDegraded } from "../ai/client.js";
 import { sendKill } from "../ws/kill-server.js";
 import { ANOMALY_CHECK_INTERVAL_MINUTES, TIER_FEATURES } from "@clawnitor/shared";
 import type { BaselineProfile } from "../ai/baseline-builder.js";
+import { createQueue } from "./queue.js";
 
 export function startAnomalyCheckWorker() {
+  const alertQueue = createQueue("alerts");
+
   return createWorker("anomaly-check", async (job: Job) => {
     if (isDegraded()) {
-      console.warn("Skipping anomaly check — Haiku API degraded");
+      console.warn("Skipping anomaly check — AI provider degraded");
       return { skipped: true };
     }
 
@@ -55,16 +58,23 @@ export function startAnomalyCheckWorker() {
 
       // Create alert for high scores
       if (result.classification === "alert" || result.classification === "critical") {
-        await db.insert(alerts).values({
+        const severity = result.classification === "critical" ? "critical" : "elevated";
+        const [alert] = await db.insert(alerts).values({
           user_id: baseline.user_id,
           agent_id: baseline.agent_id,
-          severity: result.classification === "critical" ? "critical" : "elevated",
+          severity,
           message: `Anomaly detected (score: ${result.score}): ${result.explanation}`,
           context: {
             anomaly_score: result.score,
             classification: result.classification,
             explanation: result.explanation,
           },
+        }).returning();
+
+        await alertQueue.add("deliver", {
+          alertId: alert.id,
+          userId: baseline.user_id,
+          severity,
         });
 
         // Auto-kill on critical (only if user has kill switch feature)

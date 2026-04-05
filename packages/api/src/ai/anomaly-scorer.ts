@@ -1,6 +1,6 @@
 import type { ClawnitorEvent } from "@clawnitor/shared";
 import type { BaselineProfile } from "./baseline-builder.js";
-import { evaluate, isDegraded } from "./haiku-client.js";
+import { evaluate, isDegraded } from "./client.js";
 
 const SYSTEM_PROMPT = `You are an anomaly detection system for AI agent monitoring. You receive a baseline profile of normal agent behavior and a batch of recent events.
 

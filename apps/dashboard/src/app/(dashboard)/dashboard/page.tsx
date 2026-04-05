@@ -58,7 +58,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Stats row with trend arrows */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
           { label: "Events Today", value: stats?.events_today ?? 0 },
           {

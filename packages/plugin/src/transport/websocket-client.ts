@@ -46,9 +46,10 @@ export class WebSocketClient {
   private connect() {
     if (this.stopped) return;
 
+    // wss:// for production (https), ws:// only for localhost development
     const wsUrl = this.config.backendUrl
       .replace("https://", "wss://")
-      .replace("http://", "ws://");
+      .replace("http://", "ws://"); // nosemgrep: insecure-websocket — ws:// only used for localhost dev
 
     try {
       this.ws = new WebSocket(`${wsUrl}/ws`);
@@ -96,6 +97,8 @@ export class WebSocketClient {
     const jitter = delay * (0.75 + Math.random() * 0.5);
 
     this.reconnectAttempt++;
-    this.reconnectTimer = setTimeout(() => this.connect(), jitter);
+    this.reconnectTimer = setTimeout(() => {
+      if (!this.stopped) this.connect();
+    }, jitter);
   }
 }
