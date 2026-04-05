@@ -1,20 +1,48 @@
 {
   "name": "@clawnitor/plugin",
-  "version": "0.0.1",
+  "version": "1.0.1",
+  "description": "OpenClaw plugin for Clawnitor — agent monitoring, alerting, and kill switch",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "openclaw": {
-    "extensions": ["./dist/index.js"]
+    "extensions": [
+      "./dist/index.js"
+    ]
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm run build"
+  },
+  "keywords": [
+    "clawnitor",
+    "openclaw",
+    "openclaw-plugin",
+    "agent-monitoring",
+    "ai-safety",
+    "kill-switch",
+    "anomaly-detection",
+    "observability"
+  ],
+  "author": "David Kogan <davidkny22@gmail.com>",
+  "license": "AGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davidkny22/clawnitor-plugin.git"
+  },
+  "homepage": "https://clawnitor.io",
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
-    "@clawnitor/shared": "workspace:*",
+    "@clawnitor/shared": "workspace:^",
     "better-sqlite3": "^11"
   },
   "devDependencies": {

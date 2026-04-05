@@ -18,7 +18,7 @@ export const PRICE_IDS = {
     additionalAgent: "price_1TB4gaL6FFGNUHLlQfaWbajT", // $3/mo
   },
   team: {
-    base: "price_1TB4grL6FFGNUHLliKe6W6cR", // $29/mo (10 agents included)
+    base: "price_1TBHA0L6FFGNUHLlEqmpgCAG", // $19/mo (10 agents included)
     additionalAgent: "price_1TB4gsL6FFGNUHLlIDamGisi", // $2/mo
   },
   // Enterprise: custom pricing (contact sales)
@@ -40,8 +40,8 @@ export async function createCheckoutSession(
     customer: customerId || undefined,
     customer_email: customerId ? undefined : email,
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: "https://clawnitor.io/settings?billing=success",
-    cancel_url: "https://clawnitor.io/settings?billing=cancel",
+    success_url: "https://app.clawnitor.io/settings?billing=success",
+    cancel_url: "https://app.clawnitor.io/settings?billing=cancel",
     metadata: { userId, plan },
   });
 
@@ -56,7 +56,7 @@ export async function createPortalSession(
 
   const session = await stripe.billingPortal.sessions.create({
     customer: customerId,
-    return_url: "https://clawnitor.io/settings",
+    return_url: "https://app.clawnitor.io/settings",
   });
 
   return session.url;

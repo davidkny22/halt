@@ -5,6 +5,7 @@ import { WebSocketClient } from "./transport/websocket-client.js";
 import { createRateTracker } from "./severity.js";
 import { killState } from "./kill-switch/kill-state.js";
 import { LocalFailsafe } from "./kill-switch/local-failsafe.js";
+import { RuleCache } from "./rule-cache.js";
 import {
   createBeforeToolCallHandler,
   createAfterToolCallHandler,
@@ -27,6 +28,7 @@ export default function register(api: any) {
   const config = parseConfig(rawConfig);
   const rateTracker = createRateTracker();
   const failsafe = new LocalFailsafe(config);
+  const ruleCache = new RuleCache(config);
 
   // Initialize SQLite cache for offline resilience
   const cache = new SqliteCache();
@@ -57,6 +59,7 @@ export default function register(api: any) {
     },
   });
   wsClient.start();
+  ruleCache.start();
 
   // Periodically flush cached events
   const cacheFlushInterval = setInterval(() => {
@@ -83,6 +86,7 @@ export default function register(api: any) {
     rateTracker,
     redactionPatterns: config.redactionPatterns,
     failsafe,
+    ruleCache,
   };
 
   // Register hooks

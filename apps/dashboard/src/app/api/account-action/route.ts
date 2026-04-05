@@ -1,0 +1,89 @@
+import { auth } from "@/auth";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const INTERNAL_SECRET = process.env.INTERNAL_API_SECRET || "";
+
+export async function POST(request: Request) {
+  const session = await auth();
+  if (!session?.user?.email) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = await request.json();
+  const { action, ...data } = body;
+
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    "X-Internal-Secret": INTERNAL_SECRET,
+    "X-User-Email": session.user.email,
+  };
+
+  if (action === "toggle-data-sharing") {
+    const res = await fetch(`${API_URL}/api/account/data-sharing`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({ enabled: data.enabled }),
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "rotate-key") {
+    const res = await fetch(`${API_URL}/api/account/rotate-key`, {
+      method: "POST",
+      headers,
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "delete-account") {
+    const res = await fetch(`${API_URL}/api/account`, {
+      method: "DELETE",
+      headers,
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "checkout") {
+    const res = await fetch(`${API_URL}/api/billing/checkout`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ plan: data.plan || "pro" }),
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "start-trial") {
+    const res = await fetch(`${API_URL}/api/billing/start-trial`, {
+      method: "POST",
+      headers,
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "get-alert-channels") {
+    const res = await fetch(`${API_URL}/api/account/alert-channels`, {
+      method: "GET",
+      headers,
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "save-alert-channel") {
+    const res = await fetch(`${API_URL}/api/account/alert-channels/${data.channel}`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({ config: data.config, enabled: data.enabled ?? true }),
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "remove-alert-channel") {
+    const res = await fetch(`${API_URL}/api/account/alert-channels/${data.channel}`, {
+      method: "DELETE",
+      headers,
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  return Response.json({ error: "Unknown action" }, { status: 400 });
+}

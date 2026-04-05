@@ -30,8 +30,8 @@ export default function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold mb-3" style={{ color: "var(--color-text)" }}>Data export and deletion</h2>
-          <p>You can export your data anytime from Settings. Account deletion permanently removes all events, rules, baselines, and billing information.</p>
+          <h2 className="text-lg font-semibold mb-3" style={{ color: "var(--color-text)" }}>Account deletion</h2>
+          <p>You can delete your account from Settings. Account deletion permanently removes all events, rules, baselines, agents, and billing information.</p>
         </section>
 
         <section>

@@ -13,6 +13,11 @@ import { statusRoutes } from "./routes/status.js";
 import { billingRoutes } from "./routes/billing.js";
 import { authRoutes } from "./routes/auth.js";
 import { teamsRoutes } from "./routes/teams.js";
+import { statsRoutes } from "./routes/stats.js";
+import { accountRoutes } from "./routes/account.js";
+import { enterpriseRoutes } from "./routes/enterprise.js";
+import { savesRoutes } from "./routes/saves.js";
+import { publicStatsRoutes } from "./routes/public-stats.js";
 import { startEventProcessor } from "./jobs/event-processor.js";
 import { startAlertDelivery } from "./jobs/alert-delivery.js";
 import { startUsageSyncWorker } from "./jobs/usage-sync.js";
@@ -36,6 +41,7 @@ export async function buildApp() {
     origin: [
       "https://clawnitor.io",
       "https://www.clawnitor.io",
+      "https://app.clawnitor.io",
       ...(process.env.NODE_ENV !== "production" ? ["http://localhost:3000"] : []),
     ],
     credentials: true,
@@ -54,6 +60,11 @@ export async function buildApp() {
   await app.register(billingRoutes);
   await app.register(authRoutes);
   await app.register(teamsRoutes);
+  await app.register(statsRoutes);
+  await app.register(accountRoutes);
+  await app.register(enterpriseRoutes);
+  await app.register(savesRoutes);
+  await app.register(publicStatsRoutes);
 
   // Health check
   app.get("/health", async () => ({ status: "ok" }));

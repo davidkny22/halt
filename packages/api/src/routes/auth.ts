@@ -3,11 +3,39 @@ import { eq } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import { users, apiKeys } from "../db/schema.js";
 import { generateApiKey, hashApiKey } from "../auth/api-key.js";
+import { RateLimiter } from "../util/rate-limiter.js";
+import { getConfig } from "../config.js";
+import { timingSafeEqual } from "node:crypto";
+
+const authRateLimiter = new RateLimiter(10, 10); // 10 req/min
+
+function validateInternalSecret(request: any): boolean {
+  const config = getConfig();
+  if (!config.INTERNAL_API_SECRET) return false;
+  const secret = request.headers["x-internal-secret"] as string;
+  if (!secret) return false;
+  try {
+    const secretBuf = Buffer.from(secret);
+    const expectedBuf = Buffer.from(config.INTERNAL_API_SECRET);
+    return secretBuf.length === expectedBuf.length && timingSafeEqual(secretBuf, expectedBuf);
+  } catch {
+    return false;
+  }
+}
 
 export async function authRoutes(app: FastifyInstance) {
   // Called by dashboard after GitHub OAuth — creates or finds user, returns API key
+  // Requires INTERNAL_API_SECRET — only the dashboard backend should call this
   app.post("/api/auth/provision", {
     handler: async (request, reply) => {
+      if (!validateInternalSecret(request)) {
+        return reply.status(401).send({ error: "Unauthorized" });
+      }
+
+      const ip = request.ip;
+      if (!authRateLimiter.consume(ip)) {
+        return reply.status(429).send({ error: "Too many requests" });
+      }
       const { email, github_id, name } = request.body as {
         email: string;
         github_id?: string;
@@ -77,8 +105,18 @@ export async function authRoutes(app: FastifyInstance) {
   });
 
   // Get user info by email (for dashboard session enrichment)
+  // Requires INTERNAL_API_SECRET — only the dashboard backend should call this
   app.get("/api/auth/me", {
     handler: async (request, reply) => {
+      if (!validateInternalSecret(request)) {
+        return reply.status(401).send({ error: "Unauthorized" });
+      }
+
+      const ip = request.ip;
+      if (!authRateLimiter.consume(ip)) {
+        return reply.status(429).send({ error: "Too many requests" });
+      }
+
       const email = (request.query as { email?: string }).email;
       if (!email) {
         return reply.status(400).send({ error: "email required" });

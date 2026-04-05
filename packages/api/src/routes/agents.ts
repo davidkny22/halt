@@ -3,7 +3,7 @@ import { eq, and, count } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "../db/client.js";
 import { agents, users } from "../db/schema.js";
-import { authenticateApiKey } from "../auth/middleware.js";
+import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
 import { TIER_FEATURES, type Tier } from "@clawnitor/shared";
 
 const MAX_AGENTS_FREE = 1;

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const RULE_TYPES = ["threshold", "rate", "keyword"] as const;
+export const RULE_TYPES = ["threshold", "rate", "keyword", "nl"] as const;
 export type RuleType = (typeof RULE_TYPES)[number];
 
 export const thresholdConfigSchema = z.object({
@@ -29,10 +29,17 @@ export const keywordConfigSchema = z.object({
 
 export type KeywordConfig = z.infer<typeof keywordConfigSchema>;
 
+export const nlConfigSchema = z.object({
+  promptText: z.string().min(1).max(1000),
+});
+
+export type NLConfig = z.infer<typeof nlConfigSchema>;
+
 export const ruleConfigSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("threshold"), ...thresholdConfigSchema.shape }),
   z.object({ type: z.literal("rate"), ...rateConfigSchema.shape }),
   z.object({ type: z.literal("keyword"), ...keywordConfigSchema.shape }),
+  z.object({ type: z.literal("nl"), ...nlConfigSchema.shape }),
 ]);
 
 export type RuleConfig = z.infer<typeof ruleConfigSchema>;

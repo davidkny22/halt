@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const INTERNAL_SECRET = process.env.INTERNAL_API_SECRET || "";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -19,7 +20,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       try {
         const res = await fetch(`${API_URL}/api/auth/provision`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "X-Internal-Secret": INTERNAL_SECRET },
           body: JSON.stringify({
             email: user.email,
             github_id: account?.providerAccountId,
@@ -39,7 +40,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // Fetch user info from backend to enrich the token
         try {
           const res = await fetch(
-            `${API_URL}/api/auth/me?email=${encodeURIComponent(user.email)}`
+            `${API_URL}/api/auth/me?email=${encodeURIComponent(user.email)}`,
+            { headers: { "X-Internal-Secret": INTERNAL_SECRET } }
           );
           if (res.ok) {
             const data = await res.json();

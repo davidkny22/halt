@@ -3,7 +3,7 @@ import { z } from "zod";
 import { clawnitorEventSchema } from "@clawnitor/shared";
 import { getDb } from "../db/client.js";
 import { events, agents } from "../db/schema.js";
-import { authenticateApiKey } from "../auth/middleware.js";
+import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
 import { RateLimiter } from "../util/rate-limiter.js";
 import { IdempotencyChecker } from "../util/idempotency.js";
 import { createQueue } from "../jobs/queue.js";
@@ -90,8 +90,10 @@ export async function eventsRoutes(app: FastifyInstance) {
         }
       }
 
-      // Insert events
-      const rows = unique.map((e) => ({
+      // Insert events (filter out events whose agents weren't registered due to limit)
+      const rows = unique
+        .filter((e) => agentIdMap.has(e.agent_id))
+        .map((e) => ({
         id: e.event_id,
         user_id: userId,
         agent_id: agentIdMap.get(e.agent_id)!,
@@ -146,18 +148,22 @@ export async function eventsRoutes(app: FastifyInstance) {
       };
 
       const db = getDb();
-      const limit = Math.min(parseInt(query.limit || "50"), 100);
-      const offset = parseInt(query.offset || "0");
+      const limit = Math.min(Math.max(parseInt(query.limit || "50", 10) || 50, 1), 100);
+      const offset = Math.max(parseInt(query.offset || "0", 10) || 0, 0);
 
-      let q = db
+      const conditions = [eq(events.user_id, userId)];
+      if (query.agent_id) {
+        conditions.push(eq(events.agent_id, query.agent_id));
+      }
+
+      const rows = await db
         .select()
         .from(events)
-        .where(eq(events.user_id, userId))
+        .where(and(...conditions))
         .orderBy(desc(events.timestamp))
         .limit(limit)
         .offset(offset);
 
-      const rows = await q;
       return reply.send({ events: rows, limit, offset });
     },
   });

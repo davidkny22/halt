@@ -17,6 +17,9 @@ const envSchema = z.object({
   AUTH_SECRET: process.env.NODE_ENV === "production"
     ? z.string().min(16)
     : z.string().optional(),
+  INTERNAL_API_SECRET: process.env.NODE_ENV === "production"
+    ? z.string().min(16)
+    : z.string().min(16).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

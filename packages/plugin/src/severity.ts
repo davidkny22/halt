@@ -40,13 +40,12 @@ export function assignSeverity(
     return "elevated";
   }
 
-  // Rate-based: if tool call rate exceeds 2x rolling 5-min average
+  // Rate-based: flag elevated if tool call rate exceeds 30/min
+  // (normal agents do 5-15/min, 30+ suggests a loop or runaway)
   if (rateTracker && eventType === "tool_use") {
     const rate = rateTracker.getRate();
-    // Only trigger if we have enough data (at least 1 call/min baseline)
-    if (rate > 1 && rate > 2 * (rate * 0.8)) {
-      // Simplified: if rate exceeds baseline significantly
-      // In practice this triggers when rate spikes above normal
+    if (rate > 30) {
+      return "elevated";
     }
   }
 

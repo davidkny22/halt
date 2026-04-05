@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 
-const MARKETING_PATHS = ["/", "/pricing", "/privacy"];
+const MARKETING_PATHS = ["/", "/pricing", "/privacy", "/demo", "/docs"];
 const PUBLIC_PATHS = ["/api", "/_next", "/favicon.ico", "/health", "/login", "/signup"];
 
 export default auth((req) => {

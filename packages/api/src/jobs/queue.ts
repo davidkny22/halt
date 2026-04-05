@@ -7,6 +7,8 @@ function getConnectionOpts() {
   return {
     host: url.hostname,
     port: parseInt(url.port || "6379"),
+    password: url.password || undefined,
+    username: url.username || undefined,
     maxRetriesPerRequest: null,
   };
 }

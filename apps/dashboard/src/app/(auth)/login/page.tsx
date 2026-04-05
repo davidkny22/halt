@@ -20,7 +20,7 @@ export default function LoginPage() {
         <form
           action={async () => {
             "use server";
-            await signIn("github", { redirectTo: "/" });
+            await signIn("github", { redirectTo: "/dashboard" });
           }}
         >
           <button
@@ -63,14 +63,12 @@ export default function LoginPage() {
           className="text-center text-sm"
           style={{ color: "var(--color-text-secondary)" }}
         >
-          Email/password sign in coming soon.
-          <br />
+          Don&apos;t have an account?{" "}
           <Link
             href="/signup"
-            className="mt-2 inline-block"
             style={{ color: "var(--color-coral)" }}
           >
-            Sign up free with GitHub →
+            Sign up free
           </Link>
         </p>
       </div>

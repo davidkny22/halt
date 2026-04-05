@@ -2,7 +2,7 @@
 
 /* Clawnitor Design System */
 /* Font: Satoshi (loaded via layout.tsx) */
-/* Dark mode default, light mode available */
+/* Dark mode default, light mode via class toggle */
 
 @theme {
   /* Dark mode (default) */
@@ -24,25 +24,29 @@
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
-/* Light mode overrides */
-@media (prefers-color-scheme: light) {
-  :root:not(.dark) {
-    --color-bg: #FBF8F4;
-    --color-surface: #FFFFFF;
-    --color-border: rgba(0, 0, 0, 0.08);
-    --color-text: #1C1917;
-    --color-text-secondary: rgba(28, 25, 23, 0.45);
-    --color-text-tertiary: rgba(28, 25, 23, 0.25);
-    --color-coral: #D4531A;
-    --color-coral-soft: rgba(212, 83, 26, 0.1);
-    --color-sky: #0D9488;
-    --color-purple: #7C3AED;
-    --color-green: #16A34A;
-  }
+/* Light mode — activated by removing .dark class from <html> */
+:root:not(.dark) {
+  --color-bg: #FBF8F4;
+  --color-surface: #FFFFFF;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-text: #1C1917;
+  --color-text-secondary: rgba(28, 25, 23, 0.45);
+  --color-text-tertiary: rgba(28, 25, 23, 0.25);
+  --color-coral: #D4531A;
+  --color-coral-soft: rgba(212, 83, 26, 0.1);
+  --color-sky: #0D9488;
+  --color-purple: #7C3AED;
+  --color-green: #16A34A;
+  --color-yellow: #D97706;
+  --color-red: #DC2626;
 }
 
 .dark {
   color-scheme: dark;
+}
+
+:root:not(.dark) {
+  color-scheme: light;
 }
 
 body {
@@ -51,4 +55,5 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s, color 0.2s;
 }

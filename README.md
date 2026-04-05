@@ -1,36 +1,46 @@
-# 🦞 Clawnitor
+<p align="center">
+  <img src="apps/dashboard/public/favicon.svg" width="48" height="48" alt="Clawnitor" />
+</p>
 
-**Agent monitoring, alerting, and kill switch for OpenClaw.**
+<h3 align="center">Clawnitor</h3>
 
-Your agents run while you sleep. Clawnitor keeps its claws on them.
+<p align="center">
+  Agent monitoring and kill switch for OpenClaw.
+  <br />
+  Other tools watch. We intervene.
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@clawnitor/plugin"><img src="https://img.shields.io/npm/v/@clawnitor/plugin?label=plugin&color=FF6B4A" alt="npm" /></a>
+  <a href="https://clawnitor.io/demo"><img src="https://img.shields.io/badge/demo-live-4ADE80" alt="demo" /></a>
+  <a href="https://clawnitor.io/docs"><img src="https://img.shields.io/badge/docs-clawnitor.io-38BDF8" alt="docs" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-BSL--1.1-A78BFA" alt="license" /></a>
+</p>
 
 ---
 
-## What is Clawnitor?
+Clawnitor hooks into OpenClaw's `before_tool_call`. Every action your agent tries to take gets evaluated against your rules **before it executes** — not after. If a rule matches, the action is blocked in-process with zero network latency.
 
-Clawnitor is the all-in-one monitoring and intervention framework for autonomous AI agents running on [OpenClaw](https://openclaw.ai). It captures every action your agent takes, evaluates custom rules in real-time, fires multi-channel alerts, and can instantly pause runaway agents — all from a beautiful cloud dashboard.
+**[Try the live demo](https://clawnitor.io/demo)** — no signup required.
 
-## Features
+## What it does
 
-- **Real-time event capture** — hooks into every tool call, LLM request, message, and lifecycle event
-- **Pattern-matching rules** — threshold, rate, and keyword alerts with instant evaluation
-- **AI anomaly detection** — behavioral baselines + Claude Haiku scoring (Pro)
-- **Natural language rules** — "Alert me if my agent seems confused" (Pro)
-- **2-path kill switch** — instant in-process blocking + server-triggered pause (Pro)
-- **Local failsafe** — spend circuit breaker, rate limiter, tool blocklist (always active)
-- **Multi-channel alerts** — email (free), Telegram, Discord, SMS (Pro)
-- **Cloud dashboard** — activity feed, stats, rules manager, alert history, agent management
-- **Offline resilience** — SQLite cache ensures no events are lost during network blips
+- **Pre-action kill switch** — 3 layers of defense: server kill state, local failsafe, cached rule evaluation. All run before execution.
+- **Smart rules** — threshold, rate, keyword, or describe what you want in plain English. Claude Haiku evaluates NL rules against the event stream.
+- **AI anomaly detection** — 72-hour behavioral baselines. Clawnitor learns what normal looks like, then flags what isn't.
+- **Multi-channel alerts** — email, Telegram, Discord, SMS. Get notified where you actually look.
+- **Offline resilience** — SQLite cache, local failsafe, and cached rules stay active even when the internet isn't.
+- **Cloud dashboard** — real-time activity feed, spend trends, rules manager, saves history, team management.
 
-## Quick Start
+## Quick start
 
 ```bash
-# 1. Sign up at https://clawnitor.io
+npm install @clawnitor/plugin
+```
 
-# 2. Install the plugin
-openclaw plugins install @clawnitor/plugin
+Add to your `openclaw.json`:
 
-# 3. Add your API key to openclaw.json
+```json
 {
   "plugins": {
     "entries": {
@@ -42,98 +52,59 @@ openclaw plugins install @clawnitor/plugin
     }
   }
 }
-
-# 4. Your agents are now monitored 🦞
 ```
 
-## Architecture
+Sign up at [clawnitor.io](https://clawnitor.io) to get your API key. Events appear on your dashboard in real-time.
+
+## How it works
 
 ```
-┌─────────────────────┐     HTTPS      ┌──────────────────────┐
-│   OpenClaw Agent     │ ──────────────→│   Clawnitor Backend   │
-│                      │                │                       │
-│  ┌────────────────┐  │   WebSocket    │  Rules Engine          │
-│  │ Clawnitor      │  │ ←────────────→│  Anomaly Detection     │
-│  │ Plugin         │  │               │  Alert Dispatcher      │
-│  │                │  │               │  Billing (Stripe)      │
-│  │ • Event capture│  │               └───────────┬───────────┘
-│  │ • Kill switch  │  │                           │
-│  │ • Local cache  │  │               ┌───────────┴───────────┐
-│  │ • Failsafe     │  │               │   Next.js Dashboard    │
-│  └────────────────┘  │               │   clawnitor.io         │
-└─────────────────────┘               └───────────────────────┘
+OpenClaw Agent                    Clawnitor Backend
+┌────────────────┐    HTTPS      ┌──────────────────┐
+│ Clawnitor      │ ────────────> │ Rules engine      │
+│ Plugin         │               │ Anomaly detection │
+│                │   WebSocket   │ Alert dispatcher  │
+│ Event capture  │ <───────────> │ Kill signals      │
+│ Kill switch    │               └────────┬─────────┘
+│ Local failsafe │                        │
+│ Rule cache     │               ┌────────┴─────────┐
+│ SQLite cache   │               │ Dashboard         │
+└────────────────┘               │ app.clawnitor.io  │
+                                 └──────────────────┘
 ```
 
 ## Pricing
 
-| | Free | Pro ($5/mo) |
-|---|---|---|
-| Event audit trail | ✅ | ✅ |
-| Pattern rules | 3 | Unlimited |
-| NL rules (AI) | — | ✅ |
-| Kill switch | — | ✅ |
-| Anomaly detection | — | ✅ |
-| Alert channels | Email | Email, Telegram, Discord, SMS |
-| Event history | 7 days | 90 days |
-| Additional agents | — | $3/mo each |
+| | Free | Pro ($5/mo) | Team ($19/mo) | Enterprise |
+|---|---|---|---|---|
+| Agents | 1 | 3 (+$3/ea) | 10 (+$2/ea) | Unlimited |
+| Rules | 3 pattern | Unlimited + NL | Unlimited + shared | Unlimited |
+| Kill switch | — | Yes | Yes | Yes |
+| AI detection | — | Yes | Yes | Yes |
+| Alerts | Email | All channels | All channels | All + webhooks |
+| History | 7 days | 90 days | 1 year | Unlimited |
+| Team members | 2 | 3 | 10 | Unlimited |
+| SSO / Audit logs | — | — | — | Yes |
 
 14-day free trial of Pro. No credit card required.
 
-## Tech Stack
+## Links
 
-- **Monorepo**: pnpm + Turborepo
-- **Backend**: Fastify, Drizzle ORM, PostgreSQL, BullMQ, Redis
-- **Plugin**: TypeScript, OpenClaw hooks API, SQLite (better-sqlite3)
-- **Dashboard**: Next.js, Tailwind CSS, Satoshi font
-- **AI**: Anthropic Claude Haiku
-- **Billing**: Stripe
-- **Alerts**: Resend, Telegram Bot API, Discord webhooks, Twilio
+- [Live demo](https://clawnitor.io/demo) — try it without signing up
+- [Documentation](https://clawnitor.io/docs) — quickstart, config reference, API
+- [Plugin on npm](https://www.npmjs.com/package/@clawnitor/plugin) — `npm install @clawnitor/plugin`
+- [Report issues](https://github.com/davidkny22/clawnitor/issues)
 
-## Development
+## Tech stack
 
-```bash
-# Prerequisites: Node.js 20+, pnpm, Docker
+Fastify, Drizzle ORM, PostgreSQL, BullMQ, Redis, Next.js 15, Tailwind CSS, Auth.js, Stripe, Claude Haiku, Resend. Monorepo via pnpm + Turborepo.
 
-# Start infrastructure
-docker compose up -d
+## License
 
-# Install dependencies
-pnpm install
-
-# Copy environment variables
-cp .env.example .env
-
-# Push database schema
-pnpm db:push
-
-# Run all tests
-pnpm --filter @clawnitor/shared test
-pnpm --filter @clawnitor/api test
-pnpm --filter @clawnitor/plugin test
-
-# Start backend
-pnpm --filter @clawnitor/api dev
-
-# Start dashboard
-pnpm --filter @clawnitor/dashboard dev
-```
-
-## Project Structure
-
-```
-clawnitor/
-├── packages/
-│   ├── shared/          # Types, schemas, constants
-│   ├── api/             # Fastify backend
-│   └── plugin/          # OpenClaw plugin
-├── apps/
-│   └── dashboard/       # Next.js dashboard
-├── operator/            # Autonomous agent team config
-│   └── agents/          # CEO, Marketing, Growth, Support, Engineering
-├── docker-compose.yml   # Local PostgreSQL + Redis
-└── SKILL.md             # ClawHub marketplace listing
-```
+[BSL 1.1](LICENSE) — source-available, converts to AGPL-3.0. Plugin is [AGPL-3.0](https://github.com/davidkny22/clawnitor-plugin/blob/main/LICENSE) (open source).
 
 ---
 
-Built by [David Kogan](https://github.com/davidkny22). Run by lobsters. 🦞
+<p align="center">
+  Built by <a href="https://github.com/davidkny22">David Kogan</a>. Your agents run while you sleep. We keep their claws where they belong.
+</p>

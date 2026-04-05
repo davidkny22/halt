@@ -10,12 +10,15 @@ import type { KillMessage, UnkillMessage } from "@clawnitor/shared";
 const connections = new Map<string, Set<WebSocket>>();
 const AUTH_TIMEOUT_MS = 10_000;
 const MAX_WS_PAYLOAD = 4096;
+const MAX_CONNECTIONS_PER_USER = 20;
+const MAX_PRE_AUTH_MESSAGES = 3;
 
 export async function killServerRoutes(app: FastifyInstance) {
   app.get("/ws", { websocket: true }, async (socket, request) => {
     // Auth via first message (not URL params — avoids key in server logs)
     let authenticated = false;
     let userId: string | null = null;
+    let preAuthMessageCount = 0;
 
     const authTimeout = setTimeout(() => {
       if (!authenticated) {
@@ -32,6 +35,12 @@ export async function killServerRoutes(app: FastifyInstance) {
       }
 
       if (!authenticated) {
+        preAuthMessageCount++;
+        if (preAuthMessageCount > MAX_PRE_AUTH_MESSAGES) {
+          socket.close(4008, "Too many pre-auth messages");
+          return;
+        }
+
         // First message must be the API key
         clearTimeout(authTimeout);
 
@@ -50,6 +59,13 @@ export async function killServerRoutes(app: FastifyInstance) {
         }
 
         authenticated = true;
+
+        // Enforce per-user connection limit
+        const existingConns = connections.get(userId);
+        if (existingConns && existingConns.size >= MAX_CONNECTIONS_PER_USER) {
+          socket.close(4009, "Too many connections");
+          return;
+        }
 
         // Register connection
         if (!connections.has(userId)) {

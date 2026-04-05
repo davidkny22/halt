@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { eq, and, count } from "drizzle-orm";
+import { eq, and, count, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { randomBytes } from "node:crypto";
 import { getDb } from "../db/client.js";
@@ -13,8 +13,8 @@ import {
   alerts,
   users,
 } from "../db/schema.js";
-import { authenticateApiKey } from "../auth/middleware.js";
-import { ruleConfigSchema } from "@clawnitor/shared";
+import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
+import { ruleConfigSchema, TIER_FEATURES, type Tier } from "@clawnitor/shared";
 
 const createTeamBody = z.object({
   name: z.string().min(1).max(255),
@@ -22,7 +22,7 @@ const createTeamBody = z.object({
 
 const inviteBody = z.object({
   email: z.string().email(),
-  role: z.enum(["admin", "member"]).default("member"),
+  role: z.enum(["owner", "admin", "editor", "viewer"]).default("editor"),
 });
 
 const sharedRuleBody = z.object({
@@ -63,7 +63,7 @@ export async function teamsRoutes(app: FastifyInstance) {
       await db.insert(teamMembers).values({
         team_id: team.id,
         user_id: userId,
-        role: "admin",
+        role: "owner",
       });
 
       return reply.status(201).send(team);
@@ -158,12 +158,30 @@ export async function teamsRoutes(app: FastifyInstance) {
           and(
             eq(teamMembers.team_id, teamId),
             eq(teamMembers.user_id, userId),
-            eq(teamMembers.role, "admin")
+            inArray(teamMembers.role, ["owner", "admin"])
           )
         );
 
       if (!membership) {
         return reply.status(403).send({ error: "Only admins can invite members" });
+      }
+
+      // Enforce member limit based on team owner's tier
+      const [team] = await db.select().from(teams).where(eq(teams.id, teamId));
+      const [owner] = await db.select().from(users).where(eq(users.id, team.owner_id));
+      const ownerTier = (owner?.tier || "free") as Tier;
+      const maxMembers = TIER_FEATURES[ownerTier]?.maxTeamMembers || 2;
+
+      const currentMembers = await db
+        .select({ value: count() })
+        .from(teamMembers)
+        .where(eq(teamMembers.team_id, teamId));
+
+      if (Number(currentMembers[0].value) >= maxMembers) {
+        return reply.status(403).send({
+          error: "Member limit reached",
+          message: `Your ${ownerTier} plan allows up to ${maxMembers} team members. Upgrade for more.`,
+        });
       }
 
       const token = randomBytes(32).toString("hex");
@@ -256,7 +274,7 @@ export async function teamsRoutes(app: FastifyInstance) {
           and(
             eq(teamMembers.team_id, teamId),
             eq(teamMembers.user_id, userId),
-            eq(teamMembers.role, "admin")
+            inArray(teamMembers.role, ["owner", "admin"])
           )
         );
 
@@ -381,7 +399,7 @@ export async function teamsRoutes(app: FastifyInstance) {
           and(
             eq(teamMembers.team_id, teamId),
             eq(teamMembers.user_id, userId),
-            eq(teamMembers.role, "admin")
+            inArray(teamMembers.role, ["owner", "admin"])
           )
         );
 

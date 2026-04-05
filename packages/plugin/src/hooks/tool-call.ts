@@ -3,6 +3,7 @@ import type { HttpsSender } from "../transport/https-sender.js";
 import type { RateTracker } from "../severity.js";
 import { killState } from "../kill-switch/kill-state.js";
 import type { LocalFailsafe } from "../kill-switch/local-failsafe.js";
+import type { RuleCache } from "../rule-cache.js";
 
 interface ToolCallContext {
   agentId: string;
@@ -11,12 +12,23 @@ interface ToolCallContext {
   rateTracker: RateTracker;
   redactionPatterns: string[];
   failsafe: LocalFailsafe;
+  ruleCache: RuleCache;
 }
 
 export function createBeforeToolCallHandler(ctx: ToolCallContext) {
   return (event: any) => {
     ctx.rateTracker.record();
     ctx.failsafe.recordToolCall();
+
+    // Record event in rule cache for time-window based rules
+    ctx.ruleCache.recordEvent({
+      timestamp: Date.now(),
+      toolName: event.toolName,
+      eventType: "tool_use",
+      costUsd: event.cost,
+      action: event.toolName,
+      target: event.toolName,
+    });
 
     const clawnitorEvent = buildEvent({
       agentId: ctx.agentId,
@@ -34,7 +46,7 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
 
     ctx.sender.enqueue(clawnitorEvent);
 
-    // Check kill state (server-triggered)
+    // 1. Check kill state (server-triggered)
     if (killState.isKilled()) {
       return {
         block: true,
@@ -42,7 +54,7 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
       };
     }
 
-    // Check local failsafe
+    // 2. Check local failsafe (spend/rate/blocklist)
     const failsafeResult = ctx.failsafe.check(event.toolName || "");
     if (failsafeResult.block) {
       killState.setKilled(failsafeResult.reason);
@@ -52,15 +64,34 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
       };
     }
 
+    // 3. Check cached server rules locally (PRE-ACTION for pattern rules)
+    const ruleResult = ctx.ruleCache.checkBeforeToolCall(
+      event.toolName || "",
+      event.params
+    );
+    if (ruleResult.blocked) {
+      killState.setKilled(ruleResult.reason || "Rule triggered");
+      return {
+        block: true,
+        blockReason: ruleResult.reason,
+      };
+    }
+
     return undefined;
   };
 }
 
 export function createAfterToolCallHandler(ctx: ToolCallContext) {
   return (event: any) => {
-    // Track spend for failsafe
+    // Track spend for failsafe and rule cache
     if (typeof event.cost === "number") {
       ctx.failsafe.addSpend(event.cost);
+      ctx.ruleCache.recordEvent({
+        timestamp: Date.now(),
+        toolName: event.toolName,
+        eventType: "tool_use",
+        costUsd: event.cost,
+      });
     }
 
     const clawnitorEvent = buildEvent({

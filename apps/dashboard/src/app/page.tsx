@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LogoMark, LogoFull } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const features = [
   {
@@ -64,7 +65,7 @@ const steps = [
     title: "Sleep peacefully",
     description:
       "Your agents are monitored. You'll know if anything goes wrong.",
-    code: "🦞 monitoring...",
+    code: "✓ monitoring...",
   },
 ];
 
@@ -136,12 +137,20 @@ export default function LandingPage() {
             FAQ
           </a>
           <Link
+            href="/docs"
+            className="text-sm hidden md:block"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
+            Docs
+          </Link>
+          <Link
             href="https://app.clawnitor.io/login"
             className="text-sm font-medium"
             style={{ color: "var(--color-text-secondary)" }}
           >
             Sign In
           </Link>
+          <ThemeToggle />
           <Link
             href="https://app.clawnitor.io/signup"
             className="text-sm font-semibold px-4 py-2 rounded-lg text-white"
@@ -195,7 +204,7 @@ export default function LandingPage() {
               WebkitTextFillColor: "transparent",
             }}
           >
-            We keep our claws on them.
+            We keep their claws where they belong.
           </span>
         </h1>
 
@@ -204,8 +213,10 @@ export default function LandingPage() {
           style={{ color: "var(--color-text-secondary)" }}
         >
           The all-in-one monitoring and intervention framework for OpenClaw.
-          Event capture. Smart rules. AI anomaly detection. Kill switch. One
-          plugin, total peace of mind.
+          <br />
+          Event capture. Smart rules. AI anomaly detection. Kill switch.
+          <br />
+          One plugin, total peace of mind.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
@@ -223,16 +234,16 @@ export default function LandingPage() {
               →
             </span>
           </Link>
-          <a
-            href="#how-it-works"
+          <Link
+            href="/demo"
             className="px-8 py-4 rounded-xl font-semibold text-base inline-flex items-center justify-center gap-2"
             style={{
               border: "1px solid var(--color-border)",
               color: "var(--color-text-secondary)",
             }}
           >
-            See How It Works
-          </a>
+            Try Live Demo
+          </Link>
         </div>
 
         {/* Dashboard Preview */}
@@ -355,8 +366,7 @@ export default function LandingPage() {
         }}
       >
         <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-          Built for the OpenClaw ecosystem — for solo founders and teams
-          running autonomous agents
+          Built for solo founders, teams, and companies running autonomous agents
         </p>
       </section>
 
@@ -367,18 +377,20 @@ export default function LandingPage() {
       >
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-            Everything you need.
+            Other tools watch.
             <br />
             <span style={{ color: "var(--color-coral)" }}>
-              Nothing you don&apos;t.
+              We intervene.
             </span>
           </h2>
           <p
             className="text-base max-w-lg mx-auto"
             style={{ color: "var(--color-text-secondary)" }}
           >
-            Other tools give you a dashboard. Clawnitor gives you a dashboard,
-            rules, alerts, anomaly detection, AND a kill switch. In one plugin.
+            Dashboards are everywhere. Clawnitor is the only product that monitors,
+            alerts, AND kills your agent before it does damage.
+            <br />
+            One plugin, total control.
           </p>
         </div>
 
@@ -477,20 +489,22 @@ export default function LandingPage() {
             border: "1px solid rgba(255, 107, 74, 0.15)",
           }}
         >
-          <div className="text-5xl mb-6">🛑</div>
+          <div className="mb-6 flex justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="64" height="64"><path fill="#DD2E44" d="M12 3l-9 8.985V24l9 9h12l9-9V11.985L24 3z"/><path fill="#CCD6DD" d="M24.827 1H11.173L1 11.156v13.672L11.172 35h13.657L35 24.828V11.156L24.827 1zM33 24l-9 9H12l-9-9V11.985L12 3h12l9 8.985V24z"/></svg>
+          </div>
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-            The kill switch that
+            The kill switch that works
             <span style={{ color: "var(--color-coral)" }}>
               {" "}
-              actually works.
+              before the damage is done.
             </span>
           </h2>
           <p
             className="text-base max-w-xl mx-auto mb-8 leading-relaxed"
             style={{ color: "var(--color-text-secondary)" }}
           >
-            Other tools send you a notification after your agent deleted the
-            production database. Clawnitor blocks the action{" "}
+            Other tools send you a notification after your agent deleted
+            the production database. Clawnitor blocks the action{" "}
             <em>before</em> it executes. Zero latency. In-process. No
             network round-trip.
           </p>
@@ -509,7 +523,7 @@ export default function LandingPage() {
               {"tool_call: bash(\"rm -rf /app/data\")"}
             </div>
             <div style={{ color: "var(--color-coral)", marginTop: "8px" }}>
-              {"🦞 BLOCKED by Clawnitor"}
+              {"✖ BLOCKED by Clawnitor"}
             </div>
             <div style={{ color: "var(--color-text-secondary)" }}>
               {'→ Keyword rule matched: "rm -rf"'}
@@ -531,7 +545,7 @@ export default function LandingPage() {
       >
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-            Simple pricing. No surprises.
+            Pay for what you use.
           </h2>
           <p
             className="text-base"
@@ -558,7 +572,9 @@ export default function LandingPage() {
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 3 pattern rules</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Email alerts</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 7-day event history</li>
-              <li className="flex gap-2" style={{ color: "var(--color-text-tertiary)" }}><span>—</span> No kill switch</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 team (2 members)</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 kill switch activation/mo</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Local failsafe (always active)</li>
               <li className="flex gap-2" style={{ color: "var(--color-text-tertiary)" }}><span>—</span> No AI detection</li>
             </ul>
           </div>
@@ -570,21 +586,25 @@ export default function LandingPage() {
             </div>
             <h3 className="text-lg font-semibold mb-1">Pro</h3>
             <p className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>Full protection</p>
-            <div className="mb-5">
+            <div className="mb-2">
               <span className="text-3xl font-bold">$5</span>
               <span className="text-xs ml-1" style={{ color: "var(--color-text-secondary)" }}>/mo + $3/agent</span>
             </div>
+            <p className="text-[10px] mb-5" style={{ color: "var(--color-green)" }}>
+              Early access pricing — locked in for founding members
+            </p>
             <Link href="https://app.clawnitor.io/signup" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs text-white mb-6" style={{ backgroundColor: "var(--color-coral)" }}>
               Start Free Trial
             </Link>
             <ul className="flex flex-col gap-2.5 text-xs">
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Everything in Free</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Kill switch</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>3 agents included</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Unlimited kill switch</strong></li>
               <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>AI anomaly detection</strong></li>
               <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Natural language rules</strong></li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited rules</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited rules + 10 shared</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> All alert channels</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 90-day event history</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 90-day history, 3 members</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 14-day free trial</li>
             </ul>
           </div>
 
@@ -592,19 +612,22 @@ export default function LandingPage() {
           <div className="p-6 rounded-2xl" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
             <h3 className="text-lg font-semibold mb-1">Team</h3>
             <p className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>Scale with your team</p>
-            <div className="mb-5">
-              <span className="text-3xl font-bold">$29</span>
+            <div className="mb-2">
+              <span className="text-3xl font-bold">$19</span>
               <span className="text-xs ml-1" style={{ color: "var(--color-text-secondary)" }}>/mo + $2/agent</span>
             </div>
+            <p className="text-[10px] mb-5" style={{ color: "var(--color-green)" }}>
+              Early access pricing — locked in for founding members
+            </p>
             <Link href="https://app.clawnitor.io/signup" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs mb-6" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
-              Start Free Trial
+              Upgrade to Team
             </Link>
             <ul className="flex flex-col gap-2.5 text-xs">
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Everything in Pro</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>10 agents included</strong></li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>Role-based access</strong></li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Team dashboard</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Shared rules</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>10 team members</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>Full role management</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited shared rules</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1-year event history</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Priority support</li>
             </ul>
@@ -622,10 +645,10 @@ export default function LandingPage() {
             </a>
             <ul className="flex flex-col gap-2.5 text-xs">
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Everything in Team</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-purple)" }}>✓</span> <strong>Unlimited agents</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-purple)" }}>✓</span> <strong>Unlimited agents + teams</strong></li>
               <li className="flex gap-2"><span style={{ color: "var(--color-purple)" }}>✓</span> <strong>SSO / SAML</strong></li>
               <li className="flex gap-2"><span style={{ color: "var(--color-purple)" }}>✓</span> <strong>Audit logs</strong></li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Custom integrations</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-purple)" }}>✓</span> <strong>Custom roles + webhooks</strong></li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited history</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Dedicated support + SLA</li>
             </ul>
@@ -639,7 +662,7 @@ export default function LandingPage() {
         className="relative z-10 px-6 md:px-12 py-24 max-w-3xl mx-auto"
       >
         <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-12 text-center">
-          Questions? Answers.
+          Questions? We got answers.
         </h2>
 
         <div className="flex flex-col gap-4">
@@ -722,10 +745,11 @@ export default function LandingPage() {
             className="flex items-center gap-6 text-sm"
             style={{ color: "var(--color-text-secondary)" }}
           >
+            <Link href="/docs">Docs</Link>
             <Link href="/privacy">Privacy</Link>
             <Link href="/pricing">Pricing</Link>
             <a
-              href="https://github.com/davidkny22/clawnitor"
+              href="https://github.com/davidkny22/clawnitor-plugin"
               target="_blank"
               rel="noopener"
             >

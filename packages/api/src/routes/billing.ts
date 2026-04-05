@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { eq } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import { users } from "../db/schema.js";
-import { authenticateApiKey } from "../auth/middleware.js";
+import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
 import { createCheckoutSession, createPortalSession, getStripe } from "../billing/stripe.js";
 import { getConfig } from "../config.js";
 
@@ -124,6 +124,41 @@ export async function billingRoutes(app: FastifyInstance) {
       }
 
       return reply.send({ received: true });
+    },
+  });
+
+  // Start free trial
+  app.post("/api/billing/start-trial", {
+    preHandler: [authenticateApiKey],
+    handler: async (request, reply) => {
+      const db = getDb();
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, request.userId!));
+
+      if (!user) {
+        return reply.status(404).send({ error: "User not found" });
+      }
+
+      if (user.tier !== "free") {
+        return reply.status(400).send({ error: "Trial only available for free tier users" });
+      }
+
+      if (user.trial_started_at) {
+        return reply.status(400).send({ error: "Trial already used" });
+      }
+
+      await db
+        .update(users)
+        .set({
+          tier: "trial",
+          trial_started_at: new Date(),
+          updated_at: new Date(),
+        })
+        .where(eq(users.id, user.id));
+
+      return reply.send({ tier: "trial", trial_started_at: new Date().toISOString() });
     },
   });
 }

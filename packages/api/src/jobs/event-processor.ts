@@ -1,7 +1,7 @@
 import { createWorker, createQueue } from "./queue.js";
 import type { Job } from "bullmq";
 import { getDb } from "../db/client.js";
-import { rules, alerts, users, agents } from "../db/schema.js";
+import { rules, alerts, users, agents, saves } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 import { sendKill } from "../ws/kill-server.js";
 import { TIER_FEATURES, type Tier } from "@clawnitor/shared";
@@ -91,6 +91,16 @@ export function startEventProcessor() {
                 `Rule "${result.rule.name}" triggered: ${result.context}`,
                 result.rule.id
               );
+
+              // Record the save
+              await db.insert(saves).values({
+                user_id: userId,
+                agent_id: agent.id,
+                rule_id: result.rule.id,
+                action_blocked: events[0]?.action || "Unknown action",
+                potential_impact: estimateImpact(result.rule.config, result.context),
+                source: "auto-kill",
+              });
             }
           }
         }
@@ -106,6 +116,19 @@ export function startEventProcessor() {
 
     return { processed: events.length, alerts: triggered.length };
   });
+}
+
+function estimateImpact(config: RuleConfig, context?: string): string {
+  if (config.type === "threshold" && config.field === "cost_usd") {
+    return `Would have continued spending beyond $${config.value} limit`;
+  }
+  if (config.type === "rate") {
+    return `Rate limit exceeded — action frequency would have continued escalating`;
+  }
+  if (config.type === "keyword") {
+    return `Blocked dangerous command before execution`;
+  }
+  return context || "Prevented potentially harmful action";
 }
 
 function determineSeverity(config: RuleConfig): "normal" | "elevated" | "critical" {

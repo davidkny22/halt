@@ -2,9 +2,10 @@ import type { FastifyInstance } from "fastify";
 import { eq, and, count } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import { rules, users } from "../db/schema.js";
-import { authenticateApiKey } from "../auth/middleware.js";
+import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
 import { ruleConfigSchema, MAX_FREE_RULES } from "@clawnitor/shared";
 import { z } from "zod";
+import { logAudit } from "./enterprise.js";
 
 const createRuleBody = z.object({
   name: z.string().min(1).max(255),
@@ -38,7 +39,7 @@ export async function rulesRoutes(app: FastifyInstance) {
         return reply.status(400).send({
           error: "Bad Request",
           message: "Invalid rule configuration",
-          details: parsed.error.issues,
+          ...(process.env.NODE_ENV !== "production" && { details: parsed.error.issues }),
         });
       }
 
@@ -76,6 +77,7 @@ export async function rulesRoutes(app: FastifyInstance) {
         })
         .returning();
 
+      await logAudit({ userId, action: "rule.created", resourceType: "rule", resourceId: rule.id, details: { name, type: config.type }, ipAddress: request.ip });
       return reply.status(201).send(rule);
     },
   });
@@ -89,7 +91,7 @@ export async function rulesRoutes(app: FastifyInstance) {
         return reply.status(400).send({
           error: "Bad Request",
           message: "Invalid update",
-          details: parsed.error.issues,
+          ...(process.env.NODE_ENV !== "production" && { details: parsed.error.issues }),
         });
       }
 
@@ -133,6 +135,7 @@ export async function rulesRoutes(app: FastifyInstance) {
         return reply.status(404).send({ error: "Not Found", message: "Rule not found" });
       }
 
+      await logAudit({ userId: request.userId!, action: "rule.deleted", resourceType: "rule", resourceId: id, ipAddress: request.ip });
       return reply.send({ deleted: true });
     },
   });
