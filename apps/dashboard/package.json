@@ -1,0 +1,28 @@
+{
+  "name": "@clawnitor/dashboard",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@clawnitor/shared": "workspace:*",
+    "next": "^15",
+    "react": "^19",
+    "react-dom": "^19",
+    "next-auth": "5.0.0-beta.30",
+    "tailwindcss": "^4",
+    "@tailwindcss/postcss": "^4"
+  },
+  "devDependencies": {
+    "typescript": "^5.7",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "postcss": "^8"
+  }
+}

@@ -1,0 +1,46 @@
+import { buildEvent } from "../event-builder.js";
+import type { HttpsSender } from "../transport/https-sender.js";
+
+interface LlmContext {
+  agentId: string;
+  sessionId: string;
+  sender: HttpsSender;
+  redactionPatterns: string[];
+}
+
+export function createLlmInputHandler(ctx: LlmContext) {
+  return (event: any) => {
+    const clawnitorEvent = buildEvent({
+      agentId: ctx.agentId,
+      sessionId: ctx.sessionId,
+      eventType: "llm_call",
+      action: `llm_input: ${event.model || "unknown"}`,
+      target: event.provider || "unknown",
+      metadata: {
+        tool_name: event.model,
+      },
+      customRedactionPatterns: ctx.redactionPatterns,
+    });
+
+    ctx.sender.enqueue(clawnitorEvent);
+  };
+}
+
+export function createLlmOutputHandler(ctx: LlmContext) {
+  return (event: any) => {
+    const clawnitorEvent = buildEvent({
+      agentId: ctx.agentId,
+      sessionId: ctx.sessionId,
+      eventType: "llm_call",
+      action: `llm_output: ${event.model || "unknown"}`,
+      target: event.provider || "unknown",
+      metadata: {
+        tokens_used: event.usage?.totalTokens,
+        cost_usd: event.usage?.cost,
+      },
+      customRedactionPatterns: ctx.redactionPatterns,
+    });
+
+    ctx.sender.enqueue(clawnitorEvent);
+  };
+}

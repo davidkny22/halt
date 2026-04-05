@@ -1,0 +1,184 @@
+import {
+  pgTable,
+  uuid,
+  text,
+  varchar,
+  boolean,
+  integer,
+  timestamp,
+  jsonb,
+  pgEnum,
+  index,
+  numeric,
+} from "drizzle-orm/pg-core";
+
+export const tierEnum = pgEnum("tier", ["free", "trial", "paid"]);
+export const agentStatusEnum = pgEnum("agent_status", [
+  "active",
+  "learning",
+  "paused",
+]);
+export const eventTypeEnum = pgEnum("event_type", [
+  "tool_use",
+  "llm_call",
+  "message_sent",
+  "message_received",
+  "agent_lifecycle",
+  "subagent",
+]);
+export const severityEnum = pgEnum("severity_hint", [
+  "normal",
+  "elevated",
+  "critical",
+]);
+
+// ── Users ────────────────────────────────────────────────
+
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  password_hash: text("password_hash"),
+  github_id: varchar("github_id", { length: 255 }),
+  tier: tierEnum("tier").notNull().default("free"),
+  email_verified: boolean("email_verified").notNull().default(false),
+  data_sharing_enabled: boolean("data_sharing_enabled")
+    .notNull()
+    .default(false),
+  stripe_customer_id: varchar("stripe_customer_id", { length: 255 }),
+  trial_started_at: timestamp("trial_started_at", { withTimezone: true }),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// ── API Keys ─────────────────────────────────────────────
+
+export const apiKeys = pgTable("api_keys", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  user_id: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  key_hash: text("key_hash").notNull(),
+  prefix: varchar("prefix", { length: 16 }).notNull(),
+  rotated_at: timestamp("rotated_at", { withTimezone: true }),
+  revoked_at: timestamp("revoked_at", { withTimezone: true }),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// ── Agents ───────────────────────────────────────────────
+
+export const agents = pgTable("agents", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  user_id: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  agent_id: varchar("agent_id", { length: 255 }).notNull(),
+  status: agentStatusEnum("status").notNull().default("active"),
+  kill_reason: text("kill_reason"),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// ── Events ───────────────────────────────────────────────
+
+export const events = pgTable(
+  "events",
+  {
+    id: uuid("id").primaryKey(),
+    user_id: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    agent_id: uuid("agent_id")
+      .notNull()
+      .references(() => agents.id, { onDelete: "cascade" }),
+    session_id: varchar("session_id", { length: 255 }).notNull(),
+    event_type: eventTypeEnum("event_type").notNull(),
+    action: text("action").notNull(),
+    target: text("target").notNull(),
+    metadata: jsonb("metadata").notNull().default({}),
+    severity_hint: severityEnum("severity_hint").notNull().default("normal"),
+    plugin_version: varchar("plugin_version", { length: 32 }),
+    timestamp: timestamp("timestamp", { withTimezone: true }).notNull(),
+    created_at: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("events_user_timestamp_idx").on(table.user_id, table.timestamp),
+    index("events_agent_timestamp_idx").on(table.agent_id, table.timestamp),
+  ]
+);
+
+// ── Rules ────────────────────────────────────────────────
+
+export const rules = pgTable("rules", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  user_id: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  rule_type: varchar("rule_type", { length: 32 }).notNull(),
+  config: jsonb("config").notNull(),
+  enabled: boolean("enabled").notNull().default(true),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// ── Alerts ───────────────────────────────────────────────
+
+export const alerts = pgTable("alerts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  user_id: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  rule_id: uuid("rule_id").references(() => rules.id, {
+    onDelete: "set null",
+  }),
+  agent_id: uuid("agent_id").references(() => agents.id, {
+    onDelete: "set null",
+  }),
+  severity: severityEnum("severity").notNull(),
+  message: text("message").notNull(),
+  context: jsonb("context"),
+  delivered_channels: text("delivered_channels").array(),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// ── Baselines (Phase 5) ─────────────────────────────────
+
+export const baselines = pgTable("baselines", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  agent_id: uuid("agent_id")
+    .notNull()
+    .references(() => agents.id, { onDelete: "cascade" }),
+  user_id: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  profile: jsonb("profile").notNull().default({}),
+  accumulated_hours: numeric("accumulated_hours", {
+    precision: 10,
+    scale: 2,
+  })
+    .notNull()
+    .default("0"),
+  status: varchar("status", { length: 32 }).notNull().default("learning"),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
