@@ -8,6 +8,7 @@
   },
   "files": [
     "dist",
+    "ui",
     "README.md"
   ],
   "scripts": {

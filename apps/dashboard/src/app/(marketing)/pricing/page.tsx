@@ -9,7 +9,7 @@ export default function PricingPage() {
         </Link>
         <h1 className="text-3xl font-bold mb-4">Pricing</h1>
         <p style={{ color: "var(--color-text-secondary)" }}>
-          Open source locally. Pro when you need the cloud.
+          Free forever locally. Pro when you need the big claws.
         </p>
       </div>
 

@@ -1,5 +1,8 @@
 import type { PluginConfig } from "./config.js";
 import type { ShieldConfig } from "./shield/scanner.js";
+import { readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
+import { homedir } from "node:os";
 
 export interface CachedRule {
   id: string;
@@ -45,16 +48,40 @@ export class RuleCache {
 
   start() {
     if (this.config.offlineMode) {
-      // Load rules from plugin config (no server fetch)
-      this.rules = this.config.offlineRules.filter((r) => r.enabled);
-      if (this.config.offlineShieldConfig) {
-        this.cachedShieldConfig = this.config.offlineShieldConfig;
-      }
+      this.loadOfflineRules();
+      // Re-read ~/.clawnitor/rules.json every 30s so dashboard changes take effect
+      this.fetchTimer = setInterval(() => this.loadOfflineRules(), 30_000);
       return;
     }
     // Online: fetch immediately, then every 60s
     this.fetchRules();
     this.fetchTimer = setInterval(() => this.fetchRules(), 60_000);
+  }
+
+  private loadOfflineRules() {
+    // Priority: ~/.clawnitor/rules.json (shared with local dashboard), then inline config
+    const sharedPath = join(homedir(), ".clawnitor", "rules.json");
+    let fileRules: CachedRule[] = [];
+    try {
+      if (existsSync(sharedPath)) {
+        const raw = readFileSync(sharedPath, "utf-8");
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) fileRules = parsed;
+      }
+    } catch {
+      // File read failed — fall back to inline
+    }
+
+    // Merge: file rules take precedence, then inline config rules
+    const allRules = fileRules.length > 0
+      ? [...fileRules, ...this.config.offlineRules.filter((ir) => !fileRules.some((fr) => fr.id === ir.id))]
+      : this.config.offlineRules;
+
+    this.rules = allRules.filter((r) => r.enabled);
+
+    if (this.config.offlineShieldConfig) {
+      this.cachedShieldConfig = this.config.offlineShieldConfig;
+    }
   }
 
   stop() {
@@ -249,8 +276,27 @@ export class RuleCache {
   }
 
   getAutoKillConfig(agentId?: string): { enabled: boolean; threshold: number; windowMinutes: number } {
+    // Online mode: use server-provided configs
     if (agentId && this.autoKillConfigs[agentId]) {
       return this.autoKillConfigs[agentId];
+    }
+    // Offline mode: check ~/.clawnitor/agents.json
+    if (this.config.offlineMode && agentId) {
+      try {
+        const agentsPath = join(homedir(), ".clawnitor", "agents.json");
+        if (existsSync(agentsPath)) {
+          const configs = JSON.parse(readFileSync(agentsPath, "utf-8"));
+          if (configs[agentId]) {
+            return {
+              enabled: configs[agentId].auto_kill_enabled ?? true,
+              threshold: configs[agentId].auto_kill_threshold ?? 3,
+              windowMinutes: configs[agentId].auto_kill_window_minutes ?? 10,
+            };
+          }
+        }
+      } catch {
+        // Fall through to default
+      }
     }
     return { enabled: true, threshold: 3, windowMinutes: 10 };
   }

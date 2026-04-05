@@ -590,7 +590,7 @@ export default function LandingPage() {
             className="text-base"
             style={{ color: "var(--color-text-secondary)" }}
           >
-            Open source locally. Pro when you need the cloud.
+            Free forever locally. Pro when you need the big claws.
           </p>
         </div>
 

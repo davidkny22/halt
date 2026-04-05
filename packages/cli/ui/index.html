@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clawnitor Local Dashboard</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/ui/style.css">
+</head>
+<body>
+  <header class="hdr">
+    <div class="hdr-left">
+      <h1 class="hdr-logo">Clawnitor</h1>
+      <span class="badge">LOCAL</span>
+    </div>
+    <nav class="hdr-nav">
+      <a href="#/" class="nav-link active" data-page="dashboard">Dashboard</a>
+      <a href="#/agents" class="nav-link" data-page="agents">Agents</a>
+      <a href="#/rules" class="nav-link" data-page="rules">Rules</a>
+    </nav>
+    <div class="hdr-right" id="refresh-info"></div>
+  </header>
+  <main id="app"></main>
+  <script type="module" src="/ui/app.js"></script>
+</body>
+</html>
