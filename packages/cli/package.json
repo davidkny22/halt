@@ -1,6 +1,6 @@
 {
   "name": "@clawnitor/cli",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "CLI for Clawnitor — agent monitoring for OpenClaw. Authenticate, generate API keys, and configure from the terminal.",
   "type": "module",
   "bin": {

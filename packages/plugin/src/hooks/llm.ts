@@ -3,17 +3,20 @@ import type { HttpsSender } from "../transport/https-sender.js";
 import { getSubagentInfo } from "../subagent-context.js";
 
 interface LlmContext {
-  agentId: string;
-  sessionId: string;
   sender: HttpsSender;
   redactionPatterns: string[];
+  resolveAgentId: (event: any, ocCtx?: any) => string;
+  resolveSessionId: (event: any, ocCtx?: any, agentId?: string) => string;
 }
 
 export function createLlmInputHandler(ctx: LlmContext) {
-  return (event: any) => {
-    const sub = getSubagentInfo(event, ctx.sessionId);
+  return (event: any, ocCtx?: any) => {
+    const agentId = ctx.resolveAgentId(event, ocCtx);
+    const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
+    const sub = getSubagentInfo(event, sessionId);
+
     const clawnitorEvent = buildEvent({
-      agentId: ctx.agentId,
+      agentId,
       sessionId: sub.sessionId,
       eventType: "llm_call",
       action: `llm_input: ${event.model || "unknown"}`,
@@ -30,10 +33,13 @@ export function createLlmInputHandler(ctx: LlmContext) {
 }
 
 export function createLlmOutputHandler(ctx: LlmContext) {
-  return (event: any) => {
-    const sub = getSubagentInfo(event, ctx.sessionId);
+  return (event: any, ocCtx?: any) => {
+    const agentId = ctx.resolveAgentId(event, ocCtx);
+    const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
+    const sub = getSubagentInfo(event, sessionId);
+
     const clawnitorEvent = buildEvent({
-      agentId: ctx.agentId,
+      agentId,
       sessionId: sub.sessionId,
       eventType: "llm_call",
       action: `llm_output: ${event.model || "unknown"}`,

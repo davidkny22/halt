@@ -32,21 +32,50 @@ export default function register(api: any) {
   const rawConfig = api.pluginConfig || api.config || {};
   const config = parseConfig(rawConfig);
   const rateTracker = createRateTracker();
-  const failsafe = new LocalFailsafe(config);
-  const ruleCache = new RuleCache(config, () => resolvedAgentId);
-  const violationTracker = new ViolationTracker({
-    enabled: true,
-    threshold: 3,
-    windowMinutes: 10,
-  });
+  const ruleCache = new RuleCache(config);
 
-  // Initialize SQLite cache for offline resilience
+  // Per-agent failsafe (spend/rate isolated per agent in gateway mode)
+  const failsafes = new Map<string, LocalFailsafe>();
+  function getFailsafe(agentId: string): LocalFailsafe {
+    let fs = failsafes.get(agentId);
+    if (!fs) {
+      fs = new LocalFailsafe(config);
+      failsafes.set(agentId, fs);
+    }
+    return fs;
+  }
+
+  // Per-agent violation trackers (gateway mode: one plugin, many agents)
+  const violationTrackers = new Map<string, ViolationTracker>();
+  function getViolationTracker(agentId: string): ViolationTracker {
+    let tracker = violationTrackers.get(agentId);
+    if (!tracker) {
+      const akConfig = ruleCache.getAutoKillConfig(agentId);
+      tracker = new ViolationTracker(akConfig);
+      violationTrackers.set(agentId, tracker);
+    } else {
+      // Sync config from backend on each access (config updates every 60s via rule cache)
+      const akConfig = ruleCache.getAutoKillConfig(agentId);
+      tracker.updateConfig(akConfig);
+    }
+    return tracker;
+  }
+
   const cache = new JsonCache();
 
-  // Initialize HTTPS sender
   const sender = new HttpsSender(config, {
+    onAgentKillStates: (states) => {
+      // Per-agent kill states from HTTPS response
+      for (const [agentId, state] of Object.entries(states)) {
+        if (state.killed && !killState.isKilled(agentId)) {
+          killState.setKilled(state.reason || "Killed by server", agentId);
+        } else if (!state.killed && killState.isKilled(agentId)) {
+          killState.clearKilled(agentId);
+        }
+      }
+    },
     onKillState: (killed, reason) => {
-      // HTTPS fallback for kill state
+      // Backwards-compatible global fallback (only if agent_kill_states not present)
       if (killed && !killState.isKilled()) {
         killState.setKilled(reason || "Killed by server (HTTPS fallback)");
       } else if (!killed && killState.isKilled()) {
@@ -59,116 +88,107 @@ export default function register(api: any) {
   });
   sender.start();
 
-  // Initialize WebSocket client for real-time kill signals
   const wsClient = new WebSocketClient(config, {
-    onKill: (reason, ruleId) => {
-      killState.setKilled(reason);
+    onKill: (reason, _ruleId, agentId) => {
+      killState.setKilled(reason, agentId);
     },
-    onUnkill: () => {
-      killState.clearKilled();
+    onUnkill: (agentId) => {
+      killState.clearKilled(agentId);
     },
   });
   wsClient.start();
   ruleCache.start();
 
   // Periodically flush cached events
-  const cacheFlushInterval = setInterval(() => {
+  setInterval(() => {
     const cached = cache.flush(50);
-    if (cached.length > 0) {
-      for (const event of cached) {
-        sender.enqueue(event);
-      }
-    }
+    for (const event of cached) sender.enqueue(event);
   }, 30_000);
 
-  // Shared context for all hooks
-  let currentSessionId = "default";
+  // Per-agent session tracking: agentId → current session counter
+  const agentSessionCounters = new Map<string, number>();
 
-  // Resolve agent ID: config > workspace path > sessionKey > "unknown"
-  let resolvedAgentId = rawConfig.agentId || "unknown";
-  if (resolvedAgentId === "unknown") {
-    // Extract from workspace path: /.../.openclaw/workspace-<agentId>
-    const cwd = process.cwd();
-    const wsMatch = cwd.match(/workspace-([^/]+)$/);
-    if (wsMatch) resolvedAgentId = wsMatch[1];
+  // Resolve agent ID: prefer ctx.agentId (from OpenClaw), fall back to sessionKey parsing
+  function resolveAgentId(event: any, ocCtx?: any): string {
+    if (ocCtx?.agentId) return ocCtx.agentId;
+    const sk = event?.sessionKey as string | undefined;
+    if (sk && sk.startsWith("agent:")) {
+      const parts = sk.split(":");
+      if (parts.length >= 2 && parts[1]) return parts[1];
+    }
+    return rawConfig.agentId || "unknown";
   }
-  let agentIdResolved = resolvedAgentId !== "unknown";
+
+  // Resolve session ID: use ctx.sessionId if available, else build from agent + counter
+  function resolveSessionId(event: any, ocCtx?: any, agentId?: string): string {
+    // OpenClaw provides a session UUID when session_start fires
+    if (ocCtx?.sessionId) return ocCtx.sessionId;
+    // Use sessionKey if available (unique per agent session)
+    const sk = event?.sessionKey || ocCtx?.sessionKey;
+    if (sk) {
+      const aid = agentId || resolveAgentId(event, ocCtx);
+      const counter = agentSessionCounters.get(aid) || 0;
+      return counter > 0 ? `${sk}:${counter}` : sk;
+    }
+    return "default";
+  }
+
+  // Mark session boundary on agent_end
+  function onAgentEnd(agentId: string) {
+    const current = agentSessionCounters.get(agentId) || 0;
+    agentSessionCounters.set(agentId, current + 1);
+    getFailsafe(agentId).resetSession();
+  }
 
   const ctx = {
-    get agentId() {
-      return resolvedAgentId;
-    },
-    get sessionId() {
-      return currentSessionId;
-    },
-    resolveAgentFromEvent(event: any) {
-      if (agentIdResolved) return;
-      const sk = event?.sessionKey as string | undefined;
-      if (sk && sk.startsWith("agent:")) {
-        // Format: agent:<agentId>:main or agent:<agentId>:subagent:<uuid>
-        const parts = sk.split(":");
-        if (parts.length >= 2 && parts[1]) {
-          resolvedAgentId = parts[1];
-          agentIdResolved = true;
-        }
-      }
-    },
+    get agentId() { return rawConfig.agentId || "unknown"; },
+    get sessionId() { return "default"; },
+    resolveAgentId,
+    resolveSessionId,
     sender,
     rateTracker,
     redactionPatterns: config.redactionPatterns,
-    failsafe,
+    getFailsafe,
     ruleCache,
-    violationTracker,
+    getViolationTracker,
     shieldScanner: new ShieldScanner(),
   };
 
   // Discover all agents from openclaw.json (fire-and-forget)
   discoverAgents(config).catch(() => {});
 
-  // Register hooks
-  api.on("before_tool_call", createBeforeToolCallHandler(ctx), {
-    priority: 10,
-  });
+  // Register hooks — all handlers receive (event, ocCtx) from OpenClaw
+  api.on("before_tool_call", createBeforeToolCallHandler(ctx), { priority: 10 });
   api.on("after_tool_call", createAfterToolCallHandler(ctx), { priority: 10 });
   api.on("llm_input", createLlmInputHandler(ctx), { priority: 10 });
   api.on("llm_output", createLlmOutputHandler(ctx), { priority: 10 });
-  api.on("message_sending", createMessageSendingHandler(ctx), {
-    priority: 10,
-  });
+  api.on("message_sending", createMessageSendingHandler(ctx), { priority: 10 });
   api.on("message_sent", createMessageSentHandler(ctx), { priority: 10 });
-  api.on("message_received", createMessageReceivedHandler(ctx), {
-    priority: 10,
-  });
+  api.on("message_received", createMessageReceivedHandler(ctx), { priority: 10 });
   api.on(
     "session_start",
-    createSessionStartHandler({
-      ...ctx,
-      onSessionStart: (sid: string) => {
-        currentSessionId = sid;
-        failsafe.resetSession();
-      },
-    }),
+    createSessionStartHandler({ ...ctx, onSessionStart: () => {} }),
     { priority: 10 }
   );
   api.on(
     "session_end",
-    createSessionEndHandler({
-      ...ctx,
-      onSessionEnd: () => {
-        currentSessionId = "default";
-      },
-    }),
+    createSessionEndHandler(ctx),
     { priority: 10 }
   );
-  api.on("agent_end", createAgentEndHandler(ctx), { priority: 10 });
+  api.on(
+    "agent_end",
+    createAgentEndHandler({ ...ctx, onAgentEnd }),
+    { priority: 10 }
+  );
 
   const subagent = createSubagentHandlers(ctx);
   api.on("subagent_spawning", subagent.spawning, { priority: 10 });
   api.on("subagent_ended", subagent.ended, { priority: 10 });
 
-  // Inject visible rules into agent's system prompt
-  api.on("before_prompt_build", () => {
-    const rulesContext = ruleCache.getVisibleRulesContext();
+  // Inject visible rules into agent's system prompt (ctx has agentId)
+  api.on("before_prompt_build", (_event: any, ocCtx: any) => {
+    const agentId = ocCtx?.agentId;
+    const rulesContext = ruleCache.getVisibleRulesContextForAgent(agentId);
     if (!rulesContext) return {};
     return { appendSystemContext: rulesContext };
   }, { priority: 10 });
@@ -188,7 +208,6 @@ async function discoverAgents(config: { apiKey: string; backendUrl: string }) {
 
     if (agentIds.length === 0) return;
 
-    // Extract all tool names from agent deny/allow lists
     const tools = new Set<string>();
     for (const agent of agentList) {
       for (const t of agent?.tools?.deny || []) if (typeof t === "string") tools.add(t);
@@ -196,7 +215,7 @@ async function discoverAgents(config: { apiKey: string; backendUrl: string }) {
     }
 
     const url = `${config.backendUrl}/api/agents/discover`;
-    const res = await fetch(url, {
+    await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -208,8 +227,6 @@ async function discoverAgents(config: { apiKey: string; backendUrl: string }) {
       }),
       signal: AbortSignal.timeout(10_000),
     });
-
-    if (!res.ok) return;
   } catch {
     // Silent failure — discovery is best-effort
   }

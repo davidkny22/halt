@@ -18,7 +18,7 @@ export async function spendRoutes(app: FastifyInstance) {
       const [total] = await db
         .select({
           cost: sql<number>`coalesce(sum((${events.metadata}->>'cost_usd')::numeric), 0)::float`,
-          tokens: sql<number>`coalesce(sum((${events.metadata}->>'tokens')::int), 0)::int`,
+          tokens: sql<number>`coalesce(sum((${events.metadata}->>'tokens_used')::int), 0)::int`,
           event_count: sql<number>`count(*)::int`,
         })
         .from(events)
@@ -35,7 +35,7 @@ export async function spendRoutes(app: FastifyInstance) {
           agent_id: events.agent_id,
           agent_name: agents.name,
           cost: sql<number>`coalesce(sum((${events.metadata}->>'cost_usd')::numeric), 0)::float`,
-          tokens: sql<number>`coalesce(sum((${events.metadata}->>'tokens')::int), 0)::int`,
+          tokens: sql<number>`coalesce(sum((${events.metadata}->>'tokens_used')::int), 0)::int`,
           event_count: sql<number>`count(*)::int`,
         })
         .from(events)
@@ -54,7 +54,7 @@ export async function spendRoutes(app: FastifyInstance) {
         .select({
           day: sql<string>`date_trunc('day', ${events.timestamp})::date::text`,
           cost: sql<number>`coalesce(sum((${events.metadata}->>'cost_usd')::numeric), 0)::float`,
-          tokens: sql<number>`coalesce(sum((${events.metadata}->>'tokens')::int), 0)::int`,
+          tokens: sql<number>`coalesce(sum((${events.metadata}->>'tokens_used')::int), 0)::int`,
           event_count: sql<number>`count(*)::int`,
         })
         .from(events)
@@ -73,7 +73,7 @@ export async function spendRoutes(app: FastifyInstance) {
           session_id: events.session_id,
           agent_name: agents.name,
           cost: sql<number>`coalesce(sum((${events.metadata}->>'cost_usd')::numeric), 0)::float`,
-          tokens: sql<number>`coalesce(sum((${events.metadata}->>'tokens')::int), 0)::int`,
+          tokens: sql<number>`coalesce(sum((${events.metadata}->>'tokens_used')::int), 0)::int`,
           event_count: sql<number>`count(*)::int`,
           started: sql<string>`min(${events.timestamp})::text`,
           ended: sql<string>`max(${events.timestamp})::text`,
@@ -98,7 +98,7 @@ export async function spendRoutes(app: FastifyInstance) {
           action: events.action,
           target: events.target,
           cost: sql<number>`(${events.metadata}->>'cost_usd')::float`,
-          tokens: sql<number>`(${events.metadata}->>'tokens')::int`,
+          tokens: sql<number>`(${events.metadata}->>'tokens_used')::int`,
           model: sql<string>`${events.metadata}->>'model'`,
           timestamp: events.timestamp,
           agent_name: agents.name,
@@ -140,7 +140,7 @@ export async function spendRoutes(app: FastifyInstance) {
         .select({
           tool_name: sql<string>`${events.metadata}->>'tool_name'`,
           cost: sql<number>`coalesce(sum((${events.metadata}->>'cost_usd')::numeric), 0)::float`,
-          tokens: sql<number>`coalesce(sum((${events.metadata}->>'tokens')::int), 0)::int`,
+          tokens: sql<number>`coalesce(sum((${events.metadata}->>'tokens_used')::int), 0)::int`,
           event_count: sql<number>`count(*)::int`,
         })
         .from(events)

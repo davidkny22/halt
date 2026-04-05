@@ -9,26 +9,26 @@ import type { ShieldScanner } from "../shield/scanner.js";
 import { getSubagentInfo } from "../subagent-context.js";
 
 interface ToolCallContext {
-  agentId: string;
-  sessionId: string;
   sender: HttpsSender;
   rateTracker: RateTracker;
   redactionPatterns: string[];
-  failsafe: LocalFailsafe;
+  getFailsafe: (agentId: string) => LocalFailsafe;
   ruleCache: RuleCache;
-  violationTracker: ViolationTracker;
+  getViolationTracker: (agentId: string) => ViolationTracker;
   shieldScanner: ShieldScanner;
+  resolveAgentId: (event: any, ocCtx?: any) => string;
+  resolveSessionId: (event: any, ocCtx?: any, agentId?: string) => string;
 }
 
 export function createBeforeToolCallHandler(ctx: ToolCallContext) {
-  return (event: any) => {
-    // Resolve agent ID from session key on first event
-    (ctx as any).resolveAgentFromEvent?.(event);
-    const sub = getSubagentInfo(event, ctx.sessionId);
+  return (event: any, ocCtx?: any) => {
+    const agentId = ctx.resolveAgentId(event, ocCtx);
+    const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
+    const sub = getSubagentInfo(event, sessionId);
     ctx.rateTracker.record();
-    ctx.failsafe.recordToolCall();
+    ctx.getFailsafe(agentId).recordToolCall();
 
-    // Record event in rule cache for time-window based rules
+    // Record event in rule cache for time-window based rules (per-agent)
     ctx.ruleCache.recordEvent({
       timestamp: Date.now(),
       toolName: event.toolName,
@@ -36,7 +36,7 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
       costUsd: event.cost,
       action: event.toolName,
       target: event.toolName,
-    });
+    }, agentId);
 
     // Build a descriptive action label from tool name + params
     const toolName = event.toolName || "unknown";
@@ -51,7 +51,7 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
       : "";
 
     const clawnitorEvent = buildEvent({
-      agentId: ctx.agentId,
+      agentId,
       sessionId: sub.sessionId,
       eventType: "tool_use",
       action: `${toolName}${paramHint}`,
@@ -70,7 +70,7 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
     // Helper: capture a blocked event
     const captureBlocked = (reason: string, source: string) => {
       const blockedEvent = buildEvent({
-        agentId: ctx.agentId,
+        agentId,
         sessionId: sub.sessionId,
         eventType: "tool_use",
         action: `BLOCKED: ${toolName}${paramHint}`,
@@ -88,18 +88,18 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
       ctx.sender.enqueue(blockedEvent);
     };
 
-    // 1. Check kill state (server-triggered)
-    if (killState.isKilled()) {
-      const reason = `Clawnitor: agent paused — ${killState.getReason() || "unknown reason"}`;
+    // 1. Check kill state (server-triggered, per-agent)
+    if (killState.isKilled(agentId)) {
+      const reason = `Clawnitor: agent paused — ${killState.getReason(agentId) || "unknown reason"}`;
       captureBlocked(reason, "kill-state");
       return { block: true, blockReason: reason };
     }
 
     // 2. Check local failsafe (spend/rate/blocklist)
-    const failsafeResult = ctx.failsafe.check(event.toolName || "");
+    const failsafeResult = ctx.getFailsafe(agentId).check(event.toolName || "");
     if (failsafeResult.block) {
       captureBlocked(failsafeResult.reason, "failsafe");
-      killState.setKilled(failsafeResult.reason);
+      killState.setKilled(failsafeResult.reason, agentId);
       return { block: true, blockReason: failsafeResult.reason };
     }
 
@@ -114,7 +114,7 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
         captureBlocked(shieldReason, `shield:${shieldResult.highestSeverity}`);
 
         // Record violation for auto-kill
-        ctx.violationTracker.recordViolation({
+        ctx.getViolationTracker(agentId).recordViolation({
           ruleId: `shield:${shieldResult.highestSeverity}`,
           ruleName: `Shield: ${shieldResult.highestSeverity}`,
           timestamp: Date.now(),
@@ -126,7 +126,7 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
       } else {
         // Alert-only: send shield event but don't block
         const alertEvent = buildEvent({
-          agentId: ctx.agentId,
+          agentId,
           sessionId: sub.sessionId,
           eventType: "tool_use",
           action: `SHIELD: ${toolName}${paramHint}`,
@@ -149,13 +149,14 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
     // 4. Check cached server rules locally (PRE-ACTION for pattern rules)
     const ruleResult = ctx.ruleCache.checkBeforeToolCall(
       event.toolName || "",
-      event.params
+      event.params,
+      agentId
     );
     if (ruleResult.blocked) {
       captureBlocked(ruleResult.reason || "Rule matched", `rule:${ruleResult.ruleName}`);
 
       // Record violation for auto-kill tracking
-      const autoKillResult = ctx.violationTracker.recordViolation({
+      const autoKillResult = ctx.getViolationTracker(agentId).recordViolation({
         ruleId: ruleResult.ruleName || "unknown",
         ruleName: ruleResult.ruleName || "unknown",
         timestamp: Date.now(),
@@ -164,7 +165,7 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
       });
 
       if (autoKillResult.shouldKill) {
-        killState.setKilled(autoKillResult.message);
+        killState.setKilled(autoKillResult.message, agentId);
         return { block: true, blockReason: autoKillResult.message };
       }
 
@@ -176,18 +177,20 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
 }
 
 export function createAfterToolCallHandler(ctx: ToolCallContext) {
-  return (event: any) => {
-    const sub = getSubagentInfo(event, ctx.sessionId);
+  return (event: any, ocCtx?: any) => {
+    const agentId = ctx.resolveAgentId(event, ocCtx);
+    const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
+    const sub = getSubagentInfo(event, sessionId);
 
     // Track spend for failsafe and rule cache
     if (typeof event.cost === "number") {
-      ctx.failsafe.addSpend(event.cost);
+      ctx.getFailsafe(agentId).addSpend(event.cost);
       ctx.ruleCache.recordEvent({
         timestamp: Date.now(),
         toolName: event.toolName,
         eventType: "tool_use",
         costUsd: event.cost,
-      });
+      }, agentId);
     }
 
     const afterToolName = event.toolName || "unknown";
@@ -196,7 +199,7 @@ export function createAfterToolCallHandler(ctx: ToolCallContext) {
     const outputResult = ctx.shieldScanner.scanOutput(afterToolName, event.result);
     if (outputResult.detected) {
       const alertEvent = buildEvent({
-        agentId: ctx.agentId,
+        agentId,
         sessionId: sub.sessionId,
         eventType: "tool_use",
         action: `SHIELD: output injection in ${afterToolName}`,
@@ -216,7 +219,7 @@ export function createAfterToolCallHandler(ctx: ToolCallContext) {
       ctx.sender.enqueue(alertEvent);
 
       // Record violation for auto-kill escalation
-      ctx.violationTracker.recordViolation({
+      ctx.getViolationTracker(agentId).recordViolation({
         ruleId: `shield:output:${outputResult.highestSeverity}`,
         ruleName: `Shield: output ${outputResult.highestSeverity}`,
         timestamp: Date.now(),
@@ -226,7 +229,7 @@ export function createAfterToolCallHandler(ctx: ToolCallContext) {
     }
 
     const clawnitorEvent = buildEvent({
-      agentId: ctx.agentId,
+      agentId,
       sessionId: sub.sessionId,
       eventType: "tool_use",
       action: `${afterToolName} completed${event.error ? " (error)" : ""}`,

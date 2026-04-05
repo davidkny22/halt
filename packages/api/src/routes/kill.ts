@@ -95,8 +95,8 @@ export async function killRoutes(app: FastifyInstance) {
           and(eq(sessions.agent_id, agentId), eq(sessions.status, "active"))
         );
 
-      // Send kill via WebSocket
-      sendKill(request.userId!, reason || "Killed via API");
+      // Send kill via WebSocket (per-agent)
+      sendKill(request.userId!, reason || "Killed via API", undefined, current.agent_id);
 
       // Record the save
       await db.insert(saves).values({
@@ -156,8 +156,8 @@ export async function killRoutes(app: FastifyInstance) {
         return reply.status(409).send({ error: "Conflict", message: "Agent state changed concurrently. Retry." });
       }
 
-      // Send unkill via WebSocket
-      sendUnkill(request.userId!);
+      // Send unkill via WebSocket (per-agent)
+      sendUnkill(request.userId!, current.agent_id);
 
       await logAudit({ userId: request.userId!, action: "agent.resumed", resourceType: "agent", resourceId: agentId, ipAddress: request.ip });
 

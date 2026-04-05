@@ -1,8 +1,8 @@
 import { createWorker, createQueue } from "./queue.js";
 import type { Job } from "bullmq";
 import { getDb } from "../db/client.js";
-import { rules, alerts, users, agents, saves } from "../db/schema.js";
-import { eq } from "drizzle-orm";
+import { rules, alerts, users, agents, saves, events as eventsTable } from "../db/schema.js";
+import { eq, and, sql, gte, desc } from "drizzle-orm";
 import { sendKill } from "../ws/kill-server.js";
 import { TIER_FEATURES, type Tier } from "@clawnitor/shared";
 import { evaluateRules, type RuleWithId } from "../rules/engine.js";
@@ -21,30 +21,113 @@ export function startEventProcessor() {
 
     const db = getDb();
 
-    // Load user's active rules
+    // Load user's personal rules + team shared rules
     const userRules = await db
       .select()
       .from(rules)
       .where(eq(rules.user_id, userId));
 
-    const activeRules = userRules
-      .filter((r) => r.enabled)
-      .map(
-        (r): RuleWithId => ({
-          id: r.id,
-          name: r.name,
-          config: r.config as RuleConfig,
-          action_mode: (r as any).action_mode || "both",
-        })
-      );
+    // Also load shared rules from teams the user belongs to
+    let sharedRules: any[] = [];
+    try {
+      const rawShared = await db.execute(sql`
+        SELECT sr.* FROM shared_rules sr
+        JOIN team_members tm ON tm.team_id = sr.team_id
+        WHERE tm.user_id = ${userId} AND sr.enabled = true
+      `);
+      sharedRules = (rawShared as any[]).map((r) => ({
+        ...r,
+        agent_ids: r.scope || null, // Map scope → agent_ids
+      }));
+    } catch {}
 
-    if (activeRules.length === 0) {
+    const allRules = [...userRules, ...sharedRules];
+
+    const enabledRules = allRules
+      .filter((r: any) => r.enabled)
+      .map((r: any) => ({
+        id: r.id,
+        name: r.name,
+        config: r.config as RuleConfig,
+        action_mode: r.action_mode || "both",
+        agent_ids: r.agent_ids as string[] | null,
+      }));
+
+    if (enabledRules.length === 0) {
       return { processed: events.length, alerts: 0 };
     }
 
-    // Evaluate rules against events
-    const results = evaluateRules(events, activeRules);
-    const triggered = results.filter((r) => r.triggered);
+    // Group events by agent_id and evaluate only applicable rules per agent
+    const eventsByAgent = new Map<string, ClawnitorEvent[]>();
+    for (const event of events) {
+      const aid = event.agent_id;
+      if (!eventsByAgent.has(aid)) eventsByAgent.set(aid, []);
+      eventsByAgent.get(aid)!.push(event);
+    }
+
+    const triggered: Array<{ rule: RuleWithId; context?: string; triggered: boolean; agentExtId: string }> = [];
+
+    for (const [agentExtId, agentEvents] of eventsByAgent) {
+      const applicableRules: RuleWithId[] = enabledRules
+        .filter((r) => !r.agent_ids || r.agent_ids.length === 0 || r.agent_ids.includes(agentExtId))
+        .map((r) => ({ id: r.id, name: r.name, config: r.config, action_mode: r.action_mode }));
+
+      if (applicableRules.length === 0) continue;
+
+      // For rate/threshold rules, fetch historical events from DB for the time window
+      const maxWindow = Math.max(
+        ...applicableRules
+          .filter((r) => r.config.type === "rate" || r.config.type === "threshold")
+          .map((r) => (r.config as any).windowMinutes || 60),
+        0
+      );
+
+      let evalEvents = agentEvents;
+      if (maxWindow > 0) {
+        // Look up the agent's DB ID to query historical events
+        const [agentRow] = await db
+          .select({ id: agents.id })
+          .from(agents)
+          .where(and(eq(agents.user_id, userId), eq(agents.agent_id, agentExtId)))
+          .limit(1);
+
+        if (agentRow) {
+          const windowStart = new Date(Date.now() - maxWindow * 60 * 1000);
+          const historicalEvents = await db
+            .select()
+            .from(eventsTable)
+            .where(and(
+              eq(eventsTable.user_id, userId),
+              eq(eventsTable.agent_id, agentRow.id),
+              gte(eventsTable.timestamp, windowStart)
+            ))
+            .orderBy(desc(eventsTable.timestamp))
+            .limit(500);
+
+          // Merge historical with current batch (dedup by event_id)
+          const seenIds = new Set(historicalEvents.map((e) => e.id));
+          const newEvents = agentEvents.filter((e) => !seenIds.has(e.event_id));
+          evalEvents = [
+            ...historicalEvents.map((e) => ({
+              agent_id: agentExtId,
+              session_id: e.session_id,
+              timestamp: e.timestamp.toISOString(),
+              event_type: e.event_type as any,
+              action: e.action,
+              target: e.target,
+              metadata: e.metadata as any,
+              severity_hint: e.severity_hint as any,
+              event_id: e.id,
+              plugin_version: e.plugin_version || "unknown",
+            })),
+            ...newEvents,
+          ];
+        }
+      }
+
+      const results = evaluateRules(evalEvents, applicableRules);
+      triggered.push(...results.filter((r) => r.triggered).map((r) => ({ ...r, agentExtId })));
+    }
 
     // Create alert records for triggered rules
     for (const result of triggered) {
@@ -79,13 +162,13 @@ export function startEventProcessor() {
         const [user] = await db.select().from(users).where(eq(users.id, userId));
         const tier = user?.tier as Tier | undefined;
         if (tier && TIER_FEATURES[tier].killSwitch) {
-          // Find the agent and pause it
-          const agentId = events[0]?.agent_id;
+          // Find the triggering agent and pause it
+          const agentId = result.agentExtId;
           if (agentId) {
             const [agent] = await db
               .select()
               .from(agents)
-              .where(eq(agents.agent_id, agentId));
+              .where(and(eq(agents.user_id, userId), eq(agents.agent_id, agentId)));
             if (agent) {
               await db
                 .update(agents)
@@ -97,7 +180,8 @@ export function startEventProcessor() {
               sendKill(
                 userId,
                 `Rule "${result.rule.name}" triggered: ${result.context}`,
-                result.rule.id
+                result.rule.id,
+                agentId
               );
 
               // Record the save
@@ -105,7 +189,7 @@ export function startEventProcessor() {
                 user_id: userId,
                 agent_id: agent.id,
                 rule_id: result.rule.id,
-                action_blocked: events[0]?.action || "Unknown action",
+                action_blocked: eventsByAgent.get(agentId)?.[0]?.action || "Unknown action",
                 potential_impact: estimateImpact(result.rule.config, result.context),
                 source: "auto-kill",
               });

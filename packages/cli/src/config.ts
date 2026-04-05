@@ -3,6 +3,7 @@ import { join, resolve } from "node:path";
 
 const CONFIG_FILE = "openclaw.json";
 const MAX_SEARCH_DEPTH = 5;
+const PRODUCTION_BACKEND = "https://api.clawnitor.io";
 
 export function findConfig(): string | null {
   let dir = process.cwd();
@@ -34,6 +35,7 @@ export function writeApiKey(apiKey: string): string {
       config.plugins.entries.clawnitor.config = {};
 
     config.plugins.entries.clawnitor.config.apiKey = apiKey;
+    config.plugins.entries.clawnitor.config.backendUrl = PRODUCTION_BACKEND;
 
     writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n");
     return configPath;
@@ -47,6 +49,7 @@ export function writeApiKey(apiKey: string): string {
         clawnitor: {
           config: {
             apiKey: apiKey,
+            backendUrl: PRODUCTION_BACKEND,
           },
         },
       },

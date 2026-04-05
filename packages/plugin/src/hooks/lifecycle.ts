@@ -2,21 +2,23 @@ import { buildEvent } from "../event-builder.js";
 import type { HttpsSender } from "../transport/https-sender.js";
 
 interface LifecycleContext {
-  agentId: string;
-  sessionId: string;
   sender: HttpsSender;
   redactionPatterns: string[];
-  onSessionStart?: (sessionId: string) => void;
-  onSessionEnd?: (sessionId: string) => void;
+  resolveAgentId: (event: any, ocCtx?: any) => string;
+  resolveSessionId: (event: any, ocCtx?: any, agentId?: string) => string;
+  onSessionStart?: () => void;
+  onAgentEnd?: (agentId: string) => void;
 }
 
 export function createSessionStartHandler(ctx: LifecycleContext) {
-  return (event: any) => {
-    ctx.onSessionStart?.(event.sessionId || ctx.sessionId);
+  return (event: any, ocCtx?: any) => {
+    const agentId = ctx.resolveAgentId(event, ocCtx);
+    const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
+    ctx.onSessionStart?.();
 
     const clawnitorEvent = buildEvent({
-      agentId: ctx.agentId,
-      sessionId: event.sessionId || ctx.sessionId,
+      agentId,
+      sessionId,
       eventType: "agent_lifecycle",
       action: "session started",
       target: "session",
@@ -29,12 +31,13 @@ export function createSessionStartHandler(ctx: LifecycleContext) {
 }
 
 export function createSessionEndHandler(ctx: LifecycleContext) {
-  return (event: any) => {
-    ctx.onSessionEnd?.(event.sessionId || ctx.sessionId);
+  return (event: any, ocCtx?: any) => {
+    const agentId = ctx.resolveAgentId(event, ocCtx);
+    const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
 
     const clawnitorEvent = buildEvent({
-      agentId: ctx.agentId,
-      sessionId: event.sessionId || ctx.sessionId,
+      agentId,
+      sessionId,
       eventType: "agent_lifecycle",
       action: "session ended",
       target: "session",
@@ -49,10 +52,13 @@ export function createSessionEndHandler(ctx: LifecycleContext) {
 }
 
 export function createAgentEndHandler(ctx: LifecycleContext) {
-  return (event: any) => {
+  return (event: any, ocCtx?: any) => {
+    const agentId = ctx.resolveAgentId(event, ocCtx);
+    const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
+
     const clawnitorEvent = buildEvent({
-      agentId: ctx.agentId,
-      sessionId: ctx.sessionId,
+      agentId,
+      sessionId,
       eventType: "agent_lifecycle",
       action: event.error ? "agent ended with error" : "agent ended",
       target: "agent",
@@ -64,16 +70,21 @@ export function createAgentEndHandler(ctx: LifecycleContext) {
     });
 
     ctx.sender.enqueue(clawnitorEvent);
+
+    // Mark session boundary — next events from this agent get a new session
+    ctx.onAgentEnd?.(agentId);
   };
 }
 
 export function createSubagentHandlers(ctx: LifecycleContext) {
   return {
-    spawning: (event: any) => {
+    spawning: (event: any, ocCtx?: any) => {
+      const agentId = ctx.resolveAgentId(event, ocCtx);
+      const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
       const subagentId = event.subagentId || event.childSessionKey || "unknown";
       const clawnitorEvent = buildEvent({
-        agentId: ctx.agentId,
-        sessionId: ctx.sessionId,
+        agentId,
+        sessionId,
         eventType: "subagent",
         action: "subagent spawning",
         target: subagentId,
@@ -87,11 +98,13 @@ export function createSubagentHandlers(ctx: LifecycleContext) {
       });
       ctx.sender.enqueue(clawnitorEvent);
     },
-    ended: (event: any) => {
+    ended: (event: any, ocCtx?: any) => {
+      const agentId = ctx.resolveAgentId(event, ocCtx);
+      const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
       const subagentId = event.subagentId || event.childSessionKey || "unknown";
       const clawnitorEvent = buildEvent({
-        agentId: ctx.agentId,
-        sessionId: ctx.sessionId,
+        agentId,
+        sessionId,
         eventType: "subagent",
         action: "subagent ended",
         target: subagentId,

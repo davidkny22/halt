@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { eq, and, count, sql } from "drizzle-orm";
 import { getDb } from "../db/client.js";
-import { rules, users } from "../db/schema.js";
+import { rules, users, agents } from "../db/schema.js";
 import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
 import { ruleConfigSchema, MAX_FREE_RULES, TIER_FEATURES, type Tier } from "@clawnitor/shared";
 import { z } from "zod";
@@ -42,15 +42,59 @@ export async function rulesRoutes(app: FastifyInstance) {
       const [user] = await db.select({ rule_visibility: users.rule_visibility }).from(users).where(eq(users.id, request.userId!));
       const ruleVisibility = user?.rule_visibility || "per_rule";
 
-      // If agent_id filter provided, return only global rules + rules scoped to this agent
-      if (query.agent_id) {
-        const filtered = rows.filter((r) =>
-          !r.agent_ids || r.agent_ids.length === 0 || r.agent_ids.includes(query.agent_id!)
-        );
-        return reply.send({ rules: filtered, rule_visibility: ruleVisibility });
+      // Fetch per-agent auto-kill configs
+      const agentRows = await db
+        .select({
+          agent_id: agents.agent_id,
+          auto_kill_enabled: agents.auto_kill_enabled,
+          auto_kill_threshold: agents.auto_kill_threshold,
+          auto_kill_window_minutes: agents.auto_kill_window_minutes,
+          status: agents.status,
+        })
+        .from(agents)
+        .where(eq(agents.user_id, request.userId!));
+
+      const autoKillConfigs: Record<string, { enabled: boolean; threshold: number; windowMinutes: number }> = {};
+      for (const a of agentRows) {
+        if (a.status !== "discovered") {
+          autoKillConfigs[a.agent_id] = {
+            enabled: a.auto_kill_enabled,
+            threshold: a.auto_kill_threshold,
+            windowMinutes: a.auto_kill_window_minutes,
+          };
+        }
       }
 
-      return reply.send({ rules: rows, rule_visibility: ruleVisibility });
+      // Fetch team shared rules if user is in a team (map scope → agent_ids)
+      let sharedRuleRows: any[] = [];
+      try {
+        const rawShared = await db.execute(sql`
+          SELECT sr.* FROM shared_rules sr
+          JOIN team_members tm ON tm.team_id = sr.team_id
+          WHERE tm.user_id = ${request.userId!} AND sr.enabled = true
+        `);
+        sharedRuleRows = (rawShared as any[]).map((r) => ({
+          ...r,
+          agent_ids: r.scope || null, // Map scope → agent_ids for consistent filtering
+        }));
+      } catch {}
+
+      const allRules = [...rows, ...sharedRuleRows];
+
+      // If agent_id filter provided, check if agent is discovered (no rules for unactivated agents)
+      if (query.agent_id) {
+        const agentConfig = agentRows.find((a) => a.agent_id === query.agent_id);
+        if (agentConfig?.status === "discovered") {
+          return reply.send({ rules: [], rule_visibility: ruleVisibility, auto_kill_configs: autoKillConfigs });
+        }
+
+        const filtered = allRules.filter((r: any) =>
+          !r.agent_ids || r.agent_ids.length === 0 || r.agent_ids.includes(query.agent_id!)
+        );
+        return reply.send({ rules: filtered, rule_visibility: ruleVisibility, auto_kill_configs: autoKillConfigs });
+      }
+
+      return reply.send({ rules: allRules, rule_visibility: ruleVisibility, auto_kill_configs: autoKillConfigs });
     },
   });
 

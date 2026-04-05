@@ -48,6 +48,13 @@ export default function AgentDetailPage() {
   useEffect(() => {
     async function load() {
       try {
+        // Reconcile orphaned events into sessions before loading
+        await fetch("/api/agents-action", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "reconcile-sessions" }),
+        }).catch(() => {});
+
         const [configRes, sessionsRes] = await Promise.all([
           fetch("/api/agents-action", {
             method: "POST",

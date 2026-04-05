@@ -9,41 +9,39 @@ export async function sendMagicLink(email: string): Promise<string> {
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(
-      (data as { error?: string }).error || "Failed to send magic link"
-    );
+    throw new Error((data as { error?: string }).error || "Failed to send magic link");
   }
 
-  const data: { token: string } = await res.json();
-  return data.token; // polling token
+  const { token } = (await res.json()) as { token: string };
+  return token;
 }
 
 export async function pollMagicLink(
-  pollingToken: string
-): Promise<{ email: string; sessionToken: string }> {
-  const deadline = Date.now() + 5 * 60_000; // 5 min timeout
+  token: string,
+  timeoutMs: number = 5 * 60 * 1000
+): Promise<{ email: string }> {
+  const start = Date.now();
+  const interval = 3000; // 3 seconds
 
-  console.log("  Check your email and click the link.\n");
-  console.log("  Waiting...");
-
-  while (Date.now() < deadline) {
-    await new Promise((r) => setTimeout(r, 3000));
-
+  while (Date.now() - start < timeoutMs) {
     const res = await fetch(`${API_URL}/api/auth/cli-magic-link/status`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: pollingToken }),
+      body: JSON.stringify({ token }),
     });
 
-    if (!res.ok) continue;
-
-    const data: { verified: boolean; email?: string; sessionToken?: string } =
-      await res.json();
-
-    if (data.verified && data.email && data.sessionToken) {
-      return { email: data.email, sessionToken: data.sessionToken };
+    if (res.ok) {
+      const data = (await res.json()) as { verified: boolean; email?: string; expired?: boolean };
+      if (data.verified && data.email) {
+        return { email: data.email };
+      }
+      if (data.expired) {
+        throw new Error("Magic link expired. Run clawnitor init again.");
+      }
     }
+
+    await new Promise((r) => setTimeout(r, interval));
   }
 
-  throw new Error("Magic link timed out. Try again.");
+  throw new Error("Timed out waiting for email verification.");
 }

@@ -91,9 +91,12 @@ export function startAnomalyCheckWorker() {
             })
             .where(eq(agents.id, baseline.agent_id));
 
+          const [killedAgent] = await db.select({ agent_id: agents.agent_id }).from(agents).where(eq(agents.id, baseline.agent_id));
           sendKill(
             baseline.user_id,
-            `Critical anomaly (score: ${result.score}): ${result.explanation}`
+            `Critical anomaly (score: ${result.score}): ${result.explanation}`,
+            undefined,
+            killedAgent?.agent_id
           );
         }
       }

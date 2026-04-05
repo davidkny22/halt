@@ -12,6 +12,27 @@ declare module "fastify" {
   }
 }
 
+const TRIAL_DURATION_MS = 14 * 24 * 60 * 60 * 1000;
+const EXTENDED_TRIAL_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
+
+async function checkTierExpiry(db: ReturnType<typeof getDb>, userId: string) {
+  const [user] = await db.select().from(users).where(eq(users.id, userId));
+  if (!user) return;
+
+  if (user.tier === "trial" && user.trial_started_at) {
+    const duration = user.beta_code === "EXTENDED_TRIAL" ? EXTENDED_TRIAL_DURATION_MS : TRIAL_DURATION_MS;
+    if (Date.now() - user.trial_started_at.getTime() > duration) {
+      await db.update(users).set({ tier: "free", updated_at: new Date() }).where(eq(users.id, userId));
+    }
+  }
+
+  if (user.tier === "paid" && user.beta_code && user.beta_expires_at) {
+    if (Date.now() > user.beta_expires_at.getTime()) {
+      await db.update(users).set({ tier: "free", updated_at: new Date() }).where(eq(users.id, userId));
+    }
+  }
+}
+
 // Plugin API key auth — for OpenClaw plugin → API calls
 export async function authenticateApiKey(
   request: FastifyRequest,
@@ -41,6 +62,10 @@ export async function authenticateApiKey(
         }
       }
       request.userId = key.user_id;
+      // Update last_used_at (fire-and-forget, don't block auth)
+      db.update(apiKeys).set({ last_used_at: new Date() }).where(eq(apiKeys.id, key.id)).catch(() => {});
+      // Check trial/beta expiry (fire-and-forget downgrade)
+      checkTierExpiry(db, key.user_id).catch(() => {});
       return;
     }
   }

@@ -24,21 +24,22 @@ export async function eventsRoutes(app: FastifyInstance) {
     handler: async (request, reply) => {
       const userId = request.userId!;
 
-      // Rate limit
-      if (!rateLimiter.consume(userId, 1)) {
-        return reply.status(429).send({
-          error: "Too Many Requests",
-          message: "Rate limit exceeded. Max 1000 events/minute.",
-        });
-      }
-
-      // Validate body
+      // Validate body first so we know event count for rate limiting
       const parsed = ingestSchema.safeParse(request.body);
       if (!parsed.success) {
         return reply.status(400).send({
           error: "Bad Request",
           message: "Invalid event payload",
           ...(process.env.NODE_ENV !== "production" && { details: parsed.error.issues }),
+        });
+      }
+
+      // Rate limit by event count, not request count
+      const eventCount = parsed.data.events.length;
+      if (!rateLimiter.consume(userId, eventCount)) {
+        return reply.status(429).send({
+          error: "Too Many Requests",
+          message: "Rate limit exceeded. Max 1000 events/minute.",
         });
       }
 
@@ -63,36 +64,11 @@ export async function eventsRoutes(app: FastifyInstance) {
             .where(and(eq(agents.user_id, userId), inArray(agents.agent_id, uniqueAgentIds)))
         : [];
 
-      const discoveredToActivate: string[] = [];
+      const discoveredAgentIds = new Set<string>(); // external agent_ids that are still discovered
       for (const agent of existingAgents) {
         agentIdMap.set(agent.agent_id, agent.id);
         if (agent.status === "discovered") {
-          discoveredToActivate.push(agent.id);
-        }
-      }
-
-      // Promote discovered agents to active when they start sending events (tier-limited)
-      if (discoveredToActivate.length > 0) {
-        const [user] = await db.select().from(users).where(eq(users.id, userId));
-        const tier = (user?.tier || "free") as Tier;
-        const maxAgents = TIER_FEATURES[tier].maxAgents;
-
-        const [{ value: monitoredCount }] = await db
-          .select({ value: count() })
-          .from(agents)
-          .where(and(
-            eq(agents.user_id, userId),
-            sql`${agents.status} != 'discovered'`
-          ));
-
-        const slotsAvailable = Math.max(0, maxAgents - Number(monitoredCount));
-        const toPromote = discoveredToActivate.slice(0, slotsAvailable);
-
-        if (toPromote.length > 0) {
-          await db
-            .update(agents)
-            .set({ status: "active" })
-            .where(inArray(agents.id, toPromote));
+          discoveredAgentIds.add(agent.agent_id);
         }
       }
 
@@ -104,8 +80,9 @@ export async function eventsRoutes(app: FastifyInstance) {
           .from(agents)
           .where(eq(agents.user_id, userId));
 
+        let createdCount = 0;
         for (const agentExtId of unknownIds) {
-          if (Number(agentCount) + agentIdMap.size >= 50) break;
+          if (Number(agentCount) + createdCount >= 50) break;
 
           const [newAgent] = await db
             .insert(agents)
@@ -124,11 +101,14 @@ export async function eventsRoutes(app: FastifyInstance) {
           });
 
           agentIdMap.set(agentExtId, newAgent.id);
+          createdCount++;
         }
       }
 
-      // Keep only events tied to known/registered agents
-      const acceptedEvents = unique.filter((e) => agentIdMap.has(e.agent_id));
+      // Keep only events from monitored agents (not discovered, not unknown)
+      const acceptedEvents = unique.filter((e) =>
+        agentIdMap.has(e.agent_id) && !discoveredAgentIds.has(e.agent_id)
+      );
       if (acceptedEvents.length === 0) {
         return reply.send({ accepted: 0, kill_state: { killed: false } });
       }
@@ -147,14 +127,28 @@ export async function eventsRoutes(app: FastifyInstance) {
         timestamp: new Date(e.timestamp),
       }));
 
-      await db.insert(events).values(rows).onConflictDoNothing({
-        target: events.id,
-      });
+      let insertedIds: Set<string>;
+      try {
+        const inserted = await db.insert(events).values(rows).onConflictDoNothing({
+          target: events.id,
+        }).returning({ id: events.id });
+        insertedIds = new Set(inserted.map((r) => r.id));
+      } catch (err) {
+        request.log.error("Failed to insert events: %s", (err as Error).message);
+        return reply.status(500).send({ error: "Failed to store events" });
+      }
+
+      // Only process actually-inserted events for sessions and rule evaluation
+      const insertedEvents = acceptedEvents.filter((e) => insertedIds.has(e.event_id));
+      if (insertedEvents.length === 0) {
+        return reply.send({ accepted: 0, kill_state: { killed: false } });
+      }
 
       // Upsert sessions — create on first event, update stats on subsequent
+      // Prefix session IDs with user ID to prevent cross-user collisions on global PK
       const sessionMap = new Map<string, { agentDbId: string; events: typeof acceptedEvents }>();
-      for (const event of acceptedEvents) {
-        const sid = event.session_id;
+      for (const event of insertedEvents) {
+        const sid = `${userId}:${event.session_id}`;
         const agentDbId = agentIdMap.get(event.agent_id);
         if (!agentDbId) continue;
         if (!sessionMap.has(sid)) sessionMap.set(sid, { agentDbId, events: [] });
@@ -167,45 +161,49 @@ export async function eventsRoutes(app: FastifyInstance) {
         const isEnd = sessionEvents.some((e) => e.action === "session ended" || e.action === "agent ended");
         const duration = sessionEvents.find((e) => e.metadata?.duration_ms)?.metadata?.duration_ms;
 
-        // Atomic UPSERT — no race condition
-        await db
-          .insert(sessions)
-          .values({
-            id: sid,
-            user_id: userId,
-            agent_id: agentDbId,
-            status: isEnd ? "completed" : "active",
-            started_at: new Date(sessionEvents[0].timestamp),
-            ended_at: isEnd ? new Date(sessionEvents[sessionEvents.length - 1].timestamp) : undefined,
-            duration_ms: duration ? Math.round(duration) : undefined,
-            event_count: sessionEvents.length,
-            total_cost: String(cost),
-            total_tokens: tokens,
-            metadata: { plugin_version: sessionEvents[0].plugin_version },
-          })
-          .onConflictDoUpdate({
-            target: sessions.id,
-            set: {
-              event_count: sql`${sessions.event_count} + ${sessionEvents.length}`,
-              total_cost: sql`(${sessions.total_cost}::numeric + ${cost})::text`,
-              total_tokens: sql`${sessions.total_tokens} + ${tokens}`,
-              updated_at: new Date(),
-              ...(isEnd ? {
-                status: "completed" as const,
-                ended_at: new Date(sessionEvents[sessionEvents.length - 1].timestamp),
-                ...(duration ? { duration_ms: Math.round(duration) } : {}),
-              } : {}),
-            },
-          });
+        try {
+          await db
+            .insert(sessions)
+            .values({
+              id: sid,
+              user_id: userId,
+              agent_id: agentDbId,
+              status: isEnd ? "completed" : "active",
+              started_at: new Date(sessionEvents[0].timestamp),
+              ended_at: isEnd ? new Date(sessionEvents[sessionEvents.length - 1].timestamp) : undefined,
+              duration_ms: duration ? Math.round(duration) : undefined,
+              event_count: sessionEvents.length,
+              total_cost: String(cost),
+              total_tokens: tokens,
+              metadata: { plugin_version: sessionEvents[0].plugin_version },
+            })
+            .onConflictDoUpdate({
+              target: sessions.id,
+              set: {
+                event_count: sql`${sessions.event_count} + ${sessionEvents.length}`,
+                total_cost: sql`${sessions.total_cost} + ${cost}`,
+                total_tokens: sql`${sessions.total_tokens} + ${tokens}`,
+                updated_at: new Date(),
+                ...(isEnd ? {
+                  status: "completed" as const,
+                  ended_at: new Date(sessionEvents[sessionEvents.length - 1].timestamp),
+                  ...(duration ? { duration_ms: Math.round(duration) } : {}),
+                } : {}),
+              },
+            });
+        } catch (err) {
+          request.log.error("Failed to upsert session %s: %s", sid, (err as Error).message);
+        }
       }
 
       // Enqueue for processing (rule evaluation in Phase 2)
-      await eventsQueue.add("process", { events: acceptedEvents, userId });
+      await eventsQueue.add("process", { events: insertedEvents, userId });
 
-      // Check kill state — if any agent is paused, report it
+      // Check per-agent kill state
       const agentDbIds = [...new Set([...agentIdMap.values()])];
-      let killed = false;
-      let killReason: string | undefined;
+      const agentKillStates: Record<string, { killed: boolean; reason?: string }> = {};
+      let anyKilled = false;
+      let anyKillReason: string | undefined;
 
       for (const dbId of agentDbIds) {
         const [agent] = await db
@@ -213,17 +211,78 @@ export async function eventsRoutes(app: FastifyInstance) {
           .from(agents)
           .where(eq(agents.id, dbId))
           .limit(1);
-        if (agent?.status === "paused") {
-          killed = true;
-          killReason = agent.kill_reason ?? undefined;
-          break;
+        if (agent) {
+          const isPaused = agent.status === "paused";
+          agentKillStates[agent.agent_id] = {
+            killed: isPaused,
+            ...(isPaused && agent.kill_reason ? { reason: agent.kill_reason } : {}),
+          };
+          if (isPaused) {
+            anyKilled = true;
+            anyKillReason = agent.kill_reason ?? undefined;
+          }
         }
       }
 
       return reply.send({
-        accepted: acceptedEvents.length,
-        kill_state: { killed, reason: killReason },
+        accepted: insertedEvents.length,
+        // Backwards-compatible: global kill_state for older plugins
+        kill_state: { killed: anyKilled, reason: anyKillReason },
+        // Per-agent kill states for plugin 2.2+
+        agent_kill_states: agentKillStates,
       });
+    },
+  });
+
+  // Reconcile orphaned events into sessions (backfill)
+  app.post("/api/events/reconcile", {
+    preHandler: [authenticateApiKey],
+    handler: async (request, reply) => {
+      const db = getDb();
+      const userId = request.userId!;
+
+      // Find session_ids in events that have no sessions row (prefixed with userId for global PK)
+      const orphans = await db.execute(sql`
+        SELECT
+          ${userId} || ':' || e.session_id as prefixed_session_id,
+          e.agent_id,
+          min(e.timestamp) as started_at,
+          max(e.timestamp) as ended_at,
+          count(*)::int as event_count,
+          COALESCE(SUM((e.metadata->>'cost_usd')::numeric), 0) as total_cost,
+          COALESCE(SUM((e.metadata->>'tokens_used')::int), 0)::int as total_tokens
+        FROM events e
+        LEFT JOIN sessions s ON s.id = ${userId} || ':' || e.session_id
+        WHERE e.user_id = ${userId} AND s.id IS NULL
+        GROUP BY e.session_id, e.agent_id
+      `);
+
+      if (orphans.length === 0) {
+        return reply.send({ reconciled: 0 });
+      }
+
+      let reconciled = 0;
+      for (const row of orphans) {
+        try {
+          await db.insert(sessions).values({
+            id: row.prefixed_session_id as string,
+            user_id: userId,
+            agent_id: row.agent_id as string,
+            status: "completed",
+            started_at: new Date(row.started_at as string),
+            ended_at: new Date(row.ended_at as string),
+            event_count: Number(row.event_count),
+            total_cost: String(row.total_cost),
+            total_tokens: Number(row.total_tokens),
+            metadata: {},
+          }).onConflictDoNothing({ target: sessions.id });
+          reconciled++;
+        } catch (err) {
+          request.log.error("Failed to reconcile session %s: %s", row.prefixed_session_id, (err as Error).message);
+        }
+      }
+
+      return reply.send({ reconciled, total_orphans: orphans.length });
     },
   });
 

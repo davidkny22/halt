@@ -11,14 +11,14 @@ export class WebSocketClient {
   private reconnectAttempt = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private stopped = false;
-  private onKill?: (reason: string, ruleId?: string) => void;
-  private onUnkill?: () => void;
+  private onKill?: (reason: string, ruleId?: string, agentId?: string) => void;
+  private onUnkill?: (agentId?: string) => void;
 
   constructor(
     config: PluginConfig,
     opts: {
-      onKill?: (reason: string, ruleId?: string) => void;
-      onUnkill?: () => void;
+      onKill?: (reason: string, ruleId?: string, agentId?: string) => void;
+      onUnkill?: (agentId?: string) => void;
     }
   ) {
     this.config = config;
@@ -64,9 +64,9 @@ export class WebSocketClient {
         try {
           const msg = JSON.parse(String(event.data)) as WsMessage & { type: string };
           if (msg.type === "kill") {
-            this.onKill?.(msg.reason, (msg as any).rule_id);
+            this.onKill?.(msg.reason, (msg as any).rule_id, (msg as any).agent_id);
           } else if (msg.type === "unkill") {
-            this.onUnkill?.();
+            this.onUnkill?.((msg as any).agent_id);
           }
         } catch {
           // Ignore unparseable messages

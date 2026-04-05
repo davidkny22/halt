@@ -126,11 +126,11 @@ async function authenticateWs(raw: string): Promise<string | null> {
   return null;
 }
 
-export function sendKill(userId: string, reason: string, ruleId?: string): boolean {
+export function sendKill(userId: string, reason: string, ruleId?: string, agentId?: string): boolean {
   const userConns = connections.get(userId);
   if (!userConns || userConns.size === 0) return false;
 
-  const message: KillMessage = { type: "kill", reason, rule_id: ruleId };
+  const message: KillMessage = { type: "kill", reason, rule_id: ruleId, ...(agentId ? { agent_id: agentId } : {}) };
   const payload = JSON.stringify(message);
 
   for (const socket of userConns) {
@@ -142,11 +142,11 @@ export function sendKill(userId: string, reason: string, ruleId?: string): boole
   return true;
 }
 
-export function sendUnkill(userId: string): boolean {
+export function sendUnkill(userId: string, agentId?: string): boolean {
   const userConns = connections.get(userId);
   if (!userConns || userConns.size === 0) return false;
 
-  const message: UnkillMessage = { type: "unkill" };
+  const message: UnkillMessage = { type: "unkill", ...(agentId ? { agent_id: agentId } : {}) };
   const payload = JSON.stringify(message);
 
   for (const socket of userConns) {

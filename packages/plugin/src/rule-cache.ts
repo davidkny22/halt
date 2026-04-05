@@ -9,6 +9,7 @@ export interface CachedRule {
   enabled: boolean;
   action_mode?: string; // "block" | "alert" | "both"
   agent_visible?: boolean;
+  agent_ids?: string[] | null; // null = all agents
 }
 
 interface RuleCheckResult {
@@ -32,15 +33,14 @@ export class RuleCache {
   private rules: CachedRule[] = [];
   private config: PluginConfig;
   private fetchTimer: ReturnType<typeof setInterval> | null = null;
-  private recentEvents: EventRecord[] = [];
+  private recentEventsByAgent = new Map<string, EventRecord[]>();
   private readonly MAX_RECENT_EVENTS = 500;
   private cachedShieldConfig: ShieldConfig | null = null;
-  private getAgentId?: () => string;
-  private ruleVisibility: string = "per_rule"; // "all_visible" | "per_rule" | "all_silent"
+  private ruleVisibility: string = "per_rule";
+  private autoKillConfigs: Record<string, { enabled: boolean; threshold: number; windowMinutes: number }> = {};
 
-  constructor(config: PluginConfig, getAgentId?: () => string) {
+  constructor(config: PluginConfig) {
     this.config = config;
-    this.getAgentId = getAgentId;
   }
 
   start() {
@@ -58,11 +58,8 @@ export class RuleCache {
 
   private async fetchRules() {
     try {
-      let url = `${this.config.backendUrl}/api/rules`;
-      const agentId = this.getAgentId?.();
-      if (agentId && agentId !== "unknown") {
-        url += `?agent_id=${encodeURIComponent(agentId)}`;
-      }
+      // Fetch ALL rules (no agent filter) — filter per-agent at evaluation time
+      const url = `${this.config.backendUrl}/api/rules`;
       const res = await fetch(url, {
         headers: {
           Authorization: `Bearer ${this.config.apiKey}`,
@@ -73,6 +70,7 @@ export class RuleCache {
         const data = await res.json();
         this.rules = (data.rules || []).filter((r: CachedRule) => r.enabled);
         this.ruleVisibility = data.rule_visibility || "per_rule";
+        this.autoKillConfigs = data.auto_kill_configs || {};
         this.cachedShieldConfig = null; // Rebuild on next getShieldConfig()
       }
     } catch {
@@ -80,33 +78,43 @@ export class RuleCache {
     }
   }
 
-  recordEvent(event: EventRecord) {
-    this.recentEvents.push(event);
-    // Trim to max size
-    if (this.recentEvents.length > this.MAX_RECENT_EVENTS) {
-      this.recentEvents = this.recentEvents.slice(-this.MAX_RECENT_EVENTS);
+  recordEvent(event: EventRecord, agentId?: string) {
+    const key = agentId || "_global";
+    let events = this.recentEventsByAgent.get(key);
+    if (!events) {
+      events = [];
+      this.recentEventsByAgent.set(key, events);
+    }
+    events.push(event);
+    if (events.length > this.MAX_RECENT_EVENTS) {
+      this.recentEventsByAgent.set(key, events.slice(-this.MAX_RECENT_EVENTS));
     }
   }
 
-  // Evaluate all cached pattern rules against the current tool call + recent history
+  private getRecentEvents(agentId?: string): EventRecord[] {
+    return this.recentEventsByAgent.get(agentId || "_global") || [];
+  }
+
+  // Evaluate cached pattern rules against the current tool call (per-agent filtered)
   checkBeforeToolCall(
     toolName: string,
-    params?: Record<string, unknown>
+    params?: Record<string, unknown>,
+    agentId?: string
   ): RuleCheckResult {
     const paramsStr = params ? JSON.stringify(params).slice(0, 500) : "";
 
-    // Skip rule evaluation for tool calls that target the Clawnitor backend itself
-    // (e.g., curl commands creating rules with keywords in the config)
-    if (paramsStr.includes("api.clawnitor.io") || paramsStr.includes("/api/rules")) {
+    if (toolName === "fetch" && paramsStr.includes("api.clawnitor.io")) {
       return { blocked: false };
     }
 
-    for (const rule of this.rules) {
+    const applicableRules = agentId ? this.rulesForAgent(agentId) : this.rules;
+
+    for (const rule of applicableRules) {
       if (rule.rule_type === "nl") continue; // Can't evaluate locally
       if (rule.rule_type === "injection") continue; // Handled by Shield scanner
       if (rule.action_mode === "alert") continue; // Alert-only rules don't block
 
-      const result = this.evaluateRule(rule, toolName, paramsStr);
+      const result = this.evaluateRule(rule, toolName, paramsStr, agentId);
       if (result.blocked) {
         return result;
       }
@@ -118,7 +126,8 @@ export class RuleCache {
   private evaluateRule(
     rule: CachedRule,
     toolName: string,
-    paramsStr: string
+    paramsStr: string,
+    agentId?: string
   ): RuleCheckResult {
     const config = rule.config;
 
@@ -127,11 +136,11 @@ export class RuleCache {
     }
 
     if (rule.rule_type === "rate") {
-      return this.evaluateRate(rule);
+      return this.evaluateRate(rule, agentId);
     }
 
     if (rule.rule_type === "threshold") {
-      return this.evaluateThreshold(rule);
+      return this.evaluateThreshold(rule, agentId);
     }
 
     return { blocked: false };
@@ -169,13 +178,13 @@ export class RuleCache {
     return { blocked: false };
   }
 
-  private evaluateRate(rule: CachedRule): RuleCheckResult {
+  private evaluateRate(rule: CachedRule, agentId?: string): RuleCheckResult {
     const config = rule.config;
     const windowMs = (config.windowMinutes || 10) * 60 * 1000;
     const maxCount = config.maxCount || 100;
     const now = Date.now();
 
-    let filtered = this.recentEvents.filter(
+    let filtered = this.getRecentEvents(agentId).filter(
       (e) => e.timestamp > now - windowMs
     );
 
@@ -197,12 +206,12 @@ export class RuleCache {
     return { blocked: false };
   }
 
-  private evaluateThreshold(rule: CachedRule): RuleCheckResult {
+  private evaluateThreshold(rule: CachedRule, agentId?: string): RuleCheckResult {
     const config = rule.config;
     const windowMs = (config.windowMinutes || 60) * 60 * 1000;
     const now = Date.now();
 
-    const recentInWindow = this.recentEvents.filter(
+    const recentInWindow = this.getRecentEvents(agentId).filter(
       (e) => e.timestamp > now - windowMs
     );
 
@@ -231,12 +240,32 @@ export class RuleCache {
     return this.rules.length;
   }
 
+  getAutoKillConfig(agentId?: string): { enabled: boolean; threshold: number; windowMinutes: number } {
+    if (agentId && this.autoKillConfigs[agentId]) {
+      return this.autoKillConfigs[agentId];
+    }
+    return { enabled: true, threshold: 3, windowMinutes: 10 };
+  }
+
+  // Filter rules applicable to a specific agent
+  private rulesForAgent(agentId?: string): CachedRule[] {
+    if (!agentId) return this.rules;
+    return this.rules.filter((r) =>
+      !r.agent_ids || r.agent_ids.length === 0 || r.agent_ids.includes(agentId)
+    );
+  }
+
   getVisibleRulesContext(): string | null {
+    return this.getVisibleRulesContextForAgent(undefined);
+  }
+
+  getVisibleRulesContextForAgent(agentId?: string): string | null {
     if (this.ruleVisibility === "all_silent") return null;
 
+    const agentRules = this.rulesForAgent(agentId);
     const visible = this.ruleVisibility === "all_visible"
-      ? this.rules
-      : this.rules.filter((r) => r.agent_visible !== false);
+      ? agentRules
+      : agentRules.filter((r) => r.agent_visible !== false);
     if (visible.length === 0) return null;
 
     const lines = ["# Clawnitor — Active Monitoring Rules", ""];

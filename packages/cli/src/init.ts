@@ -18,12 +18,15 @@ function ask(question: string): Promise<string> {
   });
 }
 
-async function provisionAndGetKey(email: string): Promise<string> {
-  // Provision user (creates account if new)
+async function provisionAndGetKey(email: string, opts?: { githubToken?: string; magicLinkToken?: string }): Promise<string> {
   const provisionRes = await fetch(`${API_URL}/api/auth/cli-provision`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({
+      email,
+      github_token: opts?.githubToken,
+      magic_link_token: opts?.magicLinkToken,
+    }),
   });
 
   if (!provisionRes.ok) {
@@ -48,10 +51,11 @@ export async function init() {
   );
 
   let email: string;
+  let githubToken: string | undefined;
+  let magicLinkToken: string | undefined;
 
   if (method === "1" || method.toLowerCase() === "github") {
-    // GitHub device flow
-    const githubToken = await githubDeviceAuth();
+    githubToken = await githubDeviceAuth();
     email = await getGitHubEmail(githubToken);
     console.log(`\n  Authenticated as ${email}`);
   } else if (
@@ -59,23 +63,26 @@ export async function init() {
     method.toLowerCase() === "email" ||
     method.toLowerCase() === "magic"
   ) {
-    // Magic link flow
     email = await ask("\n  Email: ");
     if (!email || !email.includes("@")) {
       throw new Error("Invalid email");
     }
 
-    const pollingToken = await sendMagicLink(email);
-    const result = await pollMagicLink(pollingToken);
+    console.log("\n  Sending verification email...");
+    magicLinkToken = await sendMagicLink(email);
+    console.log("  Check your inbox and click the verification link.");
+    console.log("  Waiting for verification...\n");
+
+    const result = await pollMagicLink(magicLinkToken);
     email = result.email;
-    console.log(`\n  Authenticated as ${email}`);
+    console.log(`  Verified as ${email}`);
   } else {
     throw new Error('Pick 1 or 2');
   }
 
   // Provision account and get API key
   console.log("\n  Generating API key...");
-  const apiKey = await provisionAndGetKey(email);
+  const apiKey = await provisionAndGetKey(email, { githubToken, magicLinkToken });
 
   // Write to config
   console.log("  Writing to openclaw.json...");

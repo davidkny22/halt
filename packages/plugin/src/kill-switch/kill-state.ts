@@ -4,33 +4,50 @@ export interface KillStateData {
   killedAt?: Date;
 }
 
-class KillState {
-  private state: KillStateData = { killed: false };
+class KillStateManager {
+  private states = new Map<string, KillStateData>();
+  private globalState: KillStateData = { killed: false };
 
-  isKilled(): boolean {
-    return this.state.killed;
+  // Per-agent kill state
+  isKilled(agentId?: string): boolean {
+    if (agentId) {
+      return this.states.get(agentId)?.killed || false;
+    }
+    return this.globalState.killed;
   }
 
-  getReason(): string | undefined {
-    return this.state.reason;
+  getReason(agentId?: string): string | undefined {
+    if (agentId) {
+      return this.states.get(agentId)?.reason;
+    }
+    return this.globalState.reason;
   }
 
-  setKilled(reason: string) {
-    this.state = {
-      killed: true,
-      reason,
-      killedAt: new Date(),
-    };
+  setKilled(reason: string, agentId?: string) {
+    const state: KillStateData = { killed: true, reason, killedAt: new Date() };
+    if (agentId) {
+      this.states.set(agentId, state);
+    } else {
+      // Global kill — affects all agents
+      this.globalState = state;
+    }
   }
 
-  clearKilled() {
-    this.state = { killed: false };
+  clearKilled(agentId?: string) {
+    if (agentId) {
+      this.states.delete(agentId);
+    } else {
+      this.globalState = { killed: false };
+    }
   }
 
-  getState(): Readonly<KillStateData> {
-    return { ...this.state };
+  getState(agentId?: string): Readonly<KillStateData> {
+    if (agentId) {
+      return { ...(this.states.get(agentId) || { killed: false }) };
+    }
+    return { ...this.globalState };
   }
 }
 
-// Singleton
-export const killState = new KillState();
+// Singleton manager (handles all agents)
+export const killState = new KillStateManager();

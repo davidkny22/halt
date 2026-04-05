@@ -28,13 +28,12 @@ export function startUsageSyncWorker() {
     for (const user of [...paidUsers, ...trialUsers]) {
       if (!user.stripe_customer_id) continue;
 
-      // Count billable units: unique agent_id + session_id pairs
-      // that sent events in the current billing period (last 30 days)
+      // Count billable units: unique agents that sent events in the current billing period
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
       const [{ value: activeUnitCount }] = await db
         .select({
-          value: sql<number>`COUNT(DISTINCT (${events.agent_id} || ':' || ${events.session_id}))`,
+          value: sql<number>`COUNT(DISTINCT ${events.agent_id})`,
         })
         .from(events)
         .where(

@@ -7,17 +7,20 @@ export class HttpsSender {
   private timer: ReturnType<typeof setInterval> | null = null;
   private config: PluginConfig;
   private onKillState?: (killed: boolean, reason?: string) => void;
+  private onAgentKillStates?: (states: Record<string, { killed: boolean; reason?: string }>) => void;
   private onFlushFail?: (events: ClawnitorEvent[]) => void;
 
   constructor(
     config: PluginConfig,
     opts?: {
       onKillState?: (killed: boolean, reason?: string) => void;
+      onAgentKillStates?: (states: Record<string, { killed: boolean; reason?: string }>) => void;
       onFlushFail?: (events: ClawnitorEvent[]) => void;
     }
   ) {
     this.config = config;
     this.onKillState = opts?.onKillState;
+    this.onAgentKillStates = opts?.onAgentKillStates;
     this.onFlushFail = opts?.onFlushFail;
   }
 
@@ -58,17 +61,27 @@ export class HttpsSender {
       });
 
       if (response.ok) {
-        const data = (await response.json()) as IngestEventsResponse;
-        if (this.onKillState) {
+        const data = (await response.json()) as any;
+        // Per-agent kill states (plugin 2.2+)
+        if (data.agent_kill_states && this.onAgentKillStates) {
+          this.onAgentKillStates(data.agent_kill_states);
+        } else if (this.onKillState && data.kill_state) {
+          // Backwards-compatible global kill state
           this.onKillState(data.kill_state.killed, data.kill_state.reason);
         }
+      } else if (response.status === 401 || response.status === 403) {
+        // Auth failure — log loudly, don't retry (key is wrong)
+        console.error(`[clawnitor] API key rejected (${response.status}). Check your apiKey in openclaw.json. Events are being dropped.`);
       } else if (response.status >= 500) {
         // Server error — cache for retry
         this.onFlushFail?.(batch);
+      } else {
+        // Other 4xx — log and drop
+        console.warn(`[clawnitor] Event send failed (${response.status}). Events dropped.`);
       }
-      // 4xx errors are dropped (bad data, auth issues)
-    } catch {
+    } catch (err) {
       // Network error — cache for retry
+      console.warn(`[clawnitor] Cannot reach ${this.config.backendUrl} — caching events for retry.`);
       this.onFlushFail?.(batch);
     }
   }

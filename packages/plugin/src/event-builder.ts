@@ -2,7 +2,15 @@ import { createEventId, type ClawnitorEvent, type EventType, type SeverityHint }
 import { assignSeverity, type RateTracker } from "./severity.js";
 import { redact, DEFAULT_PATTERNS } from "./redaction.js";
 
-const PLUGIN_VERSION = "0.0.1";
+import { readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+let PLUGIN_VERSION = "2.1.0";
+try {
+  const pkgPath = join(dirname(fileURLToPath(import.meta.url)), "..", "package.json");
+  PLUGIN_VERSION = JSON.parse(readFileSync(pkgPath, "utf-8")).version;
+} catch {}
 
 interface BuildEventParams {
   agentId: string;
