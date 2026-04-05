@@ -7,6 +7,7 @@ import { sendDiscordAlert } from "./discord.js";
 import { sendSmsAlert } from "./sms.js";
 import { fireCustomWebhooks } from "./webhook.js";
 import { TIER_FEATURES, type Tier } from "@clawnitor/shared";
+import { logger } from "../util/logger.js";
 
 interface AlertData {
   alertId: string;
@@ -57,27 +58,31 @@ export async function dispatchAlert(data: AlertData): Promise<void> {
       if (!ch.enabled) continue;
       const config = ch.config as Record<string, string>;
 
-      if (ch.channel === "telegram" && features.alertChannels.includes("telegram")) {
-        if (config.botToken && config.chatId) {
-          const sent = await sendTelegramAlert(config.botToken, config.chatId, alertPayload);
-          if (sent) deliveredChannels.push("telegram");
+      try {
+        if (ch.channel === "telegram" && features.alertChannels.includes("telegram")) {
+          if (config.botToken && config.chatId) {
+            const sent = await sendTelegramAlert(config.botToken, config.chatId, alertPayload);
+            if (sent) deliveredChannels.push("telegram");
+          }
         }
-      }
 
-      if (ch.channel === "discord" && features.alertChannels.includes("discord")) {
-        if (config.webhookUrl) {
-          const sent = await sendDiscordAlert(config.webhookUrl, alertPayload);
-          if (sent) deliveredChannels.push("discord");
+        if (ch.channel === "discord" && features.alertChannels.includes("discord")) {
+          if (config.webhookUrl) {
+            const sent = await sendDiscordAlert(config.webhookUrl, alertPayload);
+            if (sent) deliveredChannels.push("discord");
+          }
         }
-      }
 
-      if (ch.channel === "sms" && features.alertChannels.includes("sms")) {
-        if (config.accountSid && config.authToken && config.from && config.to) {
-          const sent = await sendSmsAlert(
-            config.accountSid, config.authToken, config.from, config.to, alertPayload
-          );
-          if (sent) deliveredChannels.push("sms");
+        if (ch.channel === "sms" && features.alertChannels.includes("sms")) {
+          if (config.accountSid && config.authToken && config.from && config.to) {
+            const sent = await sendSmsAlert(
+              config.accountSid, config.authToken, config.from, config.to, alertPayload
+            );
+            if (sent) deliveredChannels.push("sms");
+          }
         }
+      } catch (err) {
+        logger.error("Alert delivery failed for %s: %s", ch.channel, (err as Error).message);
       }
     }
   }

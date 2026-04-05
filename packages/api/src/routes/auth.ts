@@ -5,6 +5,7 @@ import { users, apiKeys } from "../db/schema.js";
 import { generateApiKey, hashApiKey } from "../auth/api-key.js";
 import { RateLimiter } from "../util/rate-limiter.js";
 import { getConfig } from "../config.js";
+import { logger } from "../util/logger.js";
 import { timingSafeEqual } from "node:crypto";
 import { Resend } from "resend";
 
@@ -40,7 +41,7 @@ async function sendWelcomeEmail(email: string) {
       ].join("\n"),
     });
   } catch (err) {
-    console.error("Failed to send welcome email:", (err as Error).message);
+    logger.error("Failed to send welcome email: %s", (err as Error).message);
   }
 }
 

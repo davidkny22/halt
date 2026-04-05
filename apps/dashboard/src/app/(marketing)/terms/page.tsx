@@ -7,13 +7,13 @@ export default function TermsPage() {
         ← Back to home
       </Link>
       <h1 className="text-3xl font-bold mb-2">Terms of Service</h1>
-      <p className="text-sm mb-8" style={{ color: "var(--color-text-tertiary)" }}>Last updated: March 18, 2026</p>
+      <p className="text-sm mb-8" style={{ color: "var(--color-text-tertiary)" }}>Last updated: March 21, 2026</p>
 
       <div className="flex flex-col gap-8 text-sm leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
 
         <section>
           <h2 className="text-lg font-semibold mb-3" style={{ color: "var(--color-text)" }}>1. The Service</h2>
-          <p>Clawnitor is an agent monitoring and safety tool for OpenClaw. It captures events, evaluates rules, detects anomalies, fires alerts, and provides a kill switch and auto-kill system to pause agent execution. The Service is provided by David Kogan (&quot;we&quot;, &quot;us&quot;, &quot;Clawnitor&quot;).</p>
+          <p>Clawnitor is an agent monitoring and safety tool for OpenClaw. It captures events, evaluates rules, detects anomalies, fires alerts, and provides a kill switch and auto-kill system to pause agent execution. The Service is provided by Clawnitor Inc., a subsidiary of Safer Intelligence Labs (&quot;we&quot;, &quot;us&quot;, &quot;Clawnitor&quot;).</p>
         </section>
 
         <section>
@@ -60,7 +60,11 @@ export default function TermsPage() {
             <li>Use the Service to facilitate fraud, hacking, harassment, or any illegal activity</li>
             <li>Configure rules intentionally to prevent legitimate safety shutdowns</li>
             <li>Generate excessive load on the Service, spam alerts, or abuse API rate limits</li>
-            <li>Reverse-engineer, decompile, or attempt to extract the source code of the Service</li>
+            <li>Reverse-engineer, decompile, disassemble, or attempt to derive the source code, non-public APIs, or underlying algorithms of the Service, except to the extent expressly permitted by applicable law</li>
+            <li>Access or use the Service for purposes of competitive analysis, the development or improvement of a competing product or service, or any other purpose that is to Clawnitor&apos;s detriment or commercial disadvantage</li>
+            <li>Copy, replicate, or create derivative works based on the Service&apos;s features, functionality, user interface, or design</li>
+            <li>Conduct benchmarking, performance testing, or comparative analysis of the Service for publication or competitive purposes without prior written consent</li>
+            <li>Use knowledge, insights, or information gained through access to the Service to develop, market, enhance, or inform a product or service that competes with the Service</li>
           </ul>
           <p className="mt-3">We reserve the right to monitor for violations and may cooperate with law enforcement regarding illegal activity.</p>
         </section>
@@ -93,8 +97,17 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold mb-3" style={{ color: "var(--color-text)" }}>9. Early Access &amp; Beta Features</h2>
+          <h2 className="text-lg font-semibold mb-3" style={{ color: "var(--color-text)" }}>9. Early Access, Beta &amp; Trial Programs</h2>
           <p>Clawnitor is under active development. Features may change, be modified, or be discontinued without notice. Free tier and beta features are provided without warranty and may have reduced availability or feature restrictions. Do not rely on beta features for critical safety decisions.</p>
+          <p className="mt-3"><strong style={{ color: "var(--color-text)" }}>Beta and trial participants additionally agree that:</strong></p>
+          <ul className="list-disc pl-6 mt-2 flex flex-col gap-1.5">
+            <li>Beta and trial access is provided solely for evaluation and use of the Service, not for competitive analysis or product development</li>
+            <li>You will not use information, insights, feature knowledge, or architectural understanding gained through beta or trial access to develop, enhance, inform, or contribute to any product or service that competes with Clawnitor</li>
+            <li>You will not share beta features, documentation, or non-public functionality with third parties without prior written consent</li>
+            <li>We may revoke beta or trial access at any time, for any reason, without notice or liability</li>
+            <li>These restrictions survive termination or expiration of your beta or trial access</li>
+          </ul>
+          <p className="mt-3">Violation of these beta terms constitutes grounds for immediate account termination and may result in legal action under the Governing Law provisions of these Terms.</p>
         </section>
 
         <section>
@@ -126,6 +139,7 @@ export default function TermsPage() {
           <p><strong style={{ color: "var(--color-text)" }}>By you:</strong> You may delete your account at any time from Settings. Upon deletion, all data is permanently removed within 30 days.</p>
           <p className="mt-2"><strong style={{ color: "var(--color-text)" }}>By us:</strong> We may suspend your account immediately if you violate the Acceptable Use Policy, use the Service to enable harmful agent behavior, attempt unauthorized access, or accumulate unpaid charges. We will notify you of suspension via email within 24 hours. Suspension becomes termination if not resolved within 7 days.</p>
           <p className="mt-2"><strong style={{ color: "var(--color-text)" }}>Upon termination:</strong> All data is deleted per the above timeline. No refund is issued for the current billing period. Outstanding charges remain due. You may appeal termination by emailing <a href="mailto:legal@clawnitor.io" style={{ color: "var(--color-coral)" }}>legal@clawnitor.io</a>.</p>
+          <p className="mt-2"><strong style={{ color: "var(--color-text)" }}>Survival:</strong> Sections 5 (Acceptable Use), 6 (Limitation of Liability), 7 (Intellectual Property), 9 (Beta Terms), 11 (Indemnification), and 13 (Governing Law) survive termination of your account or these Terms.</p>
         </section>
 
         <section>

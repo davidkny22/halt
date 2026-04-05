@@ -88,7 +88,7 @@ export async function buildApp() {
 
   // Seed rule templates on first startup
   seedRuleTemplates().catch((err) =>
-    console.error("Failed to seed rule templates:", err.message)
+    app.log.error("Failed to seed rule templates: %s", err.message)
   );
 
   // Health check
@@ -143,6 +143,7 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error("Failed to start server:", err);
+  // Logger not yet available at this point — stderr is fine
+  process.stderr.write(`Failed to start server: ${err}\n`);
   process.exit(1);
 });

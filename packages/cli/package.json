@@ -1,6 +1,6 @@
 {
   "name": "@clawnitor/cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI for Clawnitor — agent monitoring for OpenClaw. Authenticate, generate API keys, and configure from the terminal.",
   "type": "module",
   "bin": {
@@ -23,7 +23,7 @@
     "safety"
   ],
   "author": "David Kogan",
-  "license": "AGPL-3.0",
+  "license": "MIT",
   "homepage": "https://clawnitor.io",
   "repository": {
     "type": "git",

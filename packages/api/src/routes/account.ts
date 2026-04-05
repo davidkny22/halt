@@ -226,6 +226,10 @@ export async function accountRoutes(app: FastifyInstance) {
         return reply.status(400).send({ error: "Invalid channel" });
       }
 
+      if (config && JSON.stringify(config).length > 10_000) {
+        return reply.status(400).send({ error: "Config too large" });
+      }
+
       // Check if channel exists
       const [existing] = await db
         .select()

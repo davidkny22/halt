@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { eq, and, count } from "drizzle-orm";
+import { eq, and, count, sql } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import { rules, users } from "../db/schema.js";
 import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
@@ -60,12 +60,14 @@ export async function rulesRoutes(app: FastifyInstance) {
       const tierFeatures = TIER_FEATURES[tier];
 
       if (tier === "free") {
+        // Use FOR UPDATE to prevent race condition at tier limit
         const [{ value: ruleCount }] = await db
-          .select({ value: count() })
+          .select({ value: sql<number>`count(*)::int` })
           .from(rules)
-          .where(eq(rules.user_id, userId));
+          .where(eq(rules.user_id, userId))
+          .for("update");
 
-        if (ruleCount >= MAX_FREE_RULES) {
+        if (Number(ruleCount) >= MAX_FREE_RULES) {
           return reply.status(403).send({
             error: "Upgrade Required",
             message: `Free tier is limited to ${MAX_FREE_RULES} rules. Upgrade to Pro for unlimited rules.`,
@@ -163,6 +165,24 @@ export async function rulesRoutes(app: FastifyInstance) {
     handler: async (request, reply) => {
       const { id } = request.params as { id: string };
       const db = getDb();
+
+      // Guard: cannot delete Critical Shield rules
+      const [rule] = await db
+        .select()
+        .from(rules)
+        .where(and(eq(rules.id, id), eq(rules.user_id, request.userId!)));
+
+      if (!rule) {
+        return reply.status(404).send({ error: "Not Found", message: "Rule not found" });
+      }
+
+      const config = rule.config as any;
+      if (config?.is_shield && config?.shield_tier === "critical") {
+        return reply.status(403).send({
+          error: "Forbidden",
+          message: "Critical Shield rules cannot be deleted. You can disable them in settings.",
+        });
+      }
 
       const deleted = await db
         .delete(rules)

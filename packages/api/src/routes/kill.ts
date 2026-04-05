@@ -18,7 +18,8 @@ export async function killRoutes(app: FastifyInstance) {
         return reply.status(429).send({ error: "Too many requests" });
       }
       const { agentId } = request.params as { agentId: string };
-      const { reason } = (request.body as { reason?: string }) || {};
+      const rawReason = (request.body as { reason?: string })?.reason;
+      const reason = rawReason ? rawReason.slice(0, 500) : undefined;
       const db = getDb();
 
       // Check monthly kill limit for free tier
@@ -51,16 +52,34 @@ export async function killRoutes(app: FastifyInstance) {
         }
       }
 
+      // Read current agent + version for optimistic locking
+      const [current] = await db
+        .select()
+        .from(agents)
+        .where(and(eq(agents.id, agentId), eq(agents.user_id, request.userId!)));
+
+      if (!current) {
+        return reply.status(404).send({ error: "Not Found", message: "Agent not found" });
+      }
+
       const [agent] = await db
         .update(agents)
-        .set({ status: "paused", kill_reason: reason || "Killed via API" })
+        .set({
+          status: "paused",
+          kill_reason: reason || "Killed via API",
+          version: current.version + 1,
+        })
         .where(
-          and(eq(agents.id, agentId), eq(agents.user_id, request.userId!))
+          and(
+            eq(agents.id, agentId),
+            eq(agents.user_id, request.userId!),
+            eq(agents.version, current.version)
+          )
         )
         .returning();
 
       if (!agent) {
-        return reply.status(404).send({ error: "Not Found", message: "Agent not found" });
+        return reply.status(409).send({ error: "Conflict", message: "Agent state changed concurrently. Retry." });
       }
 
       // Mark active sessions for this agent as killed
@@ -107,16 +126,34 @@ export async function killRoutes(app: FastifyInstance) {
       const { agentId } = request.params as { agentId: string };
       const db = getDb();
 
+      // Read current agent + version for optimistic locking
+      const [current] = await db
+        .select()
+        .from(agents)
+        .where(and(eq(agents.id, agentId), eq(agents.user_id, request.userId!)));
+
+      if (!current) {
+        return reply.status(404).send({ error: "Not Found", message: "Agent not found" });
+      }
+
       const [agent] = await db
         .update(agents)
-        .set({ status: "active", kill_reason: null })
+        .set({
+          status: "active",
+          kill_reason: null,
+          version: current.version + 1,
+        })
         .where(
-          and(eq(agents.id, agentId), eq(agents.user_id, request.userId!))
+          and(
+            eq(agents.id, agentId),
+            eq(agents.user_id, request.userId!),
+            eq(agents.version, current.version)
+          )
         )
         .returning();
 
       if (!agent) {
-        return reply.status(404).send({ error: "Not Found", message: "Agent not found" });
+        return reply.status(409).send({ error: "Conflict", message: "Agent state changed concurrently. Retry." });
       }
 
       // Send unkill via WebSocket

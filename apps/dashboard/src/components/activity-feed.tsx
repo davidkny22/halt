@@ -181,6 +181,7 @@ export function ActivityFeed({ events }: { events: Event[] }) {
             const isBlocked = event.metadata?.blocked === true;
             const blockReason = event.metadata?.block_reason;
             const hasError = !!event.metadata?.error;
+            const isShield = event.metadata?.shield_detection === true;
 
             return (
               <div key={event.id}>
@@ -235,7 +236,15 @@ export function ActivityFeed({ events }: { events: Event[] }) {
                       {event.agent_name}
                     </span>
                   )}
-                  {isBlocked && (
+                  {isShield && (
+                    <span
+                      className="text-[11px] font-bold px-1.5 py-0.5 rounded shrink-0"
+                      style={{ backgroundColor: "#FF6B4A", color: "white" }}
+                    >
+                      SHIELD
+                    </span>
+                  )}
+                  {isBlocked && !isShield && (
                     <span
                       className="text-[11px] font-medium px-1.5 py-0.5 rounded shrink-0"
                       style={{ backgroundColor: "rgba(255, 107, 74, 0.15)", color: "var(--color-coral)" }}
@@ -403,6 +412,23 @@ export function ActivityFeed({ events }: { events: Event[] }) {
                           <span className="break-all" style={{ color: "var(--color-coral)" }}>
                             {event.metadata.block_reason || "Action blocked by Clawnitor"}
                           </span>
+                        </>
+                      )}
+
+                      {event.metadata?.shield_detection && (
+                        <>
+                          <span style={{ color: "#FF6B4A" }}>Shield</span>
+                          <span style={{ color: "var(--color-text-secondary)" }}>
+                            {event.metadata.shield_category} ({event.metadata.shield_severity})
+                          </span>
+                          {event.metadata.shield_patterns && (
+                            <>
+                              <span style={{ color: "var(--color-text-tertiary)" }}>Patterns</span>
+                              <span style={{ color: "var(--color-text-secondary)" }}>
+                                {event.metadata.shield_patterns.join(", ")}
+                              </span>
+                            </>
+                          )}
                         </>
                       )}
 

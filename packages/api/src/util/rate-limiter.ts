@@ -57,7 +57,8 @@ export class RateLimiter {
   private evict(): void {
     const now = Date.now();
     for (const [key, bucket] of this.buckets) {
-      if (bucket.tokens >= this.burst && now - bucket.lastRefill > STALE_THRESHOLD_MS) {
+      // Evict if idle for 5 minutes (regardless of token count)
+      if (now - bucket.lastRefill > STALE_THRESHOLD_MS) {
         this.buckets.delete(key);
       }
     }

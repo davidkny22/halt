@@ -10,10 +10,14 @@ export class IdempotencyChecker {
 
     this.seen.add(eventId);
 
-    // Evict oldest when set gets too large
+    // Evict batch when set gets too large (not just one)
     if (this.seen.size > MAX_SET_SIZE) {
-      const first = this.seen.values().next().value;
-      if (first) this.seen.delete(first);
+      const evictCount = Math.floor(MAX_SET_SIZE * 0.2); // Drop 20%
+      const iter = this.seen.values();
+      for (let i = 0; i < evictCount; i++) {
+        const val = iter.next().value;
+        if (val) this.seen.delete(val);
+      }
     }
 
     return false;

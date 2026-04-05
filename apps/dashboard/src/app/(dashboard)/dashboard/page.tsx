@@ -34,6 +34,7 @@ export default async function DashboardPage() {
   const lastEventAt = (stats as any)?.last_event_at;
   const spendTrend = (stats as any)?.spend_trend ?? 0;
   const dailySpend = (stats as any)?.daily_spend ?? [];
+  const shieldBlocks = (stats as any)?.shield_blocks_today ?? 0;
   const hasEvents = eventsData?.events && eventsData.events.length > 0;
   const byAgent = spendData?.by_agent ?? [];
   const byModel = spendData?.by_model ?? [];
@@ -90,6 +91,11 @@ export default async function DashboardPage() {
             value: (stats as any)?.errors_today ?? 0,
             color: ((stats as any)?.errors_today ?? 0) > 0 ? "var(--color-coral)" : undefined,
           },
+          ...(shieldBlocks > 0 ? [{
+            label: "Threats Blocked",
+            value: shieldBlocks,
+            color: "#FF6B4A",
+          }] : []),
         ].map((stat) => (
           <div
             key={stat.label}

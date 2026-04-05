@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const RULE_TYPES = ["threshold", "rate", "keyword", "nl"] as const;
+export const RULE_TYPES = ["threshold", "rate", "keyword", "nl", "injection"] as const;
 export type RuleType = (typeof RULE_TYPES)[number];
 
 export const thresholdConfigSchema = z.object({
@@ -35,11 +35,35 @@ export const nlConfigSchema = z.object({
 
 export type NLConfig = z.infer<typeof nlConfigSchema>;
 
+export const SHIELD_TIERS = ["critical", "high", "medium"] as const;
+export type ShieldTier = (typeof SHIELD_TIERS)[number];
+
+export const SHIELD_CATEGORIES = [
+  "destructive_commands",
+  "credential_exfiltration",
+  "instruction_overrides",
+  "system_prompt_manipulation",
+  "encoding_obfuscation",
+  "data_exfiltration",
+] as const;
+export type ShieldCategory = (typeof SHIELD_CATEGORIES)[number];
+
+export const injectionConfigSchema = z.object({
+  shield_tier: z.enum(SHIELD_TIERS),
+  categories: z.array(z.string()).min(1),
+  scan_outputs: z.boolean().default(true),
+  allowlist: z.array(z.string()).default([]),
+  is_shield: z.boolean().default(false),
+});
+
+export type InjectionConfig = z.infer<typeof injectionConfigSchema>;
+
 export const ruleConfigSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("threshold"), ...thresholdConfigSchema.shape }),
   z.object({ type: z.literal("rate"), ...rateConfigSchema.shape }),
   z.object({ type: z.literal("keyword"), ...keywordConfigSchema.shape }),
   z.object({ type: z.literal("nl"), ...nlConfigSchema.shape }),
+  z.object({ type: z.literal("injection"), ...injectionConfigSchema.shape }),
 ]);
 
 export type RuleConfig = z.infer<typeof ruleConfigSchema>;

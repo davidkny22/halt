@@ -3,11 +3,17 @@ import { eq, sql, desc } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import { pageViews } from "../db/schema.js";
 import { authenticateInternal } from "../auth/middleware.js";
+import { RateLimiter } from "../util/rate-limiter.js";
+
+const trackRateLimiter = new RateLimiter(100, 100); // 100 req/min per IP
 
 export async function analyticsRoutes(app: FastifyInstance) {
   // Track a page view (no auth — called from landing page)
   app.post("/api/track", {
     handler: async (request, reply) => {
+      if (!trackRateLimiter.consume(request.ip)) {
+        return reply.status(429).send({ error: "Too many requests" });
+      }
       const { path, referrer, user_agent, session_id, screen_width } =
         request.body as {
           path?: string;

@@ -24,6 +24,7 @@ export class OpenAIProvider implements AIProvider {
   async evaluate(systemPrompt: string, userPrompt: string): Promise<string> {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
+      signal: AbortSignal.timeout(30_000),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${this.apiKey}`,
@@ -51,6 +52,7 @@ export class OpenAIProvider implements AIProvider {
   async healthCheck(): Promise<void> {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
+      signal: AbortSignal.timeout(10_000),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${this.apiKey}`,

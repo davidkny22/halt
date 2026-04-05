@@ -1,3 +1,5 @@
+import { logger } from "../util/logger.js";
+
 interface DiscordAlertData {
   severity: string;
   agentName?: string;
@@ -39,7 +41,7 @@ export async function sendDiscordAlert(
     });
     return res.ok;
   } catch {
-    console.error("Discord alert failed");
+    logger.error("Discord alert failed");
     return false;
   }
 }

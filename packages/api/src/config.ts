@@ -33,7 +33,7 @@ export function getConfig(): Env {
   if (!_config) {
     const result = envSchema.safeParse(process.env);
     if (!result.success) {
-      console.error("Invalid environment variables:", result.error.format());
+      process.stderr.write(`Invalid environment variables: ${JSON.stringify(result.error.format())}\n`);
       process.exit(1);
     }
     _config = result.data;

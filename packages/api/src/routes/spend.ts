@@ -25,7 +25,7 @@ export async function spendRoutes(app: FastifyInstance) {
         .where(
           and(
             eq(events.user_id, userId),
-            sql`${events.timestamp} > now() - interval '${sql.raw(String(dayCount))} days'`
+            sql`${events.timestamp} > now() - interval '1 day' * ${dayCount}`
           )
         );
 
@@ -43,7 +43,7 @@ export async function spendRoutes(app: FastifyInstance) {
         .where(
           and(
             eq(events.user_id, userId),
-            sql`${events.timestamp} > now() - interval '${sql.raw(String(dayCount))} days'`
+            sql`${events.timestamp} > now() - interval '1 day' * ${dayCount}`
           )
         )
         .groupBy(events.agent_id, agents.name)
@@ -61,7 +61,7 @@ export async function spendRoutes(app: FastifyInstance) {
         .where(
           and(
             eq(events.user_id, userId),
-            sql`${events.timestamp} > now() - interval '${sql.raw(String(dayCount))} days'`
+            sql`${events.timestamp} > now() - interval '1 day' * ${dayCount}`
           )
         )
         .groupBy(sql`date_trunc('day', ${events.timestamp})`)
@@ -83,7 +83,7 @@ export async function spendRoutes(app: FastifyInstance) {
         .where(
           and(
             eq(events.user_id, userId),
-            sql`${events.timestamp} > now() - interval '${sql.raw(String(dayCount))} days'`
+            sql`${events.timestamp} > now() - interval '1 day' * ${dayCount}`
           )
         )
         .groupBy(events.session_id, agents.name)
@@ -108,7 +108,7 @@ export async function spendRoutes(app: FastifyInstance) {
         .where(
           and(
             eq(events.user_id, userId),
-            sql`${events.timestamp} > now() - interval '${sql.raw(String(dayCount))} days'`,
+            sql`${events.timestamp} > now() - interval '1 day' * ${dayCount}`,
             sql`(${events.metadata}->>'cost_usd') IS NOT NULL`
           )
         )
@@ -127,7 +127,7 @@ export async function spendRoutes(app: FastifyInstance) {
         .where(
           and(
             eq(events.user_id, userId),
-            sql`${events.timestamp} > now() - interval '${sql.raw(String(dayCount))} days'`,
+            sql`${events.timestamp} > now() - interval '1 day' * ${dayCount}`,
             sql`${events.metadata}->>'model' IS NOT NULL`
           )
         )
@@ -147,7 +147,7 @@ export async function spendRoutes(app: FastifyInstance) {
         .where(
           and(
             eq(events.user_id, userId),
-            sql`${events.timestamp} > now() - interval '${sql.raw(String(dayCount))} days'`,
+            sql`${events.timestamp} > now() - interval '1 day' * ${dayCount}`,
             sql`${events.metadata}->>'tool_name' IS NOT NULL`
           )
         )

@@ -111,6 +111,20 @@ export async function statsRoutes(app: FastifyInstance) {
           )
         );
 
+      // Shield blocks today
+      const [shieldResult] = await db
+        .select({
+          value: sql<number>`count(*)::int`,
+        })
+        .from(events)
+        .where(
+          and(
+            eq(events.user_id, userId),
+            gte(events.timestamp, todayStart),
+            sql`${events.metadata} @> '{"shield_detection": true, "blocked": true}'`
+          )
+        );
+
       // Last event timestamp
       const [lastEvent] = await db
         .select({ ts: events.timestamp })
@@ -139,6 +153,7 @@ export async function statsRoutes(app: FastifyInstance) {
           spend: Number(d.spend),
           events: Number(d.event_count),
         })),
+        shield_blocks_today: Number(shieldResult?.value || 0),
         last_event_at: lastEvent?.ts?.toISOString() || null,
       });
     },

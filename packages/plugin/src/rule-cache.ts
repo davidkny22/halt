@@ -1,4 +1,5 @@
 import type { PluginConfig } from "./config.js";
+import type { ShieldConfig } from "./shield/scanner.js";
 
 export interface CachedRule {
   id: string;
@@ -32,6 +33,7 @@ export class RuleCache {
   private fetchTimer: ReturnType<typeof setInterval> | null = null;
   private recentEvents: EventRecord[] = [];
   private readonly MAX_RECENT_EVENTS = 500;
+  private cachedShieldConfig: ShieldConfig | null = null;
 
   constructor(config: PluginConfig) {
     this.config = config;
@@ -61,6 +63,7 @@ export class RuleCache {
       if (res.ok) {
         const data = await res.json();
         this.rules = (data.rules || []).filter((r: CachedRule) => r.enabled);
+        this.cachedShieldConfig = null; // Rebuild on next getShieldConfig()
       }
     } catch {
       // Keep existing cached rules on fetch failure
@@ -90,6 +93,7 @@ export class RuleCache {
 
     for (const rule of this.rules) {
       if (rule.rule_type === "nl") continue; // Can't evaluate locally
+      if (rule.rule_type === "injection") continue; // Handled by Shield scanner
       if (rule.action_mode === "alert") continue; // Alert-only rules don't block
 
       const result = this.evaluateRule(rule, toolName, paramsStr);
@@ -215,5 +219,57 @@ export class RuleCache {
 
   getRuleCount(): number {
     return this.rules.length;
+  }
+
+  getShieldConfig(): ShieldConfig {
+    if (this.cachedShieldConfig) return this.cachedShieldConfig;
+    return this.buildShieldConfig();
+  }
+
+  private buildShieldConfig(): ShieldConfig {
+    const defaults: ShieldConfig = {
+      enabledCategories: [
+        "destructive_commands", "credential_exfiltration",
+        "instruction_overrides", "system_prompt_manipulation",
+        "encoding_obfuscation", "data_exfiltration",
+      ],
+      actionModes: { critical: "block", high: "block", medium: "alert" },
+      allowlist: [],
+      scanOutputs: true,
+    };
+
+    const shieldRules = this.rules.filter((r) => r.rule_type === "injection");
+    if (shieldRules.length === 0) return defaults;
+
+    const actionModes = { ...defaults.actionModes };
+    const enabledCategories = new Set<string>();
+    const allowlist = new Set<string>();
+    let scanOutputs = true;
+
+    for (const rule of shieldRules) {
+      if (!rule.enabled) continue;
+      const config = rule.config as any;
+      const tier = config?.shield_tier;
+      if (tier && rule.action_mode) {
+        actionModes[tier as keyof typeof actionModes] =
+          rule.action_mode === "both" ? "block" : (rule.action_mode as "block" | "alert");
+      }
+      if (config?.categories) {
+        for (const cat of config.categories) enabledCategories.add(cat);
+      }
+      if (config?.allowlist) {
+        for (const tool of config.allowlist) allowlist.add(tool);
+      }
+      if (config?.scan_outputs === false) scanOutputs = false;
+    }
+
+    this.cachedShieldConfig = {
+      enabledCategories: enabledCategories.size > 0 ? [...enabledCategories] : defaults.enabledCategories,
+      actionModes,
+      allowlist: [...allowlist],
+      scanOutputs,
+    };
+
+    return this.cachedShieldConfig;
   }
 }

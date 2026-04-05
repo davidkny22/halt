@@ -3,6 +3,7 @@ import type { Job } from "bullmq";
 import { getDb } from "../db/client.js";
 import { users, agents, events } from "../db/schema.js";
 import { eq, count, and, gte, sql } from "drizzle-orm";
+import { logger } from "../util/logger.js";
 import { getStripe, PRICE_IDS } from "../billing/stripe.js";
 
 export function startUsageSyncWorker() {
@@ -91,11 +92,7 @@ export function startUsageSyncWorker() {
           synced++;
         }
       } catch (err) {
-        console.error(
-          "Usage sync failed for user:",
-          user.id,
-          (err as Error).message
-        );
+        logger.error("Usage sync failed for user: %s %s", user.id, (err as Error).message);
       }
     }
 

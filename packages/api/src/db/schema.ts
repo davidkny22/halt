@@ -90,6 +90,7 @@ export const agents = pgTable("agents", {
   auto_kill_window_minutes: integer("auto_kill_window_minutes")
     .notNull()
     .default(10),
+  version: integer("version").notNull().default(1),
   created_at: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

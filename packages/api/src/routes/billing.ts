@@ -5,6 +5,7 @@ import { users } from "../db/schema.js";
 import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
 import { createCheckoutSession, createPortalSession, getStripe } from "../billing/stripe.js";
 import { getConfig } from "../config.js";
+import { seedShieldRules } from "../db/seed-shield.js";
 
 export async function billingRoutes(app: FastifyInstance) {
   app.post("/api/billing/checkout", {
@@ -102,6 +103,11 @@ export async function billingRoutes(app: FastifyInstance) {
                 updated_at: new Date(),
               })
               .where(eq(users.id, userId));
+
+            // Seed Shield rules for newly paid user
+            seedShieldRules(userId).catch((err) =>
+              request.log.error("Failed to seed Shield rules: %s", (err as Error).message)
+            );
           }
           break;
         }
@@ -119,7 +125,7 @@ export async function billingRoutes(app: FastifyInstance) {
         case "invoice.payment_failed": {
           // 7-day grace period — don't downgrade immediately
           // The subscription.deleted event handles actual cancellation
-          console.warn("Payment failed for customer:", event.data.object.customer);
+          request.log.warn("Payment failed for customer: %s", event.data.object.customer);
           break;
         }
       }

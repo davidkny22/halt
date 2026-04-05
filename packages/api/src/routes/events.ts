@@ -7,7 +7,7 @@ import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
 import { RateLimiter } from "../util/rate-limiter.js";
 import { IdempotencyChecker } from "../util/idempotency.js";
 import { createQueue } from "../jobs/queue.js";
-import { eq, and, desc, count } from "drizzle-orm";
+import { eq, and, desc, count, inArray, sql } from "drizzle-orm";
 
 const rateLimiter = new RateLimiter(1000, 1000);
 const idempotency = new IdempotencyChecker();
@@ -51,50 +51,50 @@ export async function eventsRoutes(app: FastifyInstance) {
         return reply.send({ accepted: 0, kill_state: { killed: false } });
       }
 
-      // Resolve agent DB IDs — find or auto-register agents
+      // Resolve agent DB IDs — batch lookup, then register unknowns
       const agentIdMap = new Map<string, string>();
-      for (const event of unique) {
-        if (!agentIdMap.has(event.agent_id)) {
-          const existing = await db
+      const uniqueAgentIds = [...new Set(unique.map((e) => e.agent_id))];
+
+      // Batch lookup all agents at once (eliminates N+1)
+      const existingAgents = uniqueAgentIds.length > 0
+        ? await db
             .select()
             .from(agents)
-            .where(
-              and(eq(agents.user_id, userId), eq(agents.agent_id, event.agent_id))
-            )
-            .limit(1);
+            .where(and(eq(agents.user_id, userId), inArray(agents.agent_id, uniqueAgentIds)))
+        : [];
 
-          if (existing.length > 0) {
-            agentIdMap.set(event.agent_id, existing[0].id);
-          } else {
-            // Auto-register unknown agents (with limit)
-            const [{ value: agentCount }] = await db
-              .select({ value: count() })
-              .from(agents)
-              .where(eq(agents.user_id, userId));
+      for (const agent of existingAgents) {
+        agentIdMap.set(agent.agent_id, agent.id);
+      }
 
-            if (agentCount >= 50) {
-              // Skip events from unregistered agents beyond limit
-              continue;
-            }
+      // Register unknown agents (single count query)
+      const unknownIds = uniqueAgentIds.filter((id) => !agentIdMap.has(id));
+      if (unknownIds.length > 0) {
+        const [{ value: agentCount }] = await db
+          .select({ value: count() })
+          .from(agents)
+          .where(eq(agents.user_id, userId));
 
-            const [newAgent] = await db
-              .insert(agents)
-              .values({
-                user_id: userId,
-                name: event.agent_id,
-                agent_id: event.agent_id,
-              })
-              .returning();
+        for (const agentExtId of unknownIds) {
+          if (Number(agentCount) + agentIdMap.size >= 50) break;
 
-            await db.insert(baselines).values({
+          const [newAgent] = await db
+            .insert(agents)
+            .values({
               user_id: userId,
-              agent_id: newAgent.id,
-              profile: {},
-              status: "learning",
-            });
+              name: agentExtId,
+              agent_id: agentExtId,
+            })
+            .returning();
 
-            agentIdMap.set(event.agent_id, newAgent.id);
-          }
+          await db.insert(baselines).values({
+            user_id: userId,
+            agent_id: newAgent.id,
+            profile: {},
+            status: "learning",
+          });
+
+          agentIdMap.set(agentExtId, newAgent.id);
         }
       }
 
@@ -135,13 +135,13 @@ export async function eventsRoutes(app: FastifyInstance) {
       for (const [sid, { agentDbId, events: sessionEvents }] of sessionMap) {
         const cost = sessionEvents.reduce((s, e) => s + (e.metadata?.cost_usd || 0), 0);
         const tokens = sessionEvents.reduce((s, e) => s + (e.metadata?.tokens_used || 0), 0);
-        const isStart = sessionEvents.some((e) => e.action === "session started");
         const isEnd = sessionEvents.some((e) => e.action === "session ended" || e.action === "agent ended");
         const duration = sessionEvents.find((e) => e.metadata?.duration_ms)?.metadata?.duration_ms;
 
-        const existing = await db.select().from(sessions).where(eq(sessions.id, sid)).limit(1);
-        if (existing.length === 0) {
-          await db.insert(sessions).values({
+        // Atomic UPSERT — no race condition
+        await db
+          .insert(sessions)
+          .values({
             id: sid,
             user_id: userId,
             agent_id: agentDbId,
@@ -153,21 +153,21 @@ export async function eventsRoutes(app: FastifyInstance) {
             total_cost: String(cost),
             total_tokens: tokens,
             metadata: { plugin_version: sessionEvents[0].plugin_version },
-          }).onConflictDoNothing();
-        } else {
-          const updates: Record<string, unknown> = {
-            event_count: (existing[0].event_count || 0) + sessionEvents.length,
-            total_cost: String(Number(existing[0].total_cost || 0) + cost),
-            total_tokens: (existing[0].total_tokens || 0) + tokens,
-            updated_at: new Date(),
-          };
-          if (isEnd) {
-            updates.status = "completed";
-            updates.ended_at = new Date(sessionEvents[sessionEvents.length - 1].timestamp);
-            if (duration) updates.duration_ms = Math.round(duration);
-          }
-          await db.update(sessions).set(updates).where(eq(sessions.id, sid));
-        }
+          })
+          .onConflictDoUpdate({
+            target: sessions.id,
+            set: {
+              event_count: sql`${sessions.event_count} + ${sessionEvents.length}`,
+              total_cost: sql`(${sessions.total_cost}::numeric + ${cost})::text`,
+              total_tokens: sql`${sessions.total_tokens} + ${tokens}`,
+              updated_at: new Date(),
+              ...(isEnd ? {
+                status: "completed" as const,
+                ended_at: new Date(sessionEvents[sessionEvents.length - 1].timestamp),
+                ...(duration ? { duration_ms: Math.round(duration) } : {}),
+              } : {}),
+            },
+          });
       }
 
       // Enqueue for processing (rule evaluation in Phase 2)

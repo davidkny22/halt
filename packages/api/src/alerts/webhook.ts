@@ -2,6 +2,7 @@ import { createHmac } from "node:crypto";
 import { getDb } from "../db/client.js";
 import { customWebhooks } from "../db/schema.js";
 import { eq, and } from "drizzle-orm";
+import { logger } from "../util/logger.js";
 
 // SSRF prevention — reject internal/private network URLs
 function isInternalUrl(urlStr: string): boolean {
@@ -108,7 +109,7 @@ export async function fireCustomWebhooks(
         })
         .where(eq(customWebhooks.id, webhook.id));
 
-      console.error("Webhook delivery failed:", webhook.url, (err as Error).message);
+      logger.error("Webhook delivery failed: %s %s", webhook.url, (err as Error).message);
     }
   }
 }

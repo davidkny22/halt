@@ -6,6 +6,8 @@ import { authenticateAny } from "../auth/middleware.js";
 import { z } from "zod";
 import { Resend } from "resend";
 import { getConfig } from "../config.js";
+import { logger } from "../util/logger.js";
+import { seedShieldRules } from "../db/seed-shield.js";
 
 const BETA_DURATION_MONTHS = 6;
 const EXTENDED_TRIAL_DAYS = 30;
@@ -54,7 +56,7 @@ async function sendBetaWelcomeEmail(email: string, expiresAt: Date, channel: str
       ].join("\n"),
     });
   } catch (err) {
-    console.error("Failed to send beta welcome email:", (err as Error).message);
+    logger.error("Failed to send beta welcome email: %s", (err as Error).message);
   }
 }
 
@@ -87,7 +89,7 @@ async function sendConsolationEmail(email: string, trialEndsAt: Date) {
       ].join("\n"),
     });
   } catch (err) {
-    console.error("Failed to send consolation email:", (err as Error).message);
+    logger.error("Failed to send consolation email: %s", (err as Error).message);
   }
 }
 
@@ -189,6 +191,11 @@ export async function betaRoutes(app: FastifyInstance) {
       }
 
       if (redeemResult.status === "ok") {
+        // Seed Shield rules for newly upgraded Pro user
+        seedShieldRules(userId).catch((err) =>
+          logger.error("Failed to seed Shield rules: %s", (err as Error).message)
+        );
+
         if (user.email) {
           sendBetaWelcomeEmail(user.email, redeemResult.expiresAt, redeemResult.invite.channel);
         }
@@ -273,6 +280,11 @@ export async function betaRoutes(app: FastifyInstance) {
           updated_at: new Date(),
         })
         .where(eq(users.id, userId));
+
+      // Seed Shield rules for trial user
+      seedShieldRules(userId).catch((err) =>
+        logger.error("Failed to seed Shield rules: %s", (err as Error).message)
+      );
 
       if (user.email) {
         sendConsolationEmail(user.email, trialEndsAt);

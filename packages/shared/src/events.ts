@@ -23,6 +23,10 @@ export const eventMetadataSchema = z.object({
   error: z.string().optional(),
   raw_snippet: z.string().max(500).optional(),
   subagent_id: z.string().optional(),
+  shield_detection: z.boolean().optional(),
+  shield_category: z.string().optional(),
+  shield_severity: z.string().optional(),
+  shield_patterns: z.array(z.string()).optional(),
 });
 
 export type EventMetadata = z.infer<typeof eventMetadataSchema>;

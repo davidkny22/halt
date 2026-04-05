@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { getConfig } from "../config.js";
+import { logger } from "../util/logger.js";
 
 let _resend: Resend | undefined;
 
@@ -27,7 +28,7 @@ export async function sendAlertEmail(
 ): Promise<boolean> {
   const resend = getResend();
   if (!resend) {
-    console.warn("Resend not configured — skipping email alert");
+    logger.warn("Resend not configured — skipping email alert");
     return false;
   }
 
@@ -50,7 +51,7 @@ export async function sendAlertEmail(
     });
     return true;
   } catch (err) {
-    console.error("Failed to send alert email:", (err as Error).message);
+    logger.error("Failed to send alert email: %s", (err as Error).message);
     return false;
   }
 }

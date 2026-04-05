@@ -1,3 +1,5 @@
+import { logger } from "../util/logger.js";
+
 interface TelegramAlertData {
   severity: string;
   agentName?: string;
@@ -33,7 +35,7 @@ export async function sendTelegramAlert(
     );
     return res.ok;
   } catch {
-    console.error("Telegram alert failed");
+    logger.error("Telegram alert failed");
     return false;
   }
 }

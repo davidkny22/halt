@@ -1,4 +1,5 @@
 import twilio from "twilio";
+import { logger } from "../util/logger.js";
 
 interface SmsAlertData {
   severity: string;
@@ -26,7 +27,7 @@ export async function sendSmsAlert(
     });
     return true;
   } catch {
-    console.error("SMS alert failed");
+    logger.error("SMS alert failed");
     return false;
   }
 }

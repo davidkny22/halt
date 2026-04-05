@@ -3,6 +3,7 @@ import { eq, and, desc, count } from "drizzle-orm";
 import { z } from "zod";
 import { randomBytes, createCipheriv, createDecipheriv } from "node:crypto";
 import { getDb } from "../db/client.js";
+import { logger } from "../util/logger.js";
 import {
   auditLogs,
   customWebhooks,
@@ -73,7 +74,7 @@ function decrypt(encrypted: string): string {
     decrypted += decipher.final("utf8");
     return decrypted;
   } catch {
-    console.error("SSO secret decryption failed");
+    logger.error("SSO secret decryption failed");
     return "";
   }
 }

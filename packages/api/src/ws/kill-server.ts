@@ -43,12 +43,14 @@ export async function killServerRoutes(app: FastifyInstance) {
 
         // First message must be the API key
         try {
-          const parsed = JSON.parse(msg);
-          const apiKey = parsed.apiKey || parsed.key || msg;
-          userId = await authenticateWs(typeof apiKey === "string" ? apiKey : "");
+          let apiKey = msg.trim();
+          try {
+            const parsed = JSON.parse(msg);
+            apiKey = typeof parsed.apiKey === "string" ? parsed.apiKey : apiKey;
+          } catch {}
+          userId = await authenticateWs(apiKey);
         } catch {
-          // If not JSON, treat the entire message as the API key
-          userId = await authenticateWs(msg.trim());
+          userId = null;
         }
 
         if (!userId) {

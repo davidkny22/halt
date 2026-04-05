@@ -108,7 +108,7 @@ Fastify, Drizzle ORM, PostgreSQL, BullMQ, Redis, Next.js 15, Tailwind CSS, Auth.
 
 ## License
 
-[BSL 1.1](LICENSE) — source-available, converts to AGPL-3.0. Plugin is [AGPL-3.0](https://github.com/davidkny22/clawnitor-plugin/blob/main/LICENSE) (open source).
+[BSL 1.1](LICENSE) — source-available, converts to AGPL-3.0. Client packages (plugin, shared, CLI) are [MIT](https://github.com/davidkny22/clawnitor-plugin/blob/main/LICENSE).
 
 ---
 

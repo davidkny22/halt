@@ -28,6 +28,7 @@ export class GeminiProvider implements AIProvider {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(30_000),
       body: JSON.stringify({
         system_instruction: { parts: [{ text: systemPrompt }] },
         contents: [{ parts: [{ text: userPrompt }] }],
@@ -54,6 +55,7 @@ export class GeminiProvider implements AIProvider {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(10_000),
       body: JSON.stringify({
         contents: [{ parts: [{ text: "ping" }] }],
         generationConfig: { maxOutputTokens: 5 },

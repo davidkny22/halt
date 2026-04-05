@@ -5,6 +5,7 @@ import { killState } from "../kill-switch/kill-state.js";
 import type { LocalFailsafe } from "../kill-switch/local-failsafe.js";
 import type { RuleCache } from "../rule-cache.js";
 import type { ViolationTracker } from "../auto-kill.js";
+import type { ShieldScanner } from "../shield/scanner.js";
 import { getSubagentInfo } from "../subagent-context.js";
 
 interface ToolCallContext {
@@ -16,6 +17,7 @@ interface ToolCallContext {
   failsafe: LocalFailsafe;
   ruleCache: RuleCache;
   violationTracker: ViolationTracker;
+  shieldScanner: ShieldScanner;
 }
 
 export function createBeforeToolCallHandler(ctx: ToolCallContext) {
@@ -101,7 +103,50 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
       return { block: true, blockReason: failsafeResult.reason };
     }
 
-    // 3. Check cached server rules locally (PRE-ACTION for pattern rules)
+    // 3. Shield input scan (injection detection)
+    const shieldConfig = ctx.ruleCache.getShieldConfig();
+    ctx.shieldScanner.updateConfig(shieldConfig);
+    const shieldResult = ctx.shieldScanner.scanInput(toolName, event.params);
+    if (shieldResult.detected) {
+      const shieldReason = `Clawnitor Shield: ${shieldResult.detections[0]?.description || "injection detected"} [${shieldResult.highestSeverity}]`;
+
+      if (shieldResult.shouldBlock) {
+        captureBlocked(shieldReason, `shield:${shieldResult.highestSeverity}`);
+
+        // Record violation for auto-kill
+        ctx.violationTracker.recordViolation({
+          ruleId: `shield:${shieldResult.highestSeverity}`,
+          ruleName: `Shield: ${shieldResult.highestSeverity}`,
+          timestamp: Date.now(),
+          action: toolName,
+          target: toolName,
+        });
+
+        return { block: true, blockReason: shieldReason };
+      } else {
+        // Alert-only: send shield event but don't block
+        const alertEvent = buildEvent({
+          agentId: ctx.agentId,
+          sessionId: sub.sessionId,
+          eventType: "tool_use",
+          action: `SHIELD: ${toolName}${paramHint}`,
+          target: toolName,
+          metadata: {
+            tool_name: toolName,
+            shield_detection: true,
+            shield_category: shieldResult.detections[0]?.category,
+            shield_severity: shieldResult.highestSeverity,
+            shield_patterns: shieldResult.detections.map((d) => d.patternName),
+            ...(sub.subagentId ? { subagent_id: sub.subagentId } : {}),
+          } as any,
+          rateTracker: ctx.rateTracker,
+          customRedactionPatterns: ctx.redactionPatterns,
+        });
+        ctx.sender.enqueue(alertEvent);
+      }
+    }
+
+    // 4. Check cached server rules locally (PRE-ACTION for pattern rules)
     const ruleResult = ctx.ruleCache.checkBeforeToolCall(
       event.toolName || "",
       event.params
@@ -146,6 +191,39 @@ export function createAfterToolCallHandler(ctx: ToolCallContext) {
     }
 
     const afterToolName = event.toolName || "unknown";
+
+    // Shield output scan — detect indirect injection in tool results
+    const outputResult = ctx.shieldScanner.scanOutput(afterToolName, event.result);
+    if (outputResult.detected) {
+      const alertEvent = buildEvent({
+        agentId: ctx.agentId,
+        sessionId: sub.sessionId,
+        eventType: "tool_use",
+        action: `SHIELD: output injection in ${afterToolName}`,
+        target: afterToolName,
+        metadata: {
+          tool_name: afterToolName,
+          shield_detection: true,
+          shield_category: outputResult.detections[0]?.category,
+          shield_severity: outputResult.highestSeverity,
+          shield_patterns: outputResult.detections.map((d) => d.patternName),
+          block_source: "shield:output",
+          ...(sub.subagentId ? { subagent_id: sub.subagentId } : {}),
+        } as any,
+        rateTracker: ctx.rateTracker,
+        customRedactionPatterns: ctx.redactionPatterns,
+      });
+      ctx.sender.enqueue(alertEvent);
+
+      // Record violation for auto-kill escalation
+      ctx.violationTracker.recordViolation({
+        ruleId: `shield:output:${outputResult.highestSeverity}`,
+        ruleName: `Shield: output ${outputResult.highestSeverity}`,
+        timestamp: Date.now(),
+        action: afterToolName,
+        target: afterToolName,
+      });
+    }
 
     const clawnitorEvent = buildEvent({
       agentId: ctx.agentId,

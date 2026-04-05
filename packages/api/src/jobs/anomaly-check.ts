@@ -9,13 +9,14 @@ import { sendKill } from "../ws/kill-server.js";
 import { ANOMALY_CHECK_INTERVAL_MINUTES, TIER_FEATURES } from "@clawnitor/shared";
 import type { BaselineProfile } from "../ai/baseline-builder.js";
 import { createQueue } from "./queue.js";
+import { logger } from "../util/logger.js";
 
 export function startAnomalyCheckWorker() {
   const alertQueue = createQueue("alerts");
 
   return createWorker("anomaly-check", async (job: Job) => {
     if (isDegraded()) {
-      console.warn("Skipping anomaly check — AI provider degraded");
+      logger.warn("Skipping anomaly check — AI provider degraded");
       return { skipped: true };
     }
 

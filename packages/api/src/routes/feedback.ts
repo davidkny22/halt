@@ -3,6 +3,7 @@ import { eq, desc } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import { feedback } from "../db/schema.js";
 import { authenticateAny, authenticateInternal } from "../auth/middleware.js";
+import { logger } from "../util/logger.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 
@@ -65,7 +66,7 @@ async function categorizeFeedback(message: string): Promise<{ category: string; 
     });
 
     if (!res.ok) {
-      console.error("GPT-5-mini categorization failed:", res.status);
+      logger.error("GPT-5-mini categorization failed: %d", res.status);
       return { category: "other", sentiment: "neutral", summary: message.slice(0, 100), reply: "Thanks! We got your feedback." };
     }
 
@@ -79,7 +80,7 @@ async function categorizeFeedback(message: string): Promise<{ category: string; 
       reply: parsed.reply || "Thanks! We got your feedback.",
     };
   } catch (err) {
-    console.error("Feedback categorization error:", (err as Error).message);
+    logger.error("Feedback categorization error: %s", (err as Error).message);
     return { category: "other", sentiment: "neutral", summary: message.slice(0, 100), reply: "Thanks! We got your feedback." };
   }
 }

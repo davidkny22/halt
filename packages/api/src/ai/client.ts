@@ -16,6 +16,7 @@ import { AnthropicProvider } from "./providers/anthropic.js";
 import { OpenAIProvider } from "./providers/openai.js";
 import { GeminiProvider } from "./providers/gemini.js";
 import { GroqProvider } from "./providers/groq.js";
+import { logger } from "../util/logger.js";
 
 let _primary: AIProvider | undefined;
 let _fallback: AIProvider | undefined;
@@ -47,7 +48,7 @@ function getPrimary(): AIProvider | null {
   const name = (process.env.AI_PROVIDER || "gemini") as ProviderName;
   try {
     _primary = createProvider(name);
-    console.info("AI primary provider initialized: %s", _primary.name);
+    logger.info("AI primary provider initialized: %s", _primary.name);
     return _primary;
   } catch {
     return null;
@@ -62,7 +63,7 @@ function getFallback(): AIProvider | null {
   if (primary && primary.name === name) return null;
   try {
     _fallback = createProvider(name);
-    console.info("AI fallback provider initialized: %s", _fallback.name);
+    logger.info("AI fallback provider initialized: %s", _fallback.name);
     return _fallback;
   } catch {
     return null;
@@ -125,7 +126,7 @@ function startHealthCheck() {
         clearInterval(_healthCheckTimer);
         _healthCheckTimer = null;
       }
-      console.info("AI primary provider %s recovered", primary.name);
+      logger.info("AI primary provider %s recovered", primary.name);
     } catch {
       // Primary still down
     }
@@ -136,7 +137,7 @@ function markFailure(provider: AIProvider) {
   _consecutiveFailures++;
   if (_consecutiveFailures >= MAX_CONSECUTIVE_FAILURES && !_primaryDegraded) {
     _primaryDegraded = true;
-    console.warn(
+    logger.warn(
       "AI primary provider %s degraded after %d failures, switching to fallback",
       provider.name,
       _consecutiveFailures
@@ -147,7 +148,7 @@ function markFailure(provider: AIProvider) {
   // If already on fallback and failing, mark everything degraded
   if (_primaryDegraded && _consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
     _allDegraded = true;
-    console.warn("AI fallback provider also degraded — all AI unavailable");
+    logger.warn("AI fallback provider also degraded — all AI unavailable");
     startHealthCheck();
   }
 }
@@ -174,7 +175,7 @@ export async function evaluate(
     return response;
   } catch (err) {
     markFailure(provider);
-    console.error("AI provider error: %s %s", provider.name, (err as Error).message);
+    logger.error("AI provider error: %s %s", provider.name, (err as Error).message);
 
     // If we just switched to fallback, retry immediately on fallback
     if (_primaryDegraded && !_allDegraded) {
@@ -183,11 +184,11 @@ export async function evaluate(
         try {
           const response = await fallback.evaluate(systemPrompt, userPrompt);
           markSuccess();
-          console.info("AI failover to %s succeeded", fallback.name);
+          logger.info("AI failover to %s succeeded", fallback.name);
           return response;
         } catch (fallbackErr) {
           markFailure(fallback);
-          console.error("AI fallback error: %s %s", fallback.name, (fallbackErr as Error).message);
+          logger.error("AI fallback error: %s %s", fallback.name, (fallbackErr as Error).message);
         }
       }
     }

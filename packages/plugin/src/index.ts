@@ -7,6 +7,7 @@ import { killState } from "./kill-switch/kill-state.js";
 import { LocalFailsafe } from "./kill-switch/local-failsafe.js";
 import { RuleCache } from "./rule-cache.js";
 import { ViolationTracker } from "./auto-kill.js";
+import { ShieldScanner } from "./shield/scanner.js";
 import {
   createBeforeToolCallHandler,
   createAfterToolCallHandler,
@@ -115,6 +116,7 @@ export default function register(api: any) {
     failsafe,
     ruleCache,
     violationTracker,
+    shieldScanner: new ShieldScanner(),
   };
 
   // Register hooks

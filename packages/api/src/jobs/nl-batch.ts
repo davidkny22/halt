@@ -2,28 +2,29 @@ import { createQueue, createWorker } from "./queue.js";
 import type { Job } from "bullmq";
 import { getDb } from "../db/client.js";
 import { rules, events, alerts, users } from "../db/schema.js";
-import { eq, and, gte, desc } from "drizzle-orm";
+import { eq, and, gte, desc, sql } from "drizzle-orm";
 import { evaluateNLRule } from "../rules/nl-evaluator.js";
 import { isDegraded } from "../ai/client.js";
 import { TIER_FEATURES, type Tier } from "@clawnitor/shared";
+import { logger } from "../util/logger.js";
 
 export function startNLBatchWorker() {
   const alertQueue = createQueue("alerts");
 
   return createWorker("nl-eval", async (job: Job) => {
     if (isDegraded()) {
-      console.warn("Skipping NL evaluation — AI provider degraded");
+      logger.warn("Skipping NL evaluation — AI provider degraded");
       return { skipped: true };
     }
 
     const db = getDb();
 
-    // Find all paid users with NL rules
-    const allUsers = await db.select().from(users);
-    const paidUsers = allUsers.filter((u) => {
-      const tier = u.tier as Tier;
-      return TIER_FEATURES[tier].nlRules;
-    });
+    // Find paid users with NL rules (avoid full table scan)
+    // Tier values are hardcoded from our own constants, not user input
+    const paidUsers = await db
+      .select()
+      .from(users)
+      .where(sql`${users.tier} IN ('paid', 'trial', 'team', 'enterprise')`);
 
     let totalEvaluated = 0;
 

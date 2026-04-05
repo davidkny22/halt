@@ -1,7 +1,37 @@
 import { getDb } from "./client.js";
 import { ruleTemplates } from "./schema.js";
+import { logger } from "../util/logger.js";
 
 const TEMPLATES = [
+  // ── Security (Shield) ─────────────────────────────────
+  {
+    name: "Shield: Critical Threats",
+    description: "Blocks destructive commands (rm -rf, DROP TABLE) and credential exfiltration (API keys, tokens, secrets). Powered by Clawnitor Shield.",
+    category: "security",
+    severity: "critical",
+    rule_type: "injection",
+    config: { type: "injection", shield_tier: "critical", categories: ["destructive_commands", "credential_exfiltration"], scan_outputs: true, is_shield: true, allowlist: [] },
+    agent_visible: false,
+  },
+  {
+    name: "Shield: Injection Detection",
+    description: "Blocks prompt injection attempts — instruction overrides, system prompt manipulation, jailbreaks, stealth patterns. Powered by Clawnitor Shield.",
+    category: "security",
+    severity: "high",
+    rule_type: "injection",
+    config: { type: "injection", shield_tier: "high", categories: ["instruction_overrides", "system_prompt_manipulation"], scan_outputs: true, is_shield: true, allowlist: [] },
+    agent_visible: false,
+  },
+  {
+    name: "Shield: Suspicious Patterns",
+    description: "Alerts on encoding tricks (zero-width chars, homoglyphs), data exfiltration (PII in outputs, credential leaks), and obfuscation. Powered by Clawnitor Shield.",
+    category: "security",
+    severity: "medium",
+    rule_type: "injection",
+    config: { type: "injection", shield_tier: "medium", categories: ["encoding_obfuscation", "data_exfiltration"], scan_outputs: true, is_shield: true, allowlist: [] },
+    agent_visible: false,
+  },
+
   // ── Safety ──────────────────────────────────────────
   {
     name: "Block destructive commands",
@@ -197,10 +227,10 @@ export async function seedRuleTemplates() {
   // Check if templates already exist
   const existing = await db.select().from(ruleTemplates).limit(1);
   if (existing.length > 0) {
-    console.log("Rule templates already seeded, skipping.");
+    logger.info("Rule templates already seeded, skipping.");
     return;
   }
 
   await db.insert(ruleTemplates).values(TEMPLATES);
-  console.log(`Seeded ${TEMPLATES.length} rule templates.`);
+  logger.info("Seeded %d rule templates.", TEMPLATES.length);
 }

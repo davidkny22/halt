@@ -199,13 +199,29 @@ export async function teamsRoutes(app: FastifyInstance) {
         })
         .returning();
 
-      // TODO: Send invite email via Resend
+      // Send invite email via Resend
+      try {
+        const { Resend } = await import("resend");
+        const resendKey = process.env.RESEND_API_KEY;
+        if (resendKey) {
+          const resend = new Resend(resendKey);
+          const inviteUrl = `https://app.clawnitor.io/team?invite=${token}`;
+          await resend.emails.send({
+            from: "Clawnitor <login@clawnitor.io>",
+            to: parsed.data.email,
+            subject: "You've been invited to a Clawnitor team",
+            html: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto"><h2 style="color:#FF6B4A">You're invited to join a team on Clawnitor</h2><p>You've been invited as <strong>${parsed.data.role}</strong> to a team on Clawnitor — agent monitoring and safety for OpenClaw.</p><p><a href="${inviteUrl}" style="display:inline-block;background:#FF6B4A;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">Accept Invite</a></p><p style="color:#888;font-size:12px">This invite expires in 7 days.</p></div>`,
+          });
+        }
+      } catch (err) {
+        request.log.error("Failed to send team invite email: %s", (err as Error).message);
+      }
 
       return reply.status(201).send({
         invite_id: invite.id,
         email: parsed.data.email,
         expires_at: expiresAt,
-        invite_url: `https://clawnitor.io/invite/${token}`,
+        invite_url: `https://app.clawnitor.io/team?invite=${token}`,
       });
     },
   });

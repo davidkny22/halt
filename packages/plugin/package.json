@@ -1,7 +1,7 @@
 {
   "name": "@clawnitor/plugin",
-  "version": "1.1.0",
-  "description": "OpenClaw plugin for Clawnitor — agent monitoring, alerting, and kill switch",
+  "version": "1.2.2",
+  "description": "Clawnitor plugin for OpenClaw — agent monitoring, alerting, and kill switch",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -32,7 +32,7 @@
     "observability"
   ],
   "author": "David Kogan <davidkny22@gmail.com>",
-  "license": "AGPL-3.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/davidkny22/clawnitor-plugin.git"
