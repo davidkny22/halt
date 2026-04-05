@@ -3,7 +3,7 @@ import { eq, and, count, sql } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import { rules, users, agents } from "../db/schema.js";
 import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
-import { ruleConfigSchema, MAX_FREE_RULES, TIER_FEATURES, type Tier } from "@clawnitor/shared";
+import { ruleConfigSchema, MAX_FREE_RULES, TIER_FEATURES, type Tier } from "@halt/shared";
 import { z } from "zod";
 import { logAudit } from "./enterprise.js";
 

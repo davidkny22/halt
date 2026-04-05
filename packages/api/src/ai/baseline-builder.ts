@@ -1,5 +1,5 @@
-import type { ClawnitorEvent } from "@clawnitor/shared";
-import { BASELINE_LEARNING_HOURS } from "@clawnitor/shared";
+import type { HaltEvent } from "@halt/shared";
+import { BASELINE_LEARNING_HOURS } from "@halt/shared";
 
 export interface BaselineProfile {
   toolDistribution: Record<string, number>;
@@ -11,7 +11,7 @@ export interface BaselineProfile {
   activeHours: number[]; // 0-23 histogram
 }
 
-export function buildProfile(events: ClawnitorEvent[]): BaselineProfile {
+export function buildProfile(events: HaltEvent[]): BaselineProfile {
   const toolCounts: Record<string, number> = {};
   const typeCounts: Record<string, number> = {};
   const hourCounts = new Array(24).fill(0);

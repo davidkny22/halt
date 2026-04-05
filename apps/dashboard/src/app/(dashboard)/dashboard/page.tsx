@@ -60,7 +60,7 @@ export default async function DashboardPage() {
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
           <span className="text-sm font-medium" style={{ color: "var(--color-green)" }}>
-            Clawnitor has blocked {savesCount} harmful {savesCount === 1 ? "action" : "actions"}
+            Halt has blocked {savesCount} harmful {savesCount === 1 ? "action" : "actions"}
           </span>
           <span className="ml-auto text-xs" style={{ color: "var(--color-text-tertiary)" }}>
             View all
@@ -122,16 +122,16 @@ export default async function DashboardPage() {
           className="rounded-lg p-8 text-center"
           style={{ border: "1px solid var(--color-border)" }}
         >
-          <h2 className="text-lg font-semibold mb-2">Welcome to Clawnitor!</h2>
+          <h2 className="text-lg font-semibold mb-2">Welcome to Halt!</h2>
           <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
             Two commands to start monitoring your OpenClaw agents.
           </p>
           <div className="max-w-md mx-auto flex flex-col gap-3">
-            <CopyBlock text="openclaw plugins install @clawnitor/plugin" />
-            <CopyBlock text="npx clawnitor init" />
+            <CopyBlock text="openclaw plugins install @halt/plugin" />
+            <CopyBlock text="npx halt init" />
           </div>
           <p className="text-xs mt-4" style={{ color: "var(--color-text-tertiary)" }}>
-            <code style={{ fontFamily: "var(--font-mono)" }}>clawnitor init</code> handles authentication and API key setup.
+            <code style={{ fontFamily: "var(--font-mono)" }}>halt init</code> handles authentication and API key setup.
           </p>
         </div>
       ) : (

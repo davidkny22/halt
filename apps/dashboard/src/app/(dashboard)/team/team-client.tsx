@@ -161,7 +161,7 @@ export function TeamClient({
           <StatsRow stats={teamStats} />
           {agents.length === 0 ? (
             <div className="rounded-lg p-6 text-center text-sm" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
-              No agents yet. Team agents appear when members install the Clawnitor plugin.
+              No agents yet. Team agents appear when members install the Halt plugin.
             </div>
           ) : (
             <div className="rounded-lg" style={{ border: "1px solid var(--color-border)" }}>

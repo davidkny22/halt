@@ -1,4 +1,4 @@
-import type { EventType, SeverityHint } from "@clawnitor/shared";
+import type { EventType, SeverityHint } from "@halt/shared";
 
 export interface RateTracker {
   getRate(): number; // calls per minute over last 5 minutes

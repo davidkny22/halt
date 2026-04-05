@@ -149,7 +149,7 @@ export default function DocsPage() {
           <Link href="/pricing">Pricing</Link>
           <ThemeToggle />
           <Link
-            href="https://app.clawnitor.io/signup"
+            href="https://app.halt.dev/signup"
             className="font-semibold px-4 py-1.5 rounded-lg text-white"
             style={{ backgroundColor: "var(--color-coral)" }}
           >
@@ -177,7 +177,7 @@ export default function DocsPage() {
 
         {/* Content */}
         <main className="flex-1 min-w-0">
-          <h1 className="text-3xl font-bold mb-2">Clawnitor Documentation</h1>
+          <h1 className="text-3xl font-bold mb-2">Halt Documentation</h1>
           <P>
             Agent monitoring, smart rules, and a kill switch for OpenClaw.
             One plugin. Total control.
@@ -188,17 +188,17 @@ export default function DocsPage() {
           <P>Get from zero to monitored in under 2 minutes.</P>
 
           <SubHeader>1. Install the plugin</SubHeader>
-          <CodeBlock title="Terminal">{`openclaw plugins install @clawnitor/plugin`}</CodeBlock>
+          <CodeBlock title="Terminal">{`openclaw plugins install @halt/plugin`}</CodeBlock>
 
           <SubHeader>2. Set up (one command)</SubHeader>
-          <CodeBlock title="Terminal">{`npx clawnitor init`}</CodeBlock>
+          <CodeBlock title="Terminal">{`npx halt init`}</CodeBlock>
           <P>
-            This handles authentication, API key generation, and config in one command. Or manually: sign up at <a href="https://app.clawnitor.io/signup" style={{ color: "var(--color-coral)" }}>app.clawnitor.io</a>, copy your API key, and add it to your <Code>openclaw.json</Code>:
+            This handles authentication, API key generation, and config in one command. Or manually: sign up at <a href="https://app.halt.dev/signup" style={{ color: "var(--color-coral)" }}>app.halt.dev</a>, copy your API key, and add it to your <Code>openclaw.json</Code>:
           </P>
           <CodeBlock title="openclaw.json">{`{
   "plugins": {
     "entries": {
-      "clawnitor": {
+      "halt": {
         "config": {
           "apiKey": "clw_live_your_key_here"
         }
@@ -209,14 +209,14 @@ export default function DocsPage() {
 
           <SubHeader>3. Agents are auto-discovered</SubHeader>
           <P>
-            When the plugin starts, it reads your <Code>openclaw.json</Code> and registers all agents with Clawnitor. They appear on your{" "}
-            <a href="https://app.clawnitor.io/agents" style={{ color: "var(--color-coral)" }}>agents page</a> as
+            When the plugin starts, it reads your <Code>openclaw.json</Code> and registers all agents with Halt. They appear on your{" "}
+            <a href="https://app.halt.dev/agents" style={{ color: "var(--color-coral)" }}>agents page</a> as
             &ldquo;discovered&rdquo; — activate the ones you want to monitor.
           </P>
           <P>
             To register agents before running them:
           </P>
-          <CodeBlock title="Terminal">{`npx clawnitor discover`}</CodeBlock>
+          <CodeBlock title="Terminal">{`npx halt discover`}</CodeBlock>
 
           {/* ═══════════════ CONFIGURATION ═══════════════ */}
           <SectionHeader id="configuration">Configuration</SectionHeader>
@@ -227,9 +227,9 @@ export default function DocsPage() {
             style={{ border: "1px solid var(--color-border)" }}
           >
             <ConfigRow name="apiKey" type="string" def="required">
-              Your Clawnitor API key. Starts with <Code>clw_live_</Code>.
+              Your Halt API key. Starts with <Code>clw_live_</Code>.
             </ConfigRow>
-            <ConfigRow name="backendUrl" type="string" def="https://api.clawnitor.io">
+            <ConfigRow name="backendUrl" type="string" def="https://api.halt.dev">
               Backend API endpoint. Override for self-hosted or development.
             </ConfigRow>
             <ConfigRow name="spendLimit" type="number" def="100">
@@ -249,7 +249,7 @@ export default function DocsPage() {
           <CodeBlock title="Full example — openclaw.json">{`{
   "plugins": {
     "entries": {
-      "clawnitor": {
+      "halt": {
         "config": {
           "apiKey": "clw_live_abc123",
           "spendLimit": 50,
@@ -264,7 +264,7 @@ export default function DocsPage() {
 
           {/* ═══════════════ EVENT MONITORING ═══════════════ */}
           <SectionHeader id="monitoring">Event Monitoring</SectionHeader>
-          <P>Clawnitor captures every action your agent takes through OpenClaw&apos;s hooks system.</P>
+          <P>Halt captures every action your agent takes through OpenClaw&apos;s hooks system.</P>
 
           <SubHeader>Event types</SubHeader>
           <div
@@ -427,7 +427,7 @@ export default function DocsPage() {
           {/* ═══════════════ ANOMALY DETECTION ═══════════════ */}
           <SectionHeader id="anomaly" badge="Pro">Anomaly Detection</SectionHeader>
           <P>
-            Clawnitor builds a 72-hour behavioral baseline for each agent — typical event rates, tool usage
+            Halt builds a 72-hour behavioral baseline for each agent — typical event rates, tool usage
             patterns, cost per session. After the learning period, it flags deviations automatically.
           </P>
           <P>
@@ -437,7 +437,7 @@ export default function DocsPage() {
           {/* ═══════════════ COST TRACKING ═══════════════ */}
           <SectionHeader id="cost-tracking">Cost Tracking</SectionHeader>
           <P>
-            Every LLM call and tool use captures cost data from OpenClaw&apos;s native tracking. Clawnitor
+            Every LLM call and tool use captures cost data from OpenClaw&apos;s native tracking. Halt
             aggregates this into actionable spend analytics on your dashboard:
           </P>
           <ul className="text-xs flex flex-col gap-2 mb-4 ml-4" style={{ color: "var(--color-text-secondary)" }}>
@@ -448,7 +448,7 @@ export default function DocsPage() {
           </ul>
           <P>
             Cost data comes from OpenClaw&apos;s native <Code>cost_usd</Code> and <Code>tokens_used</Code> fields
-            in event metadata. Clawnitor does not calculate costs — it uses what OpenClaw reports.
+            in event metadata. Halt does not calculate costs — it uses what OpenClaw reports.
           </P>
 
           {/* ═══════════════ DECISION TRACES ═══════════════ */}
@@ -483,7 +483,7 @@ export default function DocsPage() {
           {/* ═══════════════ OFFLINE RESILIENCE ═══════════════ */}
           <SectionHeader id="offline">Offline Resilience</SectionHeader>
           <P>
-            If the Clawnitor backend is unreachable, the plugin keeps working:
+            If the Halt backend is unreachable, the plugin keeps working:
           </P>
           <ul className="text-xs flex flex-col gap-2 mb-4 ml-4" style={{ color: "var(--color-text-secondary)" }}>
             <li>Events are cached locally (up to 50MB / 7 days)</li>
@@ -598,7 +598,7 @@ export default function DocsPage() {
               },
               {
                 q: "Can't connect to WebSocket",
-                a: "The plugin reconnects automatically with exponential backoff (1s to 60s). If behind a firewall, ensure outbound WebSocket connections to api.clawnitor.io are allowed. HTTPS fallback is always active.",
+                a: "The plugin reconnects automatically with exponential backoff (1s to 60s). If behind a firewall, ensure outbound WebSocket connections to api.halt.dev are allowed. HTTPS fallback is always active.",
               },
             ].map((faq) => (
               <div
@@ -619,7 +619,7 @@ export default function DocsPage() {
           >
             <p>
               Need help? Email{" "}
-              <a href="mailto:support@clawnitor.io" style={{ color: "var(--color-coral)" }}>support@clawnitor.io</a>
+              <a href="mailto:support@halt.dev" style={{ color: "var(--color-coral)" }}>support@halt.dev</a>
             </p>
             <p className="mt-2">
               <Link href="/" style={{ color: "var(--color-text-secondary)" }}>Home</Link>

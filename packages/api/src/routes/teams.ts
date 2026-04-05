@@ -14,7 +14,7 @@ import {
   users,
 } from "../db/schema.js";
 import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
-import { ruleConfigSchema, TIER_FEATURES, type Tier } from "@clawnitor/shared";
+import { ruleConfigSchema, TIER_FEATURES, type Tier } from "@halt/shared";
 
 const createTeamBody = z.object({
   name: z.string().min(1).max(255),
@@ -205,12 +205,12 @@ export async function teamsRoutes(app: FastifyInstance) {
         const resendKey = process.env.RESEND_API_KEY;
         if (resendKey) {
           const resend = new Resend(resendKey);
-          const inviteUrl = `https://app.clawnitor.io/team?invite=${token}`;
+          const inviteUrl = `https://app.halt.dev/team?invite=${token}`;
           await resend.emails.send({
-            from: "Clawnitor <login@clawnitor.io>",
+            from: "Halt <login@halt.dev>",
             to: parsed.data.email,
-            subject: "You've been invited to a Clawnitor team",
-            html: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto"><h2 style="color:#FF6B4A">You're invited to join a team on Clawnitor</h2><p>You've been invited as <strong>${parsed.data.role}</strong> to a team on Clawnitor — agent monitoring and safety for OpenClaw.</p><p><a href="${inviteUrl}" style="display:inline-block;background:#FF6B4A;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">Accept Invite</a></p><p style="color:#888;font-size:12px">This invite expires in 7 days.</p></div>`,
+            subject: "You've been invited to a Halt team",
+            html: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto"><h2 style="color:#FF6B4A">You're invited to join a team on Halt</h2><p>You've been invited as <strong>${parsed.data.role}</strong> to a team on Halt — agent monitoring and safety for OpenClaw.</p><p><a href="${inviteUrl}" style="display:inline-block;background:#FF6B4A;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">Accept Invite</a></p><p style="color:#888;font-size:12px">This invite expires in 7 days.</p></div>`,
           });
         }
       } catch (err) {
@@ -221,7 +221,7 @@ export async function teamsRoutes(app: FastifyInstance) {
         invite_id: invite.id,
         email: parsed.data.email,
         expires_at: expiresAt,
-        invite_url: `https://app.clawnitor.io/team?invite=${token}`,
+        invite_url: `https://app.halt.dev/team?invite=${token}`,
       });
     },
   });

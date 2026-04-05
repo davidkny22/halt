@@ -29,26 +29,26 @@ async function sendWelcomeEmail(email: string) {
 
   try {
     await resend.emails.send({
-      from: "David from Clawnitor <david@clawnitor.io>",
+      from: "David from Halt <david@halt.dev>",
       to: email,
-      subject: "Welcome to Clawnitor — your agents are in good hands",
+      subject: "Welcome to Halt — your agents are in good hands",
       text: [
-        "Hey! Thanks for signing up for Clawnitor.",
+        "Hey! Thanks for signing up for Halt.",
         "",
         "You're now set up with free monitoring for 1 agent — event capture, pattern rules, and a kill switch activation every month.",
         "",
         "Quick start:",
-        "1. Install the plugin: npm install @clawnitor/plugin",
+        "1. Install the plugin: npm install @halt/plugin",
         "2. Add your API key to openclaw.json",
         "3. That's it — your agent is monitored",
         "",
         "If you have a beta invite code, enter it in Settings to unlock 6 months of Pro (AI anomaly detection, NL rules, unlimited kill switch, all alert channels).",
         "",
-        "I built Clawnitor because I kept watching my own agents do things I didn't ask for. If you have feedback, questions, or just want to say hi — reply to this email or use the feedback widget on the dashboard. I read everything.",
+        "I built Halt because I kept watching my own agents do things I didn't ask for. If you have feedback, questions, or just want to say hi — reply to this email or use the feedback widget on the dashboard. I read everything.",
         "",
         "— David Kogan",
-        "  Founder, Clawnitor",
-        "  clawnitor.io",
+        "  Founder, Halt",
+        "  halt.dev",
       ].join("\n"),
     });
   } catch (err) {
@@ -249,7 +249,7 @@ export async function authRoutes(app: FastifyInstance) {
       } else if (github_token) {
         try {
           const ghRes = await fetch("https://api.github.com/user/emails", {
-            headers: { Authorization: `token ${github_token}`, "User-Agent": "Clawnitor" },
+            headers: { Authorization: `token ${github_token}`, "User-Agent": "Halt" },
             signal: AbortSignal.timeout(5000),
           });
           if (!ghRes.ok) {
@@ -336,15 +336,15 @@ export async function authRoutes(app: FastifyInstance) {
       // Link the verify code to the polling token
       (magicLinkTokens.get(verifyCode) as any).pollingToken = pollingToken;
 
-      const verifyUrl = `https://api.clawnitor.io/api/auth/cli-magic-link/verify?code=${verifyCode}`;
+      const verifyUrl = `https://api.halt.dev/api/auth/cli-magic-link/verify?code=${verifyCode}`;
 
       const resend = new Resend(config.RESEND_API_KEY);
       await resend.emails.send({
-        from: "Clawnitor <login@clawnitor.io>",
+        from: "Halt <login@halt.dev>",
         to: email,
-        subject: "Sign in to Clawnitor CLI",
+        subject: "Sign in to Halt CLI",
         html: `
-          <p>Click the link below to sign in to Clawnitor CLI:</p>
+          <p>Click the link below to sign in to Halt CLI:</p>
           <p><a href="${verifyUrl}" style="background:#FF6B4A;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Verify Email</a></p>
           <p style="color:#666;font-size:12px;">This link expires in 5 minutes. If you didn't request this, ignore this email.</p>
         `,
@@ -364,7 +364,7 @@ export async function authRoutes(app: FastifyInstance) {
 
       const entry = magicLinkTokens.get(code);
       if (!entry || Date.now() > entry.expiresAt) {
-        return reply.type("text/html").send("<h2>Link expired or invalid.</h2><p>Please run <code>clawnitor init</code> again.</p>");
+        return reply.type("text/html").send("<h2>Link expired or invalid.</h2><p>Please run <code>halt init</code> again.</p>");
       }
 
       // Mark the polling token as verified
@@ -376,7 +376,7 @@ export async function authRoutes(app: FastifyInstance) {
       // Clean up the verify code
       magicLinkTokens.delete(code);
 
-      return reply.type("text/html").send("<h2>Email verified!</h2><p>You can return to your terminal. Clawnitor CLI will continue automatically.</p>");
+      return reply.type("text/html").send("<h2>Email verified!</h2><p>You can return to your terminal. Halt CLI will continue automatically.</p>");
     },
   });
 

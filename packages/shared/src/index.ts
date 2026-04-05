@@ -1,13 +1,13 @@
 export {
   EVENT_TYPES,
   SEVERITY_HINTS,
-  clawnitorEventSchema,
+  haltEventSchema,
   eventMetadataSchema,
   createEventId,
   type EventType,
   type SeverityHint,
   type EventMetadata,
-  type ClawnitorEvent,
+  type HaltEvent,
 } from "./events.js";
 
 export {

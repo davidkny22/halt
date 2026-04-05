@@ -379,7 +379,7 @@ export default function SettingsPage() {
                 {savingSharing && <span className="ml-2 text-xs" style={{ color: "var(--color-text-tertiary)" }}>Saving...</span>}
               </p>
               <p className="text-xs mt-1" style={{ color: "var(--color-text-secondary)" }}>
-                Help improve Clawnitor for everyone. We never share raw events, message content, or agent outputs.
+                Help improve Halt for everyone. We never share raw events, message content, or agent outputs.
               </p>
             </div>
             <button

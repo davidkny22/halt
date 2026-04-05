@@ -35,7 +35,7 @@ import { createQueue } from "./jobs/queue.js";
 import {
   ANOMALY_CHECK_INTERVAL_MINUTES,
   NL_EVAL_INTERVAL_MINUTES,
-} from "@clawnitor/shared";
+} from "@halt/shared";
 
 export async function buildApp() {
   const app = Fastify({
@@ -53,9 +53,9 @@ export async function buildApp() {
 
   await app.register(cors, {
     origin: [
-      "https://clawnitor.io",
-      "https://www.clawnitor.io",
-      "https://app.clawnitor.io",
+      "https://halt.dev",
+      "https://www.halt.dev",
+      "https://app.halt.dev",
       ...(process.env.NODE_ENV !== "production" ? ["http://localhost:3000"] : []),
     ],
     credentials: true,

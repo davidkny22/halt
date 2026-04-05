@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { clawnitorEventSchema, TIER_FEATURES, type Tier } from "@clawnitor/shared";
+import { haltEventSchema, TIER_FEATURES, type Tier } from "@halt/shared";
 import { getDb } from "../db/client.js";
 import { events, agents, baselines, sessions, users } from "../db/schema.js";
 import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
@@ -13,7 +13,7 @@ const rateLimiter = new RateLimiter(1000, 1000);
 const idempotency = new IdempotencyChecker();
 
 const ingestSchema = z.object({
-  events: z.array(clawnitorEventSchema).min(1).max(100),
+  events: z.array(haltEventSchema).min(1).max(100),
 });
 
 export async function eventsRoutes(app: FastifyInstance) {

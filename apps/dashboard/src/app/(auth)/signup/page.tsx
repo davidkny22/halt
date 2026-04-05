@@ -17,7 +17,7 @@ export default async function SignupPage({
         <div className="text-center mb-8">
           <div className="flex justify-center mb-3"><LogoMark size={48} /></div>
           <h1 className="text-2xl font-bold">
-            {betaCode ? "Join the Clawnitor Beta" : "Create your account"}
+            {betaCode ? "Join the Halt Beta" : "Create your account"}
           </h1>
           <p
             style={{ color: "var(--color-text-secondary)" }}

@@ -50,7 +50,7 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
       ? `: ${String(event.params.action).slice(0, 80)}`
       : "";
 
-    const clawnitorEvent = buildEvent({
+    const haltEvent = buildEvent({
       agentId,
       sessionId: sub.sessionId,
       eventType: "tool_use",
@@ -65,7 +65,7 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
       customRedactionPatterns: ctx.redactionPatterns,
     });
 
-    ctx.sender.enqueue(clawnitorEvent);
+    ctx.sender.enqueue(haltEvent);
 
     // Helper: capture a blocked event
     const captureBlocked = (reason: string, source: string) => {
@@ -90,7 +90,7 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
 
     // 1. Check kill state (server-triggered, per-agent)
     if (killState.isKilled(agentId)) {
-      const reason = `Clawnitor: agent paused — ${killState.getReason(agentId) || "unknown reason"}`;
+      const reason = `Halt: agent paused — ${killState.getReason(agentId) || "unknown reason"}`;
       captureBlocked(reason, "kill-state");
       return { block: true, blockReason: reason };
     }
@@ -228,7 +228,7 @@ export function createAfterToolCallHandler(ctx: ToolCallContext) {
       });
     }
 
-    const clawnitorEvent = buildEvent({
+    const haltEvent = buildEvent({
       agentId,
       sessionId: sub.sessionId,
       eventType: "tool_use",
@@ -246,6 +246,6 @@ export function createAfterToolCallHandler(ctx: ToolCallContext) {
       customRedactionPatterns: ctx.redactionPatterns,
     });
 
-    ctx.sender.enqueue(clawnitorEvent);
+    ctx.sender.enqueue(haltEvent);
   };
 }

@@ -34,7 +34,7 @@ export const eventMetadataSchema = z.object({
 
 export type EventMetadata = z.infer<typeof eventMetadataSchema>;
 
-export const clawnitorEventSchema = z.object({
+export const haltEventSchema = z.object({
   agent_id: z.string().min(1),
   session_id: z.string().min(1),
   timestamp: z.string().datetime(),
@@ -47,7 +47,7 @@ export const clawnitorEventSchema = z.object({
   plugin_version: z.string(),
 });
 
-export type ClawnitorEvent = z.infer<typeof clawnitorEventSchema>;
+export type HaltEvent = z.infer<typeof haltEventSchema>;
 
 export function createEventId(): string {
   return uuidv7();

@@ -1,10 +1,10 @@
 {
-  "name": "@clawnitor/cli",
+  "name": "@halt/cli",
   "version": "1.2.1",
-  "description": "CLI for Clawnitor — agent monitoring for OpenClaw. Authenticate, generate API keys, and configure from the terminal.",
+  "description": "CLI for Halt — agent monitoring for OpenClaw. Authenticate, generate API keys, and configure from the terminal.",
   "type": "module",
   "bin": {
-    "clawnitor": "./dist/index.js"
+    "halt": "./dist/index.js"
   },
   "files": [
     "dist",
@@ -16,7 +16,7 @@
     "dev": "tsx src/index.ts"
   },
   "keywords": [
-    "clawnitor",
+    "halt",
     "openclaw",
     "agent",
     "monitoring",
@@ -25,16 +25,16 @@
   ],
   "author": "David Kogan",
   "license": "MIT",
-  "homepage": "https://clawnitor.io",
+  "homepage": "https://halt.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/davidkny22/clawnitor"
+    "url": "https://github.com/davidkny22/halt"
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@clawnitor/shared": "workspace:^",
+    "@halt/shared": "workspace:^",
     "fastify": "^5.0.0"
   },
   "devDependencies": {

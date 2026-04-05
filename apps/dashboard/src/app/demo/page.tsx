@@ -293,7 +293,7 @@ export default function DemoPage() {
         }}
       >
         Interactive demo with a live AI agent.{" "}
-        <Link href="https://app.clawnitor.io/signup" className="underline font-semibold">
+        <Link href="https://app.halt.dev/signup" className="underline font-semibold">
           Sign up
         </Link>{" "}
         to monitor your own agents.
@@ -320,7 +320,7 @@ export default function DemoPage() {
           </span>
         </div>
         <Link
-          href="https://app.clawnitor.io/signup"
+          href="https://app.halt.dev/signup"
           className="text-sm font-semibold px-4 py-2 rounded-lg text-white"
           style={{ backgroundColor: "var(--color-coral)" }}
         >
@@ -335,7 +335,7 @@ export default function DemoPage() {
             <div className="text-center mb-8">
               <h1 className="text-2xl font-bold mb-2">Watch an AI agent try to break your rules.</h1>
               <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                Clawnitor stops it. Pick a scenario to see how.
+                Halt stops it. Pick a scenario to see how.
               </p>
             </div>
 

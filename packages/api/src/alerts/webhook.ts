@@ -72,8 +72,8 @@ export async function fireCustomWebhooks(
       const body = JSON.stringify(payload);
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
-        "User-Agent": "Clawnitor-Webhook/1.0",
-        "X-Clawnitor-Event": eventType,
+        "User-Agent": "Halt-Webhook/1.0",
+        "X-Halt-Event": eventType,
       };
 
       // Sign the payload if webhook has a secret
@@ -81,7 +81,7 @@ export async function fireCustomWebhooks(
         const signature = createHmac("sha256", webhook.secret)
           .update(body)
           .digest("hex");
-        headers["X-Clawnitor-Signature"] = `sha256=${signature}`;
+        headers["X-Halt-Signature"] = `sha256=${signature}`;
       }
 
       const res = await fetch(webhook.url, {

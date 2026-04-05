@@ -4,7 +4,7 @@ import { z } from "zod";
 import { getDb } from "../db/client.js";
 import { agents, baselines, users, events } from "../db/schema.js";
 import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
-import { TIER_FEATURES, type Tier } from "@clawnitor/shared";
+import { TIER_FEATURES, type Tier } from "@halt/shared";
 
 const MAX_AGENTS_FREE = 1;
 const MAX_AGENTS_PAID = 50;

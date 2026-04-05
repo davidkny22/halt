@@ -1,4 +1,4 @@
-import { createEventId, type ClawnitorEvent, type EventType, type SeverityHint } from "@clawnitor/shared";
+import { createEventId, type HaltEvent, type EventType, type SeverityHint } from "@halt/shared";
 import { assignSeverity, type RateTracker } from "./severity.js";
 import { redact, DEFAULT_PATTERNS } from "./redaction.js";
 
@@ -23,7 +23,7 @@ interface BuildEventParams {
   customRedactionPatterns?: string[];
 }
 
-export function buildEvent(params: BuildEventParams): ClawnitorEvent {
+export function buildEvent(params: BuildEventParams): HaltEvent {
   const {
     agentId,
     sessionId,

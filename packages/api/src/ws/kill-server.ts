@@ -4,8 +4,8 @@ import { eq, and, isNull } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import { apiKeys } from "../db/schema.js";
 import { verifyApiKey } from "../auth/api-key.js";
-import { WS_HEARTBEAT_INTERVAL_MS } from "@clawnitor/shared";
-import type { KillMessage, UnkillMessage } from "@clawnitor/shared";
+import { WS_HEARTBEAT_INTERVAL_MS } from "@halt/shared";
+import type { KillMessage, UnkillMessage } from "@halt/shared";
 
 const connections = new Map<string, Set<WebSocket>>();
 const AUTH_TIMEOUT_MS = 10_000;

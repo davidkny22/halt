@@ -4,7 +4,7 @@ import { getDb } from "../db/client.js";
 import { baselines, events } from "../db/schema.js";
 import { eq, and, gte } from "drizzle-orm";
 import { buildProfile, isLearningComplete } from "../ai/baseline-builder.js";
-import type { ClawnitorEvent } from "@clawnitor/shared";
+import type { HaltEvent } from "@halt/shared";
 
 export function startBaselineUpdateWorker() {
   return createWorker("baseline-update", async (job: Job) => {
@@ -40,7 +40,7 @@ export function startBaselineUpdateWorker() {
         parseFloat(baseline.accumulated_hours) + activeHoursToday;
 
       // Build updated profile
-      const newProfile = buildProfile(todayEvents as unknown as ClawnitorEvent[]);
+      const newProfile = buildProfile(todayEvents as unknown as HaltEvent[]);
 
       // If existing profile exists, merge with decay
       const existingProfile = baseline.profile as any;

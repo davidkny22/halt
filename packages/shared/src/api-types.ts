@@ -1,4 +1,4 @@
-import type { ClawnitorEvent } from "./events.js";
+import type { HaltEvent } from "./events.js";
 
 export interface KillState {
   killed: boolean;
@@ -6,7 +6,7 @@ export interface KillState {
 }
 
 export interface IngestEventsRequest {
-  events: ClawnitorEvent[];
+  events: HaltEvent[];
 }
 
 export interface IngestEventsResponse {

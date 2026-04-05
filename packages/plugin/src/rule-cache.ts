@@ -49,7 +49,7 @@ export class RuleCache {
   start() {
     if (this.config.offlineMode) {
       this.loadOfflineRules();
-      // Re-read ~/.clawnitor/rules.json every 30s so dashboard changes take effect
+      // Re-read ~/.halt/rules.json every 30s so dashboard changes take effect
       this.fetchTimer = setInterval(() => this.loadOfflineRules(), 30_000);
       return;
     }
@@ -59,8 +59,8 @@ export class RuleCache {
   }
 
   private loadOfflineRules() {
-    // Priority: ~/.clawnitor/rules.json (shared with local dashboard), then inline config
-    const sharedPath = join(homedir(), ".clawnitor", "rules.json");
+    // Priority: ~/.halt/rules.json (shared with local dashboard), then inline config
+    const sharedPath = join(homedir(), ".halt", "rules.json");
     let fileRules: CachedRule[] = [];
     try {
       if (existsSync(sharedPath)) {
@@ -138,7 +138,7 @@ export class RuleCache {
   ): RuleCheckResult {
     const paramsStr = params ? JSON.stringify(params).slice(0, 500) : "";
 
-    if (toolName === "fetch" && paramsStr.includes("api.clawnitor.io")) {
+    if (toolName === "fetch" && paramsStr.includes("api.halt.dev")) {
       return { blocked: false };
     }
 
@@ -206,7 +206,7 @@ export class RuleCache {
       return {
         blocked: true,
         ruleName: rule.name,
-        reason: `Clawnitor: Rule "${rule.name}" blocked — keyword match: ${matched.join(", ")}`,
+        reason: `Halt: Rule "${rule.name}" blocked — keyword match: ${matched.join(", ")}`,
       };
     }
 
@@ -234,7 +234,7 @@ export class RuleCache {
       return {
         blocked: true,
         ruleName: rule.name,
-        reason: `Clawnitor: Rule "${rule.name}" blocked — ${filtered.length} events in ${config.windowMinutes}min (max: ${maxCount})`,
+        reason: `Halt: Rule "${rule.name}" blocked — ${filtered.length} events in ${config.windowMinutes}min (max: ${maxCount})`,
       };
     }
 
@@ -264,7 +264,7 @@ export class RuleCache {
       return {
         blocked: true,
         ruleName: rule.name,
-        reason: `Clawnitor: Rule "${rule.name}" blocked — ${config.field} = ${sum.toFixed(4)} (${config.operator} ${config.value})`,
+        reason: `Halt: Rule "${rule.name}" blocked — ${config.field} = ${sum.toFixed(4)} (${config.operator} ${config.value})`,
       };
     }
 
@@ -280,10 +280,10 @@ export class RuleCache {
     if (agentId && this.autoKillConfigs[agentId]) {
       return this.autoKillConfigs[agentId];
     }
-    // Offline mode: check ~/.clawnitor/agents.json
+    // Offline mode: check ~/.halt/agents.json
     if (this.config.offlineMode && agentId) {
       try {
-        const agentsPath = join(homedir(), ".clawnitor", "agents.json");
+        const agentsPath = join(homedir(), ".halt", "agents.json");
         if (existsSync(agentsPath)) {
           const configs = JSON.parse(readFileSync(agentsPath, "utf-8"));
           if (configs[agentId]) {
@@ -322,8 +322,8 @@ export class RuleCache {
       : agentRules.filter((r) => r.agent_visible !== false);
     if (visible.length === 0) return null;
 
-    const lines = ["# Clawnitor — Active Monitoring Rules", ""];
-    lines.push("The following rules are enforced by Clawnitor. Violating a rule may result in your action being blocked, an alert being sent to the user, or your session being terminated.");
+    const lines = ["# Halt — Active Monitoring Rules", ""];
+    lines.push("The following rules are enforced by Halt. Violating a rule may result in your action being blocked, an alert being sent to the user, or your session being terminated.");
     lines.push("");
 
     for (const rule of visible) {

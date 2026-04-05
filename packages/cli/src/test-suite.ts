@@ -1,5 +1,5 @@
 /**
- * Curated attack + benign event suite for `clawnitor test`.
+ * Curated attack + benign event suite for `halt test`.
  */
 
 export interface TestCase {

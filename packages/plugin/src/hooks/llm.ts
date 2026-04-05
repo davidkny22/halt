@@ -15,7 +15,7 @@ export function createLlmInputHandler(ctx: LlmContext) {
     const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
     const sub = getSubagentInfo(event, sessionId);
 
-    const clawnitorEvent = buildEvent({
+    const haltEvent = buildEvent({
       agentId,
       sessionId: sub.sessionId,
       eventType: "llm_call",
@@ -28,7 +28,7 @@ export function createLlmInputHandler(ctx: LlmContext) {
       customRedactionPatterns: ctx.redactionPatterns,
     });
 
-    ctx.sender.enqueue(clawnitorEvent);
+    ctx.sender.enqueue(haltEvent);
   };
 }
 
@@ -38,7 +38,7 @@ export function createLlmOutputHandler(ctx: LlmContext) {
     const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
     const sub = getSubagentInfo(event, sessionId);
 
-    const clawnitorEvent = buildEvent({
+    const haltEvent = buildEvent({
       agentId,
       sessionId: sub.sessionId,
       eventType: "llm_call",
@@ -52,6 +52,6 @@ export function createLlmOutputHandler(ctx: LlmContext) {
       customRedactionPatterns: ctx.redactionPatterns,
     });
 
-    ctx.sender.enqueue(clawnitorEvent);
+    ctx.sender.enqueue(haltEvent);
   };
 }

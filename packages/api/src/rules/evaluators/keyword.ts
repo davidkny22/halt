@@ -1,5 +1,5 @@
-import type { KeywordConfig } from "@clawnitor/shared";
-import type { ClawnitorEvent } from "@clawnitor/shared";
+import type { KeywordConfig } from "@halt/shared";
+import type { HaltEvent } from "@halt/shared";
 
 export interface EvalResult {
   triggered: boolean;
@@ -7,7 +7,7 @@ export interface EvalResult {
 }
 
 export function evaluateKeyword(
-  events: ClawnitorEvent[],
+  events: HaltEvent[],
   config: KeywordConfig
 ): EvalResult {
   const matchedKeywords = new Set<string>();

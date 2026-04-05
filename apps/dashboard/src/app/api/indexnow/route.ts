@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const INDEXNOW_KEY = "d050dbd71ea0c7b50b82a58c0a9789fa";
-const HOST = "clawnitor.io";
+const HOST = "halt.dev";
 const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
 
 const PUBLIC_URLS = [

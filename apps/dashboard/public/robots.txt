@@ -8,4 +8,4 @@ Disallow: /settings
 Disallow: /onboarding
 Disallow: /api/
 
-Sitemap: https://clawnitor.io/sitemap.xml
+Sitemap: https://halt.dev/sitemap.xml

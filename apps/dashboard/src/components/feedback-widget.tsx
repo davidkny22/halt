@@ -50,7 +50,7 @@ export function FeedbackWidget() {
 
   // Load history from localStorage
   useEffect(() => {
-    const stored = localStorage.getItem("clawnitor-feedback-history");
+    const stored = localStorage.getItem("halt-feedback-history");
     if (stored) {
       try { setHistory(JSON.parse(stored)); } catch {}
     }
@@ -59,7 +59,7 @@ export function FeedbackWidget() {
   // Save history to localStorage
   useEffect(() => {
     if (history.length > 0) {
-      localStorage.setItem("clawnitor-feedback-history", JSON.stringify(history.slice(-50)));
+      localStorage.setItem("halt-feedback-history", JSON.stringify(history.slice(-50)));
     }
   }, [history]);
 

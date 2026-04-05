@@ -5,7 +5,7 @@ import { rules, events, alerts, users } from "../db/schema.js";
 import { eq, and, gte, desc, sql } from "drizzle-orm";
 import { evaluateNLRule } from "../rules/nl-evaluator.js";
 import { isDegraded } from "../ai/client.js";
-import { TIER_FEATURES, type Tier } from "@clawnitor/shared";
+import { TIER_FEATURES, type Tier } from "@halt/shared";
 import { logger } from "../util/logger.js";
 
 export function startNLBatchWorker() {

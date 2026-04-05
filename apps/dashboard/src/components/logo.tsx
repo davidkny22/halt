@@ -46,7 +46,7 @@ export function LogoFull({ size = 32 }: { size?: number }) {
           lineHeight: 1,
         }}
       >
-        Clawnitor
+        Halt
       </span>
     </div>
   );

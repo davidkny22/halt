@@ -1,13 +1,13 @@
 {
-  "id": "clawnitor",
-  "name": "Clawnitor",
+  "id": "halt",
+  "name": "Halt",
   "description": "Agent monitoring and safety layer — real-time event capture, alerting, and kill switch for OpenClaw agents",
   "configSchema": {
     "type": "object",
     "required": ["apiKey"],
     "properties": {
       "apiKey": { "type": "string" },
-      "backendUrl": { "type": "string", "default": "https://api.clawnitor.io" },
+      "backendUrl": { "type": "string", "default": "https://api.halt.dev" },
       "spendLimit": { "type": "number", "default": 100 },
       "rateLimit": { "type": "number", "default": 120 },
       "toolBlocklist": { "type": "array", "items": { "type": "string" }, "default": [] },
@@ -15,8 +15,8 @@
     }
   },
   "uiHints": {
-    "apiKey": { "label": "Clawnitor API Key", "sensitive": true, "placeholder": "clw_live_..." },
-    "backendUrl": { "label": "Backend URL", "placeholder": "https://api.clawnitor.io" },
+    "apiKey": { "label": "Halt API Key", "sensitive": true, "placeholder": "clw_live_..." },
+    "backendUrl": { "label": "Backend URL", "placeholder": "https://api.halt.dev" },
     "spendLimit": { "label": "Spend Limit ($/session)", "placeholder": "100" },
     "rateLimit": { "label": "Rate Limit (calls/min)", "placeholder": "120" }
   }

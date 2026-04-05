@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { buildEvent } from "../event-builder.js";
-import { clawnitorEventSchema } from "@clawnitor/shared";
+import { haltEventSchema } from "@halt/shared";
 
 describe("buildEvent", () => {
-  it("produces a valid ClawnitorEvent", () => {
+  it("produces a valid HaltEvent", () => {
     const event = buildEvent({
       agentId: "agent-1",
       sessionId: "session-1",
@@ -13,7 +13,7 @@ describe("buildEvent", () => {
       metadata: { tool_name: "send_email" },
     });
 
-    const result = clawnitorEventSchema.safeParse(event);
+    const result = haltEventSchema.safeParse(event);
     expect(result.success).toBe(true);
   });
 

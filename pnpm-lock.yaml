@@ -20,7 +20,7 @@ importers:
       '@auth/drizzle-adapter':
         specifier: ^1.11.1
         version: 1.11.1
-      '@clawnitor/shared':
+      '@halt/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@tailwindcss/postcss':
@@ -75,15 +75,15 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.78.0
         version: 0.78.0(zod@3.25.76)
-      '@clawnitor/shared':
-        specifier: workspace:*
-        version: link:../shared
       '@fastify/cors':
         specifier: ^11
         version: 11.2.0
       '@fastify/websocket':
         specifier: ^11
         version: 11.2.0
+      '@halt/shared':
+        specifier: workspace:*
+        version: link:../shared
       bcrypt:
         specifier: ^6.0.0
         version: 6.0.0
@@ -145,7 +145,7 @@ importers:
 
   packages/cli:
     dependencies:
-      '@clawnitor/shared':
+      '@halt/shared':
         specifier: workspace:^
         version: link:../shared
       fastify:
@@ -164,10 +164,10 @@ importers:
 
   packages/plugin:
     dependencies:
-      '@clawnitor/cli':
+      '@halt/cli':
         specifier: workspace:^
         version: link:../cli
-      '@clawnitor/shared':
+      '@halt/shared':
         specifier: workspace:^
         version: link:../shared
     devDependencies:

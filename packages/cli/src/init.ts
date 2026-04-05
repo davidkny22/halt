@@ -3,7 +3,7 @@ import { githubDeviceAuth, getGitHubEmail } from "./auth/github-device.js";
 import { sendMagicLink, pollMagicLink } from "./auth/magic-link.js";
 import { writeApiKey } from "./config.js";
 
-const API_URL = process.env.CLAWNITOR_API_URL || "https://api.clawnitor.io";
+const API_URL = process.env.HALT_API_URL || "https://api.halt.dev";
 
 function ask(question: string): Promise<string> {
   const rl = createInterface({
@@ -42,7 +42,7 @@ async function provisionAndGetKey(email: string, opts?: { githubToken?: string; 
 
 export async function init() {
   console.log(`
-  Clawnitor — Agent monitoring for OpenClaw
+  Halt — Agent monitoring for OpenClaw
   by Safer Intelligence Labs
 `);
 
@@ -89,10 +89,10 @@ export async function init() {
   const configPath = writeApiKey(apiKey);
 
   console.log(`
-  Done. Clawnitor is monitoring your agents.
+  Done. Halt is monitoring your agents.
 
   Config:     ${configPath}
-  Dashboard:  https://app.clawnitor.io
-  Docs:       https://clawnitor.io/docs
+  Dashboard:  https://app.halt.dev
+  Docs:       https://halt.dev/docs
 `);
 }

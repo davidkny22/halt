@@ -1,5 +1,5 @@
 {
-  "name": "@clawnitor/dashboard",
+  "name": "@halt/dashboard",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.1",
-    "@clawnitor/shared": "workspace:*",
+    "@halt/shared": "workspace:*",
     "@tailwindcss/postcss": "^4",
     "drizzle-orm": "^0.39.3",
     "next": "^15.5.13",

@@ -1,6 +1,6 @@
 # Contributor License Agreement
 
-Thank you for your interest in contributing to Clawnitor, a product of Safer Intelligence Labs.
+Thank you for your interest in contributing to Halt, a product of Safer Intelligence Labs.
 
 By submitting a pull request or otherwise contributing to this project, you agree to the following terms:
 
@@ -8,7 +8,7 @@ By submitting a pull request or otherwise contributing to this project, you agre
 
 - **"You"** means the individual or legal entity submitting a Contribution.
 - **"Contribution"** means any code, documentation, or other material submitted to this project via pull request, patch, issue, or any other mechanism.
-- **"Project Owner"** means Clawnitor Inc., a subsidiary of Safer Intelligence Labs.
+- **"Project Owner"** means Halt Inc., a subsidiary of Safer Intelligence Labs.
 
 ## 2. Grant of Rights
 
@@ -27,8 +27,8 @@ The Project Owner is not obligated to use or incorporate any Contribution. Contr
 
 ## 5. Agreement
 
-By opening a pull request against any repository owned by the Project Owner under the Clawnitor project, you acknowledge that you have read this agreement and agree to its terms.
+By opening a pull request against any repository owned by the Project Owner under the Halt project, you acknowledge that you have read this agreement and agree to its terms.
 
 ---
 
-*This CLA applies to all repositories under the Clawnitor project, including but not limited to: clawnitor, clawnitor-plugin, and all @clawnitor npm packages.*
+*This CLA applies to all repositories under the Halt project, including but not limited to: halt, halt-plugin, and all @halt npm packages.*

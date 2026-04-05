@@ -8,7 +8,7 @@ export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
-    const stored = localStorage.getItem("clawnitor-theme") as Theme | null;
+    const stored = localStorage.getItem("halt-theme") as Theme | null;
     if (stored) {
       setTheme(stored);
       applyTheme(stored);
@@ -28,7 +28,7 @@ export function ThemeToggle() {
   function cycle() {
     const next: Theme = theme === "dark" ? "light" : "dark";
     setTheme(next);
-    localStorage.setItem("clawnitor-theme", next);
+    localStorage.setItem("halt-theme", next);
     applyTheme(next);
   }
 

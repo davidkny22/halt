@@ -1,5 +1,5 @@
 /**
- * `clawnitor check` — zero-config quick Shield reliability check.
+ * `halt check` — zero-config quick Shield reliability check.
  * One command, one number.
  */
 

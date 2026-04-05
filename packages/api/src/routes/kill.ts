@@ -6,7 +6,7 @@ import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
 import { sendKill, sendUnkill } from "../ws/kill-server.js";
 import { logAudit } from "./enterprise.js";
 import { RateLimiter } from "../util/rate-limiter.js";
-import { TIER_FEATURES, type Tier } from "@clawnitor/shared";
+import { TIER_FEATURES, type Tier } from "@halt/shared";
 
 const killRateLimiter = new RateLimiter(10, 10); // 10 req/min
 
@@ -47,7 +47,7 @@ export async function killRoutes(app: FastifyInstance) {
           return reply.status(403).send({
             error: "Kill limit reached",
             message: `Free tier includes ${features.monthlyKills} kill per month. Upgrade to Pro for unlimited kills.`,
-            upgrade_url: "https://app.clawnitor.io/settings",
+            upgrade_url: "https://app.halt.dev/settings",
           });
         }
       }

@@ -6,7 +6,7 @@ import { sendTelegramAlert } from "./telegram.js";
 import { sendDiscordAlert } from "./discord.js";
 import { sendSmsAlert } from "./sms.js";
 import { fireCustomWebhooks } from "./webhook.js";
-import { TIER_FEATURES, type Tier } from "@clawnitor/shared";
+import { TIER_FEATURES, type Tier } from "@halt/shared";
 import { logger } from "../util/logger.js";
 
 interface AlertData {
@@ -33,9 +33,9 @@ export async function dispatchAlert(data: AlertData): Promise<void> {
   const alertPayload = {
     severity: alert.severity,
     ruleName,
-    triggerSummary: `Clawnitor just saved you. Your agent was blocked because: ${ruleName}. ${triggerContext}`,
+    triggerSummary: `Halt just saved you. Your agent was blocked because: ${ruleName}. ${triggerContext}`,
     actionTaken: alert.severity === "critical" ? "Agent paused (kill switch)" : "Alert fired",
-    dashboardUrl: "https://app.clawnitor.io/saves",
+    dashboardUrl: "https://app.halt.dev/saves",
   };
 
   // Email (available to all tiers)

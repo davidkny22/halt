@@ -1,7 +1,7 @@
 {
-  "name": "@clawnitor/shared",
+  "name": "@halt/shared",
   "version": "1.2.1",
-  "description": "Shared types, schemas, and constants for Clawnitor — agent monitoring for OpenClaw",
+  "description": "Shared types, schemas, and constants for Halt — agent monitoring for OpenClaw",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -22,7 +22,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "keywords": [
-    "clawnitor",
+    "halt",
     "openclaw",
     "agent-monitoring",
     "ai-safety",
@@ -32,10 +32,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/davidkny22/clawnitor-plugin.git",
+    "url": "https://github.com/davidkny22/halt-plugin.git",
     "directory": "packages/shared"
   },
-  "homepage": "https://clawnitor.io",
+  "homepage": "https://halt.dev",
   "publishConfig": {
     "access": "public"
   },

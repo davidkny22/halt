@@ -26,7 +26,7 @@ export async function sendDiscordAlert(
       body: JSON.stringify({
         embeds: [
           {
-            title: `🦞 Clawnitor Alert [${data.severity.toUpperCase()}]`,
+            title: `🦞 Halt Alert [${data.severity.toUpperCase()}]`,
             color: severityColors[data.severity] || severityColors.elevated,
             fields: [
               { name: "Agent", value: data.agentName || "Unknown", inline: true },

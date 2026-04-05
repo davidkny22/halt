@@ -1,21 +1,21 @@
-import type { ClawnitorEvent, IngestEventsResponse } from "@clawnitor/shared";
-import { EVENT_BATCH_SIZE, EVENT_BATCH_INTERVAL_MS } from "@clawnitor/shared";
+import type { HaltEvent, IngestEventsResponse } from "@halt/shared";
+import { EVENT_BATCH_SIZE, EVENT_BATCH_INTERVAL_MS } from "@halt/shared";
 import type { PluginConfig } from "../config.js";
 
 export class HttpsSender {
-  private buffer: ClawnitorEvent[] = [];
+  private buffer: HaltEvent[] = [];
   private timer: ReturnType<typeof setInterval> | null = null;
   private config: PluginConfig;
   private onKillState?: (killed: boolean, reason?: string) => void;
   private onAgentKillStates?: (states: Record<string, { killed: boolean; reason?: string }>) => void;
-  private onFlushFail?: (events: ClawnitorEvent[]) => void;
+  private onFlushFail?: (events: HaltEvent[]) => void;
 
   constructor(
     config: PluginConfig,
     opts?: {
       onKillState?: (killed: boolean, reason?: string) => void;
       onAgentKillStates?: (states: Record<string, { killed: boolean; reason?: string }>) => void;
-      onFlushFail?: (events: ClawnitorEvent[]) => void;
+      onFlushFail?: (events: HaltEvent[]) => void;
     }
   ) {
     this.config = config;
@@ -37,7 +37,7 @@ export class HttpsSender {
     this.flush();
   }
 
-  enqueue(event: ClawnitorEvent) {
+  enqueue(event: HaltEvent) {
     this.buffer.push(event);
     if (this.buffer.length >= EVENT_BATCH_SIZE) {
       this.flush();
@@ -71,17 +71,17 @@ export class HttpsSender {
         }
       } else if (response.status === 401 || response.status === 403) {
         // Auth failure — log loudly, don't retry (key is wrong)
-        console.error(`[clawnitor] API key rejected (${response.status}). Check your apiKey in openclaw.json. Events are being dropped.`);
+        console.error(`[halt] API key rejected (${response.status}). Check your apiKey in openclaw.json. Events are being dropped.`);
       } else if (response.status >= 500) {
         // Server error — cache for retry
         this.onFlushFail?.(batch);
       } else {
         // Other 4xx — log and drop
-        console.warn(`[clawnitor] Event send failed (${response.status}). Events dropped.`);
+        console.warn(`[halt] Event send failed (${response.status}). Events dropped.`);
       }
     } catch (err) {
       // Network error — cache for retry
-      console.warn(`[clawnitor] Cannot reach ${this.config.backendUrl} — caching events for retry.`);
+      console.warn(`[halt] Cannot reach ${this.config.backendUrl} — caching events for retry.`);
       this.onFlushFail?.(batch);
     }
   }

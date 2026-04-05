@@ -4,9 +4,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: clawnitor
-      POSTGRES_PASSWORD: clawnitor
-      POSTGRES_DB: clawnitor
+      POSTGRES_USER: halt
+      POSTGRES_PASSWORD: halt
+      POSTGRES_DB: halt
     volumes:
       - pgdata:/var/lib/postgresql/data
 

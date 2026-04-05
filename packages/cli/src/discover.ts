@@ -7,7 +7,7 @@ export async function discover() {
   // 1. Resolve API key
   const apiKey = resolveApiKey();
   if (!apiKey) {
-    console.error("\n  No API key found. Run `clawnitor init` first.\n");
+    console.error("\n  No API key found. Run `halt init` first.\n");
     process.exit(1);
   }
 
@@ -46,7 +46,7 @@ export async function discover() {
   if (toolNames.size > 0) {
     console.log(`  Found ${toolNames.size} tool(s) across agent configs`);
   }
-  console.log("  Registering with Clawnitor...\n");
+  console.log("  Registering with Halt...\n");
 
   // 3. Call discover endpoint
   const backendUrl = resolveBackendUrl();
@@ -91,11 +91,11 @@ export async function discover() {
     console.log(`  ${result.skipped} agent(s) skipped (agent limit reached)`);
   }
 
-  console.log("\n  Activate agents from the dashboard at app.clawnitor.io/agents\n");
+  console.log("\n  Activate agents from the dashboard at app.halt.dev/agents\n");
 }
 
 function resolveApiKey(): string | null {
-  if (process.env.CLAWNITOR_API_KEY) return process.env.CLAWNITOR_API_KEY;
+  if (process.env.HALT_API_KEY) return process.env.HALT_API_KEY;
 
   const configPath = findConfig();
   if (!configPath) return null;
@@ -104,8 +104,8 @@ function resolveApiKey(): string | null {
     const raw = readFileSync(configPath, "utf-8");
     const config = JSON.parse(raw);
     return (
-      config?.plugins?.entries?.clawnitor?.config?.apiKey ||
-      config?.plugins?.entries?.["@clawnitor/plugin"]?.config?.apiKey ||
+      config?.plugins?.entries?.halt?.config?.apiKey ||
+      config?.plugins?.entries?.["@halt/plugin"]?.config?.apiKey ||
       null
     );
   } catch {
@@ -119,9 +119,9 @@ function resolveBackendUrl(): string {
     try {
       const raw = readFileSync(configPath, "utf-8");
       const config = JSON.parse(raw);
-      const url = config?.plugins?.entries?.clawnitor?.config?.backendUrl;
+      const url = config?.plugins?.entries?.halt?.config?.backendUrl;
       if (url) return url;
     } catch {}
   }
-  return "https://api.clawnitor.io";
+  return "https://api.halt.dev";
 }

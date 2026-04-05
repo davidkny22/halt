@@ -2,7 +2,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { eq } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import { users } from "../db/schema.js";
-import { TIER_FEATURES, type Tier } from "@clawnitor/shared";
+import { TIER_FEATURES, type Tier } from "@halt/shared";
 
 const TRIAL_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
 const EXTENDED_TRIAL_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days (beta consolation)
@@ -59,7 +59,7 @@ export function requireTier(feature: keyof typeof TIER_FEATURES.free) {
     if (!hasFeature) {
       return reply.status(403).send({
         error: "Upgrade Required",
-        message: `This feature requires a Pro subscription. Upgrade at https://clawnitor.io/settings`,
+        message: `This feature requires a Pro subscription. Upgrade at https://halt.dev/settings`,
         feature,
         currentTier: tier,
       });

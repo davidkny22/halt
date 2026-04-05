@@ -50,7 +50,7 @@ export default function PricingPage() {
           <p className="text-[10px] mb-5" style={{ color: "var(--color-green)" }}>
             Early access pricing — locked in for founding members
           </p>
-          <Link href="https://app.clawnitor.io/signup" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs text-white mb-6" style={{ backgroundColor: "var(--color-coral)" }}>
+          <Link href="https://app.halt.dev/signup" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs text-white mb-6" style={{ backgroundColor: "var(--color-coral)" }}>
             Start Free Trial
           </Link>
           <ul className="flex flex-col gap-2.5 text-xs">
@@ -77,7 +77,7 @@ export default function PricingPage() {
           <p className="text-[10px] mb-5" style={{ color: "var(--color-green)" }}>
             Early access pricing — locked in for founding members
           </p>
-          <Link href="https://app.clawnitor.io/signup" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs mb-6" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
+          <Link href="https://app.halt.dev/signup" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs mb-6" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
             Upgrade to Team
           </Link>
           <ul className="flex flex-col gap-2.5 text-xs">
@@ -98,7 +98,7 @@ export default function PricingPage() {
           <div className="mb-5">
             <span className="text-3xl font-bold">Custom</span>
           </div>
-          <a href="mailto:david@clawnitor.io" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs mb-6" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
+          <a href="mailto:david@halt.dev" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs mb-6" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
             Contact Us
           </a>
           <ul className="flex flex-col gap-2.5 text-xs">
@@ -117,7 +117,7 @@ export default function PricingPage() {
         <p className="text-sm mb-4" style={{ color: "var(--color-text-secondary)" }}>
           14-day free trial of Pro. No credit card required.
         </p>
-        <Link href="https://app.clawnitor.io/signup" className="inline-block px-8 py-3 rounded-lg font-semibold text-white" style={{ backgroundColor: "var(--color-coral)" }}>
+        <Link href="https://app.halt.dev/signup" className="inline-block px-8 py-3 rounded-lg font-semibold text-white" style={{ backgroundColor: "var(--color-coral)" }}>
           Get Started Free
         </Link>
       </div>

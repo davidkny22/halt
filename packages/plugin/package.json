@@ -1,7 +1,7 @@
 {
-  "name": "@clawnitor/plugin",
+  "name": "@halt/plugin",
   "version": "2.4.0",
-  "description": "Clawnitor plugin for OpenClaw — agent monitoring, alerting, and kill switch",
+  "description": "Halt plugin for OpenClaw — agent monitoring, alerting, and kill switch",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -23,7 +23,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "keywords": [
-    "clawnitor",
+    "halt",
     "openclaw",
     "openclaw-plugin",
     "agent-monitoring",
@@ -36,15 +36,15 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/davidkny22/clawnitor-plugin.git"
+    "url": "https://github.com/davidkny22/halt-plugin.git"
   },
-  "homepage": "https://clawnitor.io",
+  "homepage": "https://halt.dev",
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@clawnitor/shared": "workspace:^",
-    "@clawnitor/cli": "workspace:^"
+    "@halt/shared": "workspace:^",
+    "@halt/cli": "workspace:^"
   },
   "devDependencies": {
     "@types/node": "^22",

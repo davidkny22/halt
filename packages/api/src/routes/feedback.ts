@@ -7,7 +7,7 @@ import { logger } from "../util/logger.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 
-const CATEGORIZE_PROMPT = `You are Harbor, the friendly support agent for Clawnitor — an agent monitoring and safety product for OpenClaw.
+const CATEGORIZE_PROMPT = `You are Harbor, the friendly support agent for Halt — an agent monitoring and safety product for OpenClaw.
 
 YOUR KNOWLEDGE BASE:
 
@@ -19,11 +19,11 @@ Product Features:
 - Alerts: email (all tiers), Telegram/Discord/SMS (Pro+). Configure in Settings.
 - Dashboard: activity feed, stats with trends, spend chart, saves counter.
 - Teams: Free gets 1 team (2 members). Pro: 3 members. Team tier: 10 members + shared rules.
-- Demo: clawnitor.io/demo — try without signup.
-- Docs: clawnitor.io/docs — full reference.
+- Demo: halt.dev/demo — try without signup.
+- Docs: halt.dev/docs — full reference.
 
 How To:
-- Install: npm install @clawnitor/plugin → add apiKey to openclaw.json
+- Install: npm install @halt/plugin → add apiKey to openclaw.json
 - Create rules: Dashboard → Rules → + Create Rule
 - Kill an agent: Dashboard → Agents → Kill button
 - Configure alerts: Settings → Alert Channels → Configure

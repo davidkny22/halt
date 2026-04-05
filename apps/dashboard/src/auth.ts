@@ -30,7 +30,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
     Resend({
       apiKey: process.env.AUTH_RESEND_KEY || process.env.RESEND_API_KEY,
-      from: "Clawnitor <login@clawnitor.io>",
+      from: "Halt <login@halt.dev>",
     }),
   ],
   pages: {
@@ -39,7 +39,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async signIn({ user, account }) {
-      // Provision user on Clawnitor backend after any auth method
+      // Provision user on Halt backend after any auth method
       try {
         const res = await fetch(`${API_URL}/api/auth/provision`, {
           method: "POST",

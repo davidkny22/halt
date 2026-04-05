@@ -4,16 +4,16 @@ import { getDb } from "../db/client.js";
 import { rules, alerts, users, agents, saves, events as eventsTable } from "../db/schema.js";
 import { eq, and, sql, gte, desc } from "drizzle-orm";
 import { sendKill } from "../ws/kill-server.js";
-import { TIER_FEATURES, type Tier } from "@clawnitor/shared";
+import { TIER_FEATURES, type Tier } from "@halt/shared";
 import { evaluateRules, type RuleWithId } from "../rules/engine.js";
-import type { ClawnitorEvent, RuleConfig } from "@clawnitor/shared";
+import type { HaltEvent, RuleConfig } from "@halt/shared";
 
 export function startEventProcessor() {
   const alertQueue = createQueue("alerts");
 
   return createWorker("events", async (job: Job) => {
     const { events, userId } = job.data as {
-      events: ClawnitorEvent[];
+      events: HaltEvent[];
       userId: string;
     };
 
@@ -58,7 +58,7 @@ export function startEventProcessor() {
     }
 
     // Group events by agent_id and evaluate only applicable rules per agent
-    const eventsByAgent = new Map<string, ClawnitorEvent[]>();
+    const eventsByAgent = new Map<string, HaltEvent[]>();
     for (const event of events) {
       const aid = event.agent_id;
       if (!eventsByAgent.has(aid)) eventsByAgent.set(aid, []);

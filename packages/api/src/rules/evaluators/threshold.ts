@@ -1,5 +1,5 @@
-import type { ThresholdConfig } from "@clawnitor/shared";
-import type { ClawnitorEvent } from "@clawnitor/shared";
+import type { ThresholdConfig } from "@halt/shared";
+import type { HaltEvent } from "@halt/shared";
 
 export interface EvalResult {
   triggered: boolean;
@@ -7,7 +7,7 @@ export interface EvalResult {
 }
 
 export function evaluateThreshold(
-  events: ClawnitorEvent[],
+  events: HaltEvent[],
   config: ThresholdConfig
 ): EvalResult {
   // Extract the numeric field from metadata

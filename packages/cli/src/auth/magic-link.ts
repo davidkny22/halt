@@ -1,4 +1,4 @@
-const API_URL = process.env.CLAWNITOR_API_URL || "https://api.clawnitor.io";
+const API_URL = process.env.HALT_API_URL || "https://api.halt.dev";
 
 export async function sendMagicLink(email: string): Promise<string> {
   const res = await fetch(`${API_URL}/api/auth/cli-magic-link`, {
@@ -36,7 +36,7 @@ export async function pollMagicLink(
         return { email: data.email };
       }
       if (data.expired) {
-        throw new Error("Magic link expired. Run clawnitor init again.");
+        throw new Error("Magic link expired. Run halt init again.");
       }
     }
 

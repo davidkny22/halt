@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { clawnitorEventSchema, createEventId } from "../events.js";
+import { haltEventSchema, createEventId } from "../events.js";
 
 const validEvent = {
   agent_id: "agent-1",
@@ -18,9 +18,9 @@ const validEvent = {
   plugin_version: "0.0.1",
 };
 
-describe("clawnitorEventSchema", () => {
+describe("haltEventSchema", () => {
   it("accepts a valid event", () => {
-    const result = clawnitorEventSchema.safeParse(validEvent);
+    const result = haltEventSchema.safeParse(validEvent);
     expect(result.success).toBe(true);
   });
 
@@ -34,7 +34,7 @@ describe("clawnitorEventSchema", () => {
       "subagent",
     ];
     for (const event_type of types) {
-      const result = clawnitorEventSchema.safeParse({
+      const result = haltEventSchema.safeParse({
         ...validEvent,
         event_type,
       });
@@ -44,7 +44,7 @@ describe("clawnitorEventSchema", () => {
 
   it("accepts all severity hints", () => {
     for (const severity_hint of ["normal", "elevated", "critical"]) {
-      const result = clawnitorEventSchema.safeParse({
+      const result = haltEventSchema.safeParse({
         ...validEvent,
         severity_hint,
       });
@@ -53,7 +53,7 @@ describe("clawnitorEventSchema", () => {
   });
 
   it("accepts minimal metadata", () => {
-    const result = clawnitorEventSchema.safeParse({
+    const result = haltEventSchema.safeParse({
       ...validEvent,
       metadata: {},
     });
@@ -62,12 +62,12 @@ describe("clawnitorEventSchema", () => {
 
   it("rejects missing agent_id", () => {
     const { agent_id, ...rest } = validEvent;
-    const result = clawnitorEventSchema.safeParse(rest);
+    const result = haltEventSchema.safeParse(rest);
     expect(result.success).toBe(false);
   });
 
   it("rejects empty agent_id", () => {
-    const result = clawnitorEventSchema.safeParse({
+    const result = haltEventSchema.safeParse({
       ...validEvent,
       agent_id: "",
     });
@@ -75,7 +75,7 @@ describe("clawnitorEventSchema", () => {
   });
 
   it("rejects invalid event_type", () => {
-    const result = clawnitorEventSchema.safeParse({
+    const result = haltEventSchema.safeParse({
       ...validEvent,
       event_type: "invalid_type",
     });
@@ -83,7 +83,7 @@ describe("clawnitorEventSchema", () => {
   });
 
   it("rejects invalid severity_hint", () => {
-    const result = clawnitorEventSchema.safeParse({
+    const result = haltEventSchema.safeParse({
       ...validEvent,
       severity_hint: "unknown",
     });
@@ -91,7 +91,7 @@ describe("clawnitorEventSchema", () => {
   });
 
   it("rejects invalid timestamp format", () => {
-    const result = clawnitorEventSchema.safeParse({
+    const result = haltEventSchema.safeParse({
       ...validEvent,
       timestamp: "not-a-date",
     });
@@ -99,7 +99,7 @@ describe("clawnitorEventSchema", () => {
   });
 
   it("rejects raw_snippet over 500 chars", () => {
-    const result = clawnitorEventSchema.safeParse({
+    const result = haltEventSchema.safeParse({
       ...validEvent,
       metadata: { raw_snippet: "x".repeat(501) },
     });
@@ -107,7 +107,7 @@ describe("clawnitorEventSchema", () => {
   });
 
   it("accepts raw_snippet at exactly 500 chars", () => {
-    const result = clawnitorEventSchema.safeParse({
+    const result = haltEventSchema.safeParse({
       ...validEvent,
       metadata: { raw_snippet: "x".repeat(500) },
     });

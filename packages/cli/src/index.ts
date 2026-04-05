@@ -40,24 +40,24 @@ if (command === "init") {
   });
 } else {
   console.log(`
-  Clawnitor CLI — Agent monitoring for OpenClaw
+  Halt CLI — Agent monitoring for OpenClaw
 
   Commands:
-    init      Set up Clawnitor (authenticate + configure API key)
-    discover  Register all agents from openclaw.json with Clawnitor
+    init      Set up Halt (authenticate + configure API key)
+    discover  Register all agents from openclaw.json with Halt
     test      Test Shield config and rules against synthetic attacks
     check     Quick Shield reliability score (one line)
     report    View local event summary (offline mode)
     serve     Start local dashboard on localhost (offline mode)
 
   Usage:
-    npx clawnitor init
-    npx clawnitor discover           # register all agents
-    npx clawnitor test               # fetch rules from API
-    npx clawnitor test --verbose     # detailed output
-    npx clawnitor test --json        # machine-readable
-    npx clawnitor check              # one-line reliability score
-    npx clawnitor report             # local event summary
-    npx clawnitor serve              # local dashboard on localhost:5173
+    npx halt init
+    npx halt discover           # register all agents
+    npx halt test               # fetch rules from API
+    npx halt test --verbose     # detailed output
+    npx halt test --json        # machine-readable
+    npx halt check              # one-line reliability score
+    npx halt report             # local event summary
+    npx halt serve              # local dashboard on localhost:5173
 `);
 }

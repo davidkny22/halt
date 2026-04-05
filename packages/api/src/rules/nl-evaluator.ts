@@ -1,4 +1,4 @@
-import type { ClawnitorEvent } from "@clawnitor/shared";
+import type { HaltEvent } from "@halt/shared";
 import { evaluate } from "../ai/client.js";
 
 const SYSTEM_PROMPT = `You are a monitoring system evaluating agent behavior rules. You receive a batch of events from an AI agent and a natural language rule to evaluate.
@@ -17,7 +17,7 @@ export interface NLEvalResult {
 }
 
 export async function evaluateNLRule(
-  events: ClawnitorEvent[],
+  events: HaltEvent[],
   ruleText: string
 ): Promise<NLEvalResult> {
   // Summarize events for the prompt

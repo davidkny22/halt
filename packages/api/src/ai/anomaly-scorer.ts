@@ -1,4 +1,4 @@
-import type { ClawnitorEvent } from "@clawnitor/shared";
+import type { HaltEvent } from "@halt/shared";
 import type { BaselineProfile } from "./baseline-builder.js";
 import { evaluate, isDegraded } from "./client.js";
 
@@ -22,7 +22,7 @@ export interface AnomalyResult {
 }
 
 export async function scoreAnomaly(
-  events: ClawnitorEvent[],
+  events: HaltEvent[],
   baseline: BaselineProfile
 ): Promise<AnomalyResult | null> {
   if (isDegraded()) return null;

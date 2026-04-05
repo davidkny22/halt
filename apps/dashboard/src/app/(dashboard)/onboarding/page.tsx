@@ -84,7 +84,7 @@ export default async function OnboardingPage() {
   const configJson = `{
   "plugins": {
     "entries": {
-      "clawnitor": {
+      "halt": {
         "config": {
           "apiKey": "${keyDisplay}"
         }
@@ -96,7 +96,7 @@ export default async function OnboardingPage() {
   return (
     <div className="max-w-lg mx-auto py-12">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold mb-2">Welcome to Clawnitor!</h1>
+        <h1 className="text-2xl font-bold mb-2">Welcome to Halt!</h1>
         <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
           {apiKey ? "Two steps to full agent monitoring." : "You're all set. Your API key is already configured."}
         </p>
@@ -154,7 +154,7 @@ export default async function OnboardingPage() {
           </span>
           <h2 className="font-semibold">Install the plugin</h2>
         </div>
-        <CopyBlock text="npm install @clawnitor/plugin" />
+        <CopyBlock text="npm install @halt/plugin" />
       </div>
 
       {/* Step 2: Configure */}

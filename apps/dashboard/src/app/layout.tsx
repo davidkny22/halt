@@ -4,33 +4,33 @@ import { PageTracker } from "@/components/page-tracker";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Clawnitor — Agent Monitoring for OpenClaw",
+  title: "Halt — Agent Monitoring for OpenClaw",
   description:
     "Real-time monitoring, smart rules, AI anomaly detection, kill switch, and auto-kill for your OpenClaw agents. One plugin, total control.",
   icons: {
     icon: { url: "/favicon.svg", type: "image/svg+xml" },
   },
-  metadataBase: new URL("https://clawnitor.io"),
+  metadataBase: new URL("https://halt.dev"),
   openGraph: {
-    title: "Clawnitor — Agent Monitoring for OpenClaw",
+    title: "Halt — Agent Monitoring for OpenClaw",
     description:
-      "When your agent breaks your rules, Clawnitor stops it. Monitoring, smart rules, kill switch, and auto-kill in one plugin.",
-    url: "https://clawnitor.io",
-    siteName: "Clawnitor",
+      "When your agent breaks your rules, Halt stops it. Monitoring, smart rules, kill switch, and auto-kill in one plugin.",
+    url: "https://halt.dev",
+    siteName: "Halt",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Clawnitor — Agent Monitoring for OpenClaw",
+    title: "Halt — Agent Monitoring for OpenClaw",
     description:
-      "When your agent breaks your rules, Clawnitor stops it. Monitoring, smart rules, kill switch, and auto-kill in one plugin.",
+      "When your agent breaks your rules, Halt stops it. Monitoring, smart rules, kill switch, and auto-kill in one plugin.",
   },
   robots: {
     index: true,
     follow: true,
   },
   alternates: {
-    canonical: "https://clawnitor.io",
+    canonical: "https://halt.dev",
   },
 };
 
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
 // This is NOT user input — it reads from localStorage only. Safe to inline.
 const themeScript = `
   (function() {
-    var t = localStorage.getItem('clawnitor-theme');
+    var t = localStorage.getItem('halt-theme');
     if (t === 'light') {
       document.documentElement.classList.remove('dark');
     } else {
@@ -64,12 +64,12 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "SoftwareApplication",
-              name: "Clawnitor",
+              name: "Halt",
               applicationCategory: "DeveloperApplication",
               operatingSystem: "Any",
               description:
-                "Agent monitoring, smart rules, kill switch, and auto-kill for OpenClaw. When your agent breaks your rules, Clawnitor stops it.",
-              url: "https://clawnitor.io",
+                "Agent monitoring, smart rules, kill switch, and auto-kill for OpenClaw. When your agent breaks your rules, Halt stops it.",
+              url: "https://halt.dev",
               offers: [
                 {
                   "@type": "Offer",
@@ -117,10 +117,10 @@ export default function RootLayout({
               mainEntity: [
                 {
                   "@type": "Question",
-                  name: "What is Clawnitor?",
+                  name: "What is Halt?",
                   acceptedAnswer: {
                     "@type": "Answer",
-                    text: "Clawnitor is a monitoring and safety layer for autonomous AI agents running on OpenClaw. It watches everything your agent does, evaluates custom rules, and can instantly pause runaway agents.",
+                    text: "Halt is a monitoring and safety layer for autonomous AI agents running on OpenClaw. It watches everything your agent does, evaluates custom rules, and can instantly pause runaway agents.",
                   },
                 },
                 {
@@ -128,7 +128,7 @@ export default function RootLayout({
                   name: "What is auto-kill?",
                   acceptedAnswer: {
                     "@type": "Answer",
-                    text: "If an agent triggers 3 rule violations within 10 minutes, Clawnitor automatically shuts it down. No human intervention needed. The threshold and window are configurable per agent from your dashboard.",
+                    text: "If an agent triggers 3 rule violations within 10 minutes, Halt automatically shuts it down. No human intervention needed. The threshold and window are configurable per agent from your dashboard.",
                   },
                 },
                 {

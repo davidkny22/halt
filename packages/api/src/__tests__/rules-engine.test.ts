@@ -3,9 +3,9 @@ import { evaluateRules, type RuleWithId } from "../rules/engine.js";
 import { evaluateThreshold } from "../rules/evaluators/threshold.js";
 import { evaluateRate } from "../rules/evaluators/rate.js";
 import { evaluateKeyword } from "../rules/evaluators/keyword.js";
-import type { ClawnitorEvent } from "@clawnitor/shared";
+import type { HaltEvent } from "@halt/shared";
 
-function makeEvent(overrides: Partial<ClawnitorEvent> = {}): ClawnitorEvent {
+function makeEvent(overrides: Partial<HaltEvent> = {}): HaltEvent {
   return {
     agent_id: "agent-1",
     session_id: "session-1",

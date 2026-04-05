@@ -1,5 +1,5 @@
-import type { RateConfig } from "@clawnitor/shared";
-import type { ClawnitorEvent } from "@clawnitor/shared";
+import type { RateConfig } from "@halt/shared";
+import type { HaltEvent } from "@halt/shared";
 
 export interface EvalResult {
   triggered: boolean;
@@ -7,7 +7,7 @@ export interface EvalResult {
 }
 
 export function evaluateRate(
-  events: ClawnitorEvent[],
+  events: HaltEvent[],
   config: RateConfig
 ): EvalResult {
   let filtered = events;

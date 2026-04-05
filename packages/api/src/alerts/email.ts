@@ -37,11 +37,11 @@ export async function sendAlertEmail(
 
   try {
     await resend.emails.send({
-      from: "Clawnitor <alerts@clawnitor.io>",
+      from: "Halt <alerts@halt.dev>",
       to,
-      subject: `🦞 Clawnitor ${emoji} [${severityLabel}] — ${data.ruleName}`,
+      subject: `🦞 Halt ${emoji} [${severityLabel}] — ${data.ruleName}`,
       text: [
-        `🦞 Clawnitor Alert [${severityLabel}]`,
+        `🦞 Halt Alert [${severityLabel}]`,
         `Agent: ${data.agentName || "Unknown"}`,
         `Rule: "${data.ruleName}"`,
         `Triggered: ${data.triggerSummary}`,

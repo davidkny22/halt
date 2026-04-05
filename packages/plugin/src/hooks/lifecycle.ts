@@ -16,7 +16,7 @@ export function createSessionStartHandler(ctx: LifecycleContext) {
     const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
     ctx.onSessionStart?.();
 
-    const clawnitorEvent = buildEvent({
+    const haltEvent = buildEvent({
       agentId,
       sessionId,
       eventType: "agent_lifecycle",
@@ -26,7 +26,7 @@ export function createSessionStartHandler(ctx: LifecycleContext) {
       customRedactionPatterns: ctx.redactionPatterns,
     });
 
-    ctx.sender.enqueue(clawnitorEvent);
+    ctx.sender.enqueue(haltEvent);
   };
 }
 
@@ -35,7 +35,7 @@ export function createSessionEndHandler(ctx: LifecycleContext) {
     const agentId = ctx.resolveAgentId(event, ocCtx);
     const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
 
-    const clawnitorEvent = buildEvent({
+    const haltEvent = buildEvent({
       agentId,
       sessionId,
       eventType: "agent_lifecycle",
@@ -47,7 +47,7 @@ export function createSessionEndHandler(ctx: LifecycleContext) {
       customRedactionPatterns: ctx.redactionPatterns,
     });
 
-    ctx.sender.enqueue(clawnitorEvent);
+    ctx.sender.enqueue(haltEvent);
   };
 }
 
@@ -56,7 +56,7 @@ export function createAgentEndHandler(ctx: LifecycleContext) {
     const agentId = ctx.resolveAgentId(event, ocCtx);
     const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
 
-    const clawnitorEvent = buildEvent({
+    const haltEvent = buildEvent({
       agentId,
       sessionId,
       eventType: "agent_lifecycle",
@@ -69,7 +69,7 @@ export function createAgentEndHandler(ctx: LifecycleContext) {
       customRedactionPatterns: ctx.redactionPatterns,
     });
 
-    ctx.sender.enqueue(clawnitorEvent);
+    ctx.sender.enqueue(haltEvent);
 
     // Mark session boundary — next events from this agent get a new session
     ctx.onAgentEnd?.(agentId);
@@ -82,7 +82,7 @@ export function createSubagentHandlers(ctx: LifecycleContext) {
       const agentId = ctx.resolveAgentId(event, ocCtx);
       const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
       const subagentId = event.subagentId || event.childSessionKey || "unknown";
-      const clawnitorEvent = buildEvent({
+      const haltEvent = buildEvent({
         agentId,
         sessionId,
         eventType: "subagent",
@@ -96,13 +96,13 @@ export function createSubagentHandlers(ctx: LifecycleContext) {
         },
         customRedactionPatterns: ctx.redactionPatterns,
       });
-      ctx.sender.enqueue(clawnitorEvent);
+      ctx.sender.enqueue(haltEvent);
     },
     ended: (event: any, ocCtx?: any) => {
       const agentId = ctx.resolveAgentId(event, ocCtx);
       const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
       const subagentId = event.subagentId || event.childSessionKey || "unknown";
-      const clawnitorEvent = buildEvent({
+      const haltEvent = buildEvent({
         agentId,
         sessionId,
         eventType: "subagent",
@@ -114,7 +114,7 @@ export function createSubagentHandlers(ctx: LifecycleContext) {
         },
         customRedactionPatterns: ctx.redactionPatterns,
       });
-      ctx.sender.enqueue(clawnitorEvent);
+      ctx.sender.enqueue(haltEvent);
     },
   };
 }

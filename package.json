@@ -1,5 +1,5 @@
 {
-  "name": "clawnitor",
+  "name": "halt",
   "private": true,
   "scripts": {
     "dev": "turbo dev",
@@ -7,9 +7,9 @@
     "test": "turbo test",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
-    "db:generate": "pnpm --filter @clawnitor/api db:generate",
-    "db:push": "pnpm --filter @clawnitor/api db:push",
-    "db:studio": "pnpm --filter @clawnitor/api db:studio",
+    "db:generate": "pnpm --filter @halt/api db:generate",
+    "db:push": "pnpm --filter @halt/api db:push",
+    "db:studio": "pnpm --filter @halt/api db:studio",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down"
   },

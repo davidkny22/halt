@@ -38,7 +38,7 @@ const TYPE_COLORS: Record<string, string> = {
   nl: "var(--color-green)",
 };
 
-const CACHE_KEY = "clw_rule_templates_v3";
+const CACHE_KEY = "halt_rule_templates_v3";
 const CACHE_TTL = 60 * 60 * 1000; // 1h
 
 export function TemplateLibrary({ defaultExpanded = false }: { defaultExpanded?: boolean }) {
@@ -69,7 +69,7 @@ export function TemplateLibrary({ defaultExpanded = false }: { defaultExpanded?:
 
     // Fetch fresh — always go through API directly (public endpoint, no auth needed)
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.clawnitor.io";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.halt.dev";
       const res = await fetch(`${apiUrl}/api/rule-templates`, { cache: "no-store" });
       if (res.ok) {
         const { by_category } = await res.json();

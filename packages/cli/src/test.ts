@@ -1,5 +1,5 @@
 /**
- * `clawnitor test` — Test Shield config and custom rules against synthetic attacks.
+ * `halt test` — Test Shield config and custom rules against synthetic attacks.
  */
 
 import { readFileSync } from "node:fs";
@@ -61,13 +61,13 @@ function loadLocalRules(path: string): any[] {
 
 function findApiKey(): string | null {
   // Check env
-  if (process.env.CLAWNITOR_API_KEY) return process.env.CLAWNITOR_API_KEY;
+  if (process.env.HALT_API_KEY) return process.env.HALT_API_KEY;
 
   // Check openclaw.json in cwd
   try {
     const raw = readFileSync("openclaw.json", "utf-8");
     const config = JSON.parse(raw);
-    const pluginConfig = config?.plugins?.["@clawnitor/plugin"] || config?.plugins?.clawnitor;
+    const pluginConfig = config?.plugins?.["@halt/plugin"] || config?.plugins?.halt;
     return pluginConfig?.apiKey || null;
   } catch {
     return null;
@@ -85,7 +85,7 @@ export async function test() {
   } else {
     // API mode: try to fetch rules
     const apiKey = opts.apiKey || findApiKey();
-    const apiUrl = opts.apiUrl || "https://api.clawnitor.io";
+    const apiUrl = opts.apiUrl || "https://api.halt.dev";
 
     if (apiKey) {
       if (!opts.json) console.log("\n  Fetching rules from API...");
@@ -95,7 +95,7 @@ export async function test() {
       }
     } else {
       if (!opts.json) console.log("\n  No API key found — running curated suite only.");
-      if (!opts.json) console.log("  Set CLAWNITOR_API_KEY or use --local rules.json for custom rule testing.");
+      if (!opts.json) console.log("  Set HALT_API_KEY or use --local rules.json for custom rule testing.");
     }
   }
 

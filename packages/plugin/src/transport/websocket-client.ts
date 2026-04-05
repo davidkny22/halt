@@ -2,7 +2,7 @@ import {
   WS_RECONNECT_BASE_MS,
   WS_RECONNECT_MAX_MS,
   type WsMessage,
-} from "@clawnitor/shared";
+} from "@halt/shared";
 import type { PluginConfig } from "../config.js";
 
 export class WebSocketClient {

@@ -1,8 +1,8 @@
-# Clawnitor
+# Halt
 
 > Agent monitoring, smart rules, kill switch, and auto-kill for OpenClaw. One plugin, total control.
 
-Clawnitor is a monitoring and intervention SaaS for AI agents running on the OpenClaw platform. It hooks into before_tool_call and enforces safety rules at the execution layer. When an agent breaks your rules, Clawnitor stops it.
+Halt is a monitoring and intervention SaaS for AI agents running on the OpenClaw platform. It hooks into before_tool_call and enforces safety rules at the execution layer. When an agent breaks your rules, Halt stops it.
 
 ## Core Features
 
@@ -24,15 +24,15 @@ Clawnitor is a monitoring and intervention SaaS for AI agents running on the Ope
 ## Installation
 
 ```
-openclaw plugins install @clawnitor/plugin
-npx clawnitor init
+openclaw plugins install @halt/plugin
+npx halt init
 ```
 
-Or manually: sign up at clawnitor.io, copy your API key, add to openclaw.json:
+Or manually: sign up at halt.dev, copy your API key, add to openclaw.json:
 ```json
 {
   "plugins": {
-    "@clawnitor/plugin": {
+    "@halt/plugin": {
       "apiKey": "clw_live_..."
     }
   }
@@ -41,19 +41,19 @@ Or manually: sign up at clawnitor.io, copy your API key, add to openclaw.json:
 
 ## Links
 
-- [Landing Page](https://clawnitor.io)
-- [Dashboard](https://app.clawnitor.io)
-- [Interactive Demo](https://clawnitor.io/demo)
-- [Documentation](https://clawnitor.io/docs)
-- [Pricing](https://clawnitor.io/pricing)
-- [Privacy Policy](https://clawnitor.io/privacy)
-- [Terms of Service](https://clawnitor.io/terms)
-- [Plugin on npm](https://www.npmjs.com/package/@clawnitor/plugin)
-- [Plugin Source (GitHub)](https://github.com/davidkny22/clawnitor-plugin)
+- [Landing Page](https://halt.dev)
+- [Dashboard](https://app.halt.dev)
+- [Interactive Demo](https://halt.dev/demo)
+- [Documentation](https://halt.dev/docs)
+- [Pricing](https://halt.dev/pricing)
+- [Privacy Policy](https://halt.dev/privacy)
+- [Terms of Service](https://halt.dev/terms)
+- [Plugin on npm](https://www.npmjs.com/package/@halt/plugin)
+- [Plugin Source (GitHub)](https://github.com/davidkny22/halt-plugin)
 
 ## API
 
-Base URL: `https://api.clawnitor.io`
+Base URL: `https://api.halt.dev`
 
 Authentication: Bearer token (API key) for plugin-to-API. Internal secret + X-User-Email header for dashboard-to-API.
 

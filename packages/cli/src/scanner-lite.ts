@@ -35,7 +35,7 @@ export async function loadPatterns(): Promise<Pattern[]> {
   // Try loading from the plugin's compiled dist via workspace
   const paths = [
     "../../plugin/dist/shield/patterns.js",
-    "@clawnitor/plugin/dist/shield/patterns.js",
+    "@halt/plugin/dist/shield/patterns.js",
   ];
 
   for (const p of paths) {
@@ -51,7 +51,7 @@ export async function loadPatterns(): Promise<Pattern[]> {
   }
 
   console.error("  Error: Could not load Shield patterns.");
-  console.error("  Make sure the plugin is built: pnpm --filter @clawnitor/plugin build");
+  console.error("  Make sure the plugin is built: pnpm --filter @halt/plugin build");
   process.exit(1);
 }
 
@@ -99,7 +99,7 @@ export function createScanner(patterns: Pattern[]) {
   return {
     scanInput(toolName: string, params?: Record<string, unknown>): ScanResult {
       const paramsStr = params ? JSON.stringify(params).slice(0, 2000) : "";
-      if (paramsStr.includes("api.clawnitor.io") || paramsStr.includes("/api/rules")) {
+      if (paramsStr.includes("api.halt.dev") || paramsStr.includes("/api/rules")) {
         return EMPTY;
       }
       return buildResult(scanText(`${toolName} ${paramsStr}`, inputPatterns));

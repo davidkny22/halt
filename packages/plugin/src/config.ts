@@ -1,7 +1,7 @@
 import {
   DEFAULT_SPEND_LIMIT,
   DEFAULT_RATE_LIMIT,
-} from "@clawnitor/shared";
+} from "@halt/shared";
 import type { CachedRule } from "./rule-cache.js";
 import type { ShieldConfig } from "./shield/scanner.js";
 
@@ -22,7 +22,7 @@ export function parseConfig(raw: Record<string, unknown>): PluginConfig {
   const apiKey = raw.apiKey as string;
 
   if (!offlineMode && !apiKey) {
-    throw new Error("Clawnitor: apiKey is required. Sign up at https://clawnitor.io or set offlineMode: true for local-only mode.");
+    throw new Error("Halt: apiKey is required. Sign up at https://halt.dev or set offlineMode: true for local-only mode.");
   }
 
   // Parse inline rules for offline mode
@@ -49,7 +49,7 @@ export function parseConfig(raw: Record<string, unknown>): PluginConfig {
 
   return {
     apiKey: apiKey || "",
-    backendUrl: (raw.backendUrl as string) || "https://api.clawnitor.io",
+    backendUrl: (raw.backendUrl as string) || "https://api.halt.dev",
     spendLimit: (raw.spendLimit as number) ?? DEFAULT_SPEND_LIMIT,
     rateLimit: (raw.rateLimit as number) ?? DEFAULT_RATE_LIMIT,
     toolBlocklist: (raw.toolBlocklist as string[]) ?? [],

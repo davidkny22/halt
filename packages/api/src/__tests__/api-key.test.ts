@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { generateApiKey, hashApiKey, verifyApiKey } from "../auth/api-key.js";
-import { API_KEY_PREFIX } from "@clawnitor/shared";
+import { API_KEY_PREFIX } from "@halt/shared";
 
 describe("API Key", () => {
   it("generates a key with the correct prefix", () => {

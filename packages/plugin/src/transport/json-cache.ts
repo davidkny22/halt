@@ -3,14 +3,14 @@
  * Replaces SqliteCache — zero native dependencies.
  */
 
-import type { ClawnitorEvent } from "@clawnitor/shared";
-import { CACHE_SIZE_LIMIT, CACHE_AGE_LIMIT } from "@clawnitor/shared";
+import type { HaltEvent } from "@halt/shared";
+import { CACHE_SIZE_LIMIT, CACHE_AGE_LIMIT } from "@halt/shared";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 
 interface CachedEntry {
-  payload: ClawnitorEvent;
+  payload: HaltEvent;
   created_at: number; // unix ms
 }
 
@@ -19,7 +19,7 @@ export class JsonCache {
   private entries: CachedEntry[] = [];
 
   constructor(filePath?: string) {
-    this.filePath = filePath || join(tmpdir(), "clawnitor-cache.json");
+    this.filePath = filePath || join(tmpdir(), "halt-cache.json");
 
     // Ensure directory exists
     try {
@@ -39,7 +39,7 @@ export class JsonCache {
     }
   }
 
-  cache(events: ClawnitorEvent[]): void {
+  cache(events: HaltEvent[]): void {
     try {
       const now = Date.now();
       for (const event of events) {
@@ -52,7 +52,7 @@ export class JsonCache {
     }
   }
 
-  flush(limit: number = 50): ClawnitorEvent[] {
+  flush(limit: number = 50): HaltEvent[] {
     try {
       const batch = this.entries.splice(0, limit);
       if (batch.length > 0) {
@@ -65,7 +65,7 @@ export class JsonCache {
   }
 
   /** Read all cached events without removing them (for report/serve) */
-  readAll(): ClawnitorEvent[] {
+  readAll(): HaltEvent[] {
     return this.entries.map((e) => e.payload);
   }
 

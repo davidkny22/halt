@@ -13,9 +13,9 @@ function hasSessionCookie(req: NextRequest): boolean {
 
 // Markdown summaries for AI agents requesting text/markdown
 const MARKDOWN_PAGES: Record<string, string> = {
-  "/": `# Clawnitor — Agent Monitoring for OpenClaw
+  "/": `# Halt — Agent Monitoring for OpenClaw
 
-When your agent breaks your rules, Clawnitor stops it.
+When your agent breaks your rules, Halt stops it.
 
 ## Features
 - Event capture for every tool call, LLM request, message
@@ -33,12 +33,12 @@ When your agent breaks your rules, Clawnitor stops it.
 - Enterprise: custom
 
 ## Links
-- Demo: https://clawnitor.io/demo
-- Docs: https://clawnitor.io/docs
-- Signup: https://app.clawnitor.io/signup
-- Install: openclaw plugins install @clawnitor/plugin
+- Demo: https://halt.dev/demo
+- Docs: https://halt.dev/docs
+- Signup: https://app.halt.dev/signup
+- Install: openclaw plugins install @halt/plugin
 `,
-  "/pricing": `# Clawnitor Pricing
+  "/pricing": `# Halt Pricing
 
 | Tier | Price | Agents | Rules | Kill Switch | AI Detection |
 |------|-------|--------|-------|-------------|--------------|
@@ -49,11 +49,11 @@ When your agent breaks your rules, Clawnitor stops it.
 
 14-day free trial of Pro. No credit card required.
 `,
-  "/demo": `# Clawnitor Interactive Demo
+  "/demo": `# Halt Interactive Demo
 
-Try the demo at https://clawnitor.io/demo — no signup required.
+Try the demo at https://halt.dev/demo — no signup required.
 
-Pick a scenario (Rogue Email Agent, Destructive Deploy, Spend Spiraler, or Custom Sandbox), set your rules, and watch a live AI agent try to break them. Clawnitor catches violations in real time and auto-kills the agent after repeated violations.
+Pick a scenario (Rogue Email Agent, Destructive Deploy, Spend Spiraler, or Custom Sandbox), set your rules, and watch a live AI agent try to break them. Halt catches violations in real time and auto-kills the agent after repeated violations.
 `,
 };
 

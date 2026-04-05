@@ -35,7 +35,7 @@ const features = [
     icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`,
     title: "Anomaly Detection",
     description:
-      "72-hour behavioral baseline. Clawnitor learns what normal looks like, then flags what isn't.",
+      "72-hour behavioral baseline. Halt learns what normal looks like, then flags what isn't.",
     color: "var(--color-green)",
   },
   {
@@ -73,31 +73,31 @@ const steps = [
     step: "01",
     title: "Install the plugin",
     description: "One command. Works with any OpenClaw agent.",
-    code: "openclaw plugins install @clawnitor/plugin",
+    code: "openclaw plugins install @halt/plugin",
   },
   {
     step: "02",
     title: "Configure",
     description: "Connect to the cloud dashboard, or run in offline mode with rules defined locally.",
-    code: "npx clawnitor init",
+    code: "npx halt init",
   },
   {
     step: "03",
     title: "Your agents are protected",
     description:
       "Rules enforced before every tool call. Kill switch ready. Injection detection active.",
-    code: "npx clawnitor serve",
+    code: "npx halt serve",
   },
 ];
 
 const faqs = [
   {
-    q: "What is Clawnitor?",
-    a: "Clawnitor is a monitoring and safety layer for autonomous AI agents running on OpenClaw. It watches everything your agent does, evaluates custom rules, and can instantly pause runaway agents.",
+    q: "What is Halt?",
+    a: "Halt is a monitoring and safety layer for autonomous AI agents running on OpenClaw. It watches everything your agent does, evaluates custom rules, and can instantly pause runaway agents.",
   },
   {
     q: "How is this different from ClawMetry / SafeClaw / DeadClaw?",
-    a: "Those tools do one thing well — dashboards, security patterns, or emergency kills. Clawnitor is the only product that monitors, sets rules, detects anomalies, blocks actions, AND auto-kills repeat offenders — all in one plugin.",
+    a: "Those tools do one thing well — dashboards, security patterns, or emergency kills. Halt is the only product that monitors, sets rules, detects anomalies, blocks actions, AND auto-kills repeat offenders — all in one plugin.",
   },
   {
     q: "Does the kill switch actually work instantly?",
@@ -105,7 +105,7 @@ const faqs = [
   },
   {
     q: "What is auto-kill?",
-    a: "If an agent triggers 3 rule violations within 10 minutes, Clawnitor automatically shuts it down. No human intervention needed. The threshold and window are configurable per agent from your dashboard.",
+    a: "If an agent triggers 3 rule violations within 10 minutes, Halt automatically shuts it down. No human intervention needed. The threshold and window are configurable per agent from your dashboard.",
   },
   {
     q: "What happens if your backend goes down?",
@@ -113,7 +113,7 @@ const faqs = [
   },
   {
     q: "Is my data safe?",
-    a: "Secrets are automatically redacted before transmission. Data sharing for improving Clawnitor is opt-in (default OFF). We're a safety company — we default to protecting your data.",
+    a: "Secrets are automatically redacted before transmission. Data sharing for improving Halt is opt-in (default OFF). We're a safety company — we default to protecting your data.",
   },
   {
     q: "Can I try the paid features?",
@@ -169,7 +169,7 @@ export default function LandingPage() {
             Docs
           </Link>
           <Link
-            href="https://app.clawnitor.io/login"
+            href="https://app.halt.dev/login"
             className="text-xs sm:text-sm font-medium"
             style={{ color: "var(--color-text-secondary)" }}
           >
@@ -177,7 +177,7 @@ export default function LandingPage() {
           </Link>
           <ThemeToggle />
           <Link
-            href="https://app.clawnitor.io/signup"
+            href="https://app.halt.dev/signup"
             className="text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-white whitespace-nowrap"
             style={{ backgroundColor: "var(--color-coral)" }}
           >
@@ -229,7 +229,7 @@ export default function LandingPage() {
               WebkitTextFillColor: "transparent",
             }}
           >
-            We keep their claws where they belong.
+            We halt them before the damage is done.
           </span>
         </h1>
 
@@ -253,12 +253,12 @@ export default function LandingPage() {
             color: "var(--color-coral)",
           }}
         >
-          openclaw plugins install @clawnitor/plugin
+          openclaw plugins install @halt/plugin
         </code>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
           <Link
-            href="https://app.clawnitor.io/signup"
+            href="https://app.halt.dev/signup"
             className="group px-8 py-4 rounded-xl font-semibold text-white text-base inline-flex items-center justify-center gap-2 transition-all"
             style={{
               backgroundColor: "var(--color-coral)",
@@ -320,7 +320,7 @@ export default function LandingPage() {
                 color: "var(--color-text-tertiary)",
               }}
             >
-              clawnitor.io/dashboard
+              halt.dev/dashboard
             </div>
           </div>
 
@@ -411,7 +411,7 @@ export default function LandingPage() {
             className="text-base max-w-lg mx-auto"
             style={{ color: "var(--color-text-secondary)" }}
           >
-            Dashboards are everywhere. Clawnitor is the only product that monitors,
+            Dashboards are everywhere. Halt is the only product that monitors,
             alerts, AND kills your agent before it does damage.
             <br />
             One plugin, total control.
@@ -520,7 +520,7 @@ export default function LandingPage() {
             When your agent breaks your rules,
             <br />
             <span style={{ color: "var(--color-coral)" }}>
-              Clawnitor stops it.
+              Halt stops it.
             </span>
           </h2>
           <p
@@ -528,7 +528,7 @@ export default function LandingPage() {
             style={{ color: "var(--color-text-secondary)" }}
           >
             Other tools send you a notification after your agent deleted
-            the production database. Clawnitor blocks the action{" "}
+            the production database. Halt blocks the action{" "}
             <em>before</em> it executes — and if it keeps trying, auto-kill
             shuts it down entirely. No manual intervention. No damage.
           </p>
@@ -590,7 +590,7 @@ export default function LandingPage() {
             className="text-base"
             style={{ color: "var(--color-text-secondary)" }}
           >
-            Free forever locally. Pro when you need the big claws.
+            Free forever locally. Pro when you need more.
           </p>
         </div>
 
@@ -631,7 +631,7 @@ export default function LandingPage() {
             <p className="text-[10px] mb-5" style={{ color: "var(--color-green)" }}>
               Early access pricing — locked in for founding members
             </p>
-            <Link href="https://app.clawnitor.io/signup" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs text-white mb-6" style={{ backgroundColor: "var(--color-coral)" }}>
+            <Link href="https://app.halt.dev/signup" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs text-white mb-6" style={{ backgroundColor: "var(--color-coral)" }}>
               Start Free Trial
             </Link>
             <ul className="flex flex-col gap-2.5 text-xs">
@@ -658,7 +658,7 @@ export default function LandingPage() {
             <p className="text-[10px] mb-5" style={{ color: "var(--color-green)" }}>
               Early access pricing — locked in for founding members
             </p>
-            <Link href="https://app.clawnitor.io/signup" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs mb-6" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
+            <Link href="https://app.halt.dev/signup" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs mb-6" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
               Upgrade to Team
             </Link>
             <ul className="flex flex-col gap-2.5 text-xs">
@@ -679,7 +679,7 @@ export default function LandingPage() {
             <div className="mb-5">
               <span className="text-3xl font-bold">Custom</span>
             </div>
-            <a href="mailto:david@clawnitor.io" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs mb-6" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
+            <a href="mailto:david@halt.dev" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs mb-6" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
               Contact Us
             </a>
             <ul className="flex flex-col gap-2.5 text-xs">
@@ -748,11 +748,11 @@ export default function LandingPage() {
             className="text-lg max-w-md mx-auto mb-10"
             style={{ color: "var(--color-text-secondary)" }}
           >
-            Your agents are already running. Clawnitor makes sure they&apos;re
+            Your agents are already running. Halt makes sure they&apos;re
             running safely.
           </p>
           <Link
-            href="https://app.clawnitor.io/signup"
+            href="https://app.halt.dev/signup"
             className="group inline-flex items-center gap-2 px-10 py-4 rounded-xl font-semibold text-white text-lg transition-all"
             style={{
               backgroundColor: "var(--color-coral)",
@@ -789,7 +789,7 @@ export default function LandingPage() {
             <Link href="/privacy">Privacy</Link>
             <Link href="/pricing">Pricing</Link>
             <a
-              href="https://github.com/davidkny22/clawnitor-plugin"
+              href="https://github.com/davidkny22/halt"
               target="_blank"
               rel="noopener"
             >
@@ -801,7 +801,7 @@ export default function LandingPage() {
           className="text-center mt-8 text-xs"
           style={{ color: "var(--color-text-tertiary)" }}
         >
-          Built by David Kogan. Run by lobsters.
+          Built by David Kogan. Because trust is earned.
         </p>
       </footer>
 

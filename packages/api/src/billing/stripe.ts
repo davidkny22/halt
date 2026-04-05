@@ -40,8 +40,8 @@ export async function createCheckoutSession(
     customer: customerId || undefined,
     customer_email: customerId ? undefined : email,
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: "https://app.clawnitor.io/settings?billing=success",
-    cancel_url: "https://app.clawnitor.io/settings?billing=cancel",
+    success_url: "https://app.halt.dev/settings?billing=success",
+    cancel_url: "https://app.halt.dev/settings?billing=cancel",
     metadata: { userId, plan },
   });
 
@@ -56,7 +56,7 @@ export async function createPortalSession(
 
   const session = await stripe.billingPortal.sessions.create({
     customer: customerId,
-    return_url: "https://app.clawnitor.io/settings",
+    return_url: "https://app.halt.dev/settings",
   });
 
   return session.url;

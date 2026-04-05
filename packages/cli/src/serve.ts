@@ -12,7 +12,7 @@ import {
   setAgentConfig,
 } from "./serve-store.js";
 
-const CACHE_PATH = join(tmpdir(), "clawnitor-cache.json");
+const CACHE_PATH = join(tmpdir(), "halt-cache.json");
 
 interface CachedEntry {
   payload: Record<string, any>;
@@ -240,12 +240,12 @@ export async function serve() {
   try {
     await app.listen({ port, host: "127.0.0.1" });
     console.log(`
-  Clawnitor Local Dashboard
+  Halt Local Dashboard
   ${"━".repeat(40)}
   Running at http://localhost:${port}
 
   Events from: ${CACHE_PATH}
-  Rules at:    ~/.clawnitor/rules.json
+  Rules at:    ~/.halt/rules.json
 
   Press Ctrl+C to stop.
 `);

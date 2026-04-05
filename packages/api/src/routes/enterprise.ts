@@ -12,7 +12,7 @@ import {
   users,
 } from "../db/schema.js";
 import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
-import { TIER_FEATURES, type Tier } from "@clawnitor/shared";
+import { TIER_FEATURES, type Tier } from "@halt/shared";
 import { getConfig } from "../config.js";
 import { validateWebhookUrl } from "../alerts/webhook.js";
 

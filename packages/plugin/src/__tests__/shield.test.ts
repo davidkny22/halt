@@ -361,9 +361,9 @@ describe("Shield Allowlist", () => {
 // ── Self-Targeting Skip ─────────────────────────────────────
 
 describe("Shield Self-Targeting Skip", () => {
-  it("skips scanning for Clawnitor API calls", () => {
+  it("skips scanning for Halt API calls", () => {
     const r = scanner.scanInput("http", {
-      url: "https://api.clawnitor.io/api/rules",
+      url: "https://api.halt.dev/api/rules",
       body: { keywords: ["rm -rf"] },
     });
     expect(r.detected).toBe(false);

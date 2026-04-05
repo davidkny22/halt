@@ -29,11 +29,11 @@ async function sendBetaWelcomeEmail(email: string, expiresAt: Date, channel: str
 
   try {
     await resend.emails.send({
-      from: "Clawnitor <hello@clawnitor.io>",
+      from: "Halt <hello@halt.dev>",
       to: email,
-      subject: "You're in! 6 months of Clawnitor Pro, on us.",
+      subject: "You're in! 6 months of Halt Pro, on us.",
       text: [
-        "Welcome to the Clawnitor beta!",
+        "Welcome to the Halt beta!",
         "",
         "Your account has been upgraded to Pro — free for 6 months.",
         "",
@@ -47,12 +47,12 @@ async function sendBetaWelcomeEmail(email: string, expiresAt: Date, channel: str
         `Your Pro access is active until ${expiresAt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}.`,
         "After that, you'll lock in founding member pricing ($5/mo) forever.",
         "",
-        "Get started: https://app.clawnitor.io",
-        "Docs: https://clawnitor.io/docs",
+        "Get started: https://app.halt.dev",
+        "Docs: https://halt.dev/docs",
         "",
         "We built this to keep your agents safe. Tell us what you think — the feedback widget is on every dashboard page.",
         "",
-        "— David, founder of Clawnitor",
+        "— David, founder of Halt",
       ].join("\n"),
     });
   } catch (err) {
@@ -66,14 +66,14 @@ async function sendConsolationEmail(email: string, trialEndsAt: Date) {
 
   try {
     await resend.emails.send({
-      from: "Clawnitor <hello@clawnitor.io>",
+      from: "Halt <hello@halt.dev>",
       to: email,
       subject: "Beta's full — but we've got something for you.",
       text: [
         "All beta spots have been claimed — you just missed it.",
         "",
         "But because you showed up early, we've activated a 30-day extended trial",
-        "of Clawnitor Pro for your account (normally 14 days).",
+        "of Halt Pro for your account (normally 14 days).",
         "",
         "What you get for 30 days:",
         "- AI anomaly detection",
@@ -83,9 +83,9 @@ async function sendConsolationEmail(email: string, trialEndsAt: Date) {
         "",
         `Your extended trial is active until ${trialEndsAt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}.`,
         "",
-        "Get started: https://app.clawnitor.io",
+        "Get started: https://app.halt.dev",
         "",
-        "— David, founder of Clawnitor",
+        "— David, founder of Halt",
       ].join("\n"),
     });
   } catch (err) {

@@ -3,9 +3,9 @@ import { JsonCache } from "../transport/json-cache.js";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { unlinkSync } from "node:fs";
-import type { ClawnitorEvent } from "@clawnitor/shared";
+import type { HaltEvent } from "@halt/shared";
 
-function makeEvent(id: string): ClawnitorEvent {
+function makeEvent(id: string): HaltEvent {
   return {
     agent_id: "test-agent",
     session_id: "session-1",
@@ -25,7 +25,7 @@ describe("JsonCache", () => {
   let filePath: string;
 
   beforeEach(() => {
-    filePath = join(tmpdir(), `clawnitor-test-${Date.now()}.json`);
+    filePath = join(tmpdir(), `halt-test-${Date.now()}.json`);
     cache = new JsonCache(filePath);
   });
 

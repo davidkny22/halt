@@ -6,7 +6,7 @@ import { eq, and, gte, desc } from "drizzle-orm";
 import { scoreAnomaly } from "../ai/anomaly-scorer.js";
 import { isDegraded } from "../ai/client.js";
 import { sendKill } from "../ws/kill-server.js";
-import { ANOMALY_CHECK_INTERVAL_MINUTES, TIER_FEATURES } from "@clawnitor/shared";
+import { ANOMALY_CHECK_INTERVAL_MINUTES, TIER_FEATURES } from "@halt/shared";
 import type { BaselineProfile } from "../ai/baseline-builder.js";
 import { createQueue } from "./queue.js";
 import { logger } from "../util/logger.js";

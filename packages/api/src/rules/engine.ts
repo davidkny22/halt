@@ -1,4 +1,4 @@
-import type { ClawnitorEvent, RuleConfig } from "@clawnitor/shared";
+import type { HaltEvent, RuleConfig } from "@halt/shared";
 import { evaluateThreshold } from "./evaluators/threshold.js";
 import { evaluateRate } from "./evaluators/rate.js";
 import { evaluateKeyword } from "./evaluators/keyword.js";
@@ -17,7 +17,7 @@ export interface RuleEvalResult {
 }
 
 export function evaluateRules(
-  events: ClawnitorEvent[],
+  events: HaltEvent[],
   rules: RuleWithId[]
 ): RuleEvalResult[] {
   const results: RuleEvalResult[] = [];

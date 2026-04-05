@@ -1,6 +1,6 @@
 /**
  * Local config/rules persistence for offline mode.
- * Reads/writes to ~/.clawnitor/ directory.
+ * Reads/writes to ~/.halt/ directory.
  * Shared between the local dashboard (serve) and the plugin (rule-cache).
  */
 
@@ -8,7 +8,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
 
-const CONFIG_DIR = join(homedir(), ".clawnitor");
+const CONFIG_DIR = join(homedir(), ".halt");
 const RULES_PATH = join(CONFIG_DIR, "rules.json");
 const AGENTS_PATH = join(CONFIG_DIR, "agents.json");
 

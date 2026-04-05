@@ -103,7 +103,7 @@ export function EnterpriseClient({ tier }: { tier: string }) {
           <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
             Audit logs, custom webhooks, SSO/SAML, custom roles, and unlimited everything. Contact us for custom pricing.
           </p>
-          <a href="mailto:david@clawnitor.io" className="inline-block px-6 py-2.5 rounded-lg text-sm font-semibold text-white" style={{ backgroundColor: "var(--color-coral)" }}>
+          <a href="mailto:david@halt.dev" className="inline-block px-6 py-2.5 rounded-lg text-sm font-semibold text-white" style={{ backgroundColor: "var(--color-coral)" }}>
             Contact Sales
           </a>
         </div>

@@ -18,7 +18,7 @@ export function createMessageSendingHandler(ctx: MessageContext) {
     }
     const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
     const sub = getSubagentInfo(event, sessionId);
-    const clawnitorEvent = buildEvent({
+    const haltEvent = buildEvent({
       agentId,
       sessionId: sub.sessionId,
       eventType: "message_sent",
@@ -31,7 +31,7 @@ export function createMessageSendingHandler(ctx: MessageContext) {
       customRedactionPatterns: ctx.redactionPatterns,
     });
 
-    ctx.sender.enqueue(clawnitorEvent);
+    ctx.sender.enqueue(haltEvent);
     return undefined;
   };
 }
@@ -41,7 +41,7 @@ export function createMessageSentHandler(ctx: MessageContext) {
     const agentId = ctx.resolveAgentId(event, ocCtx);
     const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
     const sub = getSubagentInfo(event, sessionId);
-    const clawnitorEvent = buildEvent({
+    const haltEvent = buildEvent({
       agentId,
       sessionId: sub.sessionId,
       eventType: "message_sent",
@@ -53,7 +53,7 @@ export function createMessageSentHandler(ctx: MessageContext) {
       customRedactionPatterns: ctx.redactionPatterns,
     });
 
-    ctx.sender.enqueue(clawnitorEvent);
+    ctx.sender.enqueue(haltEvent);
   };
 }
 
@@ -62,7 +62,7 @@ export function createMessageReceivedHandler(ctx: MessageContext) {
     const agentId = ctx.resolveAgentId(event, ocCtx);
     const sessionId = ctx.resolveSessionId(event, ocCtx, agentId);
     const sub = getSubagentInfo(event, sessionId);
-    const clawnitorEvent = buildEvent({
+    const haltEvent = buildEvent({
       agentId,
       sessionId: sub.sessionId,
       eventType: "message_received",
@@ -74,6 +74,6 @@ export function createMessageReceivedHandler(ctx: MessageContext) {
       customRedactionPatterns: ctx.redactionPatterns,
     });
 
-    ctx.sender.enqueue(clawnitorEvent);
+    ctx.sender.enqueue(haltEvent);
   };
 }
