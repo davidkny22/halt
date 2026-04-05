@@ -30,6 +30,8 @@ Clawnitor hooks into OpenClaw's `before_tool_call`. Every action your agent trie
 - **Smart rules** — threshold, rate, keyword, or describe what you want in plain English. Each rule can block, alert, or both — your choice per rule. AI evaluates NL rules against the event stream.
 - **AI anomaly detection** — 72-hour behavioral baselines. Clawnitor learns what normal looks like, then flags what isn't.
 - **Multi-channel alerts** — email, Telegram, Discord, SMS. Get notified where you actually look.
+- **Shield** — built-in injection detection engine. 140 detection patterns across 6 categories scan both tool inputs and outputs for prompt injection, credential exfiltration, destructive commands, and encoding attacks. Zero latency, zero dependencies.
+- **`clawnitor test`** — test your Shield config and rules against 54 curated attack scenarios. Reliability scoring, gap detection, CI/CD gating via exit codes. `--json` for pipelines, `--verbose` for debugging.
 - **Cost tracking** — per-agent spend breakdowns, 7-day trend charts, most expensive calls ranked. Know exactly where your money goes.
 - **Decision traces** — visual timeline of every tool call within a session. See what your agent did, in what order, with per-call cost and model info.
 - **Subagent tracking** — subagent spawning/ending captured with attribution. See parent-child relationships in your session timelines.

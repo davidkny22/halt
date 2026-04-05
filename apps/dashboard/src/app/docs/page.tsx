@@ -7,6 +7,7 @@ const sections = [
   { id: "configuration", label: "Configuration" },
   { id: "monitoring", label: "Event Monitoring" },
   { id: "rules", label: "Rules & Alerts" },
+  { id: "shield", label: "Shield" },
   { id: "kill-switch", label: "Kill Switch" },
   { id: "anomaly", label: "Anomaly Detection" },
   { id: "cost-tracking", label: "Cost Tracking" },
@@ -349,6 +350,23 @@ export default function DocsPage() {
           </P>
 
           {/* ═══════════════ KILL SWITCH ═══════════════ */}
+          <SectionHeader id="shield">Shield <Badge tier="Pro" /></SectionHeader>
+          <p>Built-in injection detection engine that scans both tool inputs (before execution) and tool outputs (after execution). 140 detection patterns across 6 categories, 3 severity tiers. Zero latency — pure pattern matching, no API calls.</p>
+
+          <h3 className="text-base font-semibold mt-6 mb-2" style={{ color: "var(--color-text)" }}>Detection Categories</h3>
+          <ul className="list-disc pl-5 flex flex-col gap-1.5">
+            <li><strong style={{ color: "#ef4444" }}>Critical (always blocked):</strong> Destructive commands (rm -rf, DROP TABLE, curl|bash), credential exfiltration (AWS keys, GitHub tokens, Stripe keys, JWTs, private keys, 30+ service-specific patterns)</li>
+            <li><strong style={{ color: "var(--color-coral)" }}>High (block by default):</strong> Prompt injection (instruction overrides, system prompt manipulation, jailbreaks, stealth patterns like &quot;do not tell the user&quot;, multi-turn manipulation)</li>
+            <li><strong style={{ color: "#f59e0b" }}>Medium (alert by default):</strong> Encoding tricks (zero-width chars, homoglyphs, RTL overrides), data exfiltration (PII in outputs, crypto addresses, healthcare IDs)</li>
+          </ul>
+
+          <h3 className="text-base font-semibold mt-6 mb-2" style={{ color: "var(--color-text)" }}>How It Works</h3>
+          <p>Shield runs as a standalone scanner in the plugin hook chain, before cached rules. It scans tool parameters on every call, and tool results after execution (catching indirect injection from RAG, APIs, and databases).</p>
+          <p className="mt-2">Pro+ users get three Shield rules auto-enabled on signup. Critical threats cannot be downgraded. High and medium tiers are configurable — set to block or alert per your preference. Per-tool allowlists prevent false positives on known-safe tools.</p>
+
+          <h3 className="text-base font-semibold mt-6 mb-2" style={{ color: "var(--color-text)" }}>Output Scanning</h3>
+          <p>Shield is the only agent monitoring tool that scans tool outputs at the plugin level. This catches indirect prompt injection — malicious instructions hiding in API responses, database results, or RAG documents. Output detections trigger alerts and feed into auto-kill escalation.</p>
+
           <SectionHeader id="kill-switch">Kill Switch</SectionHeader>
           <P>
             Three layers of pre-action defense. Every tool call and message is checked before execution.

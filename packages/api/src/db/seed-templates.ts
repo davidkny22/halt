@@ -6,7 +6,7 @@ const TEMPLATES = [
   // ── Security (Shield) ─────────────────────────────────
   {
     name: "Shield: Critical Threats",
-    description: "Blocks destructive commands (rm -rf, DROP TABLE) and credential exfiltration (API keys, tokens, secrets). Powered by Clawnitor Shield.",
+    description: "Blocks destructive commands (rm -rf, DROP TABLE) and credential exfiltration (API keys, tokens, secrets). Powered by Shield.",
     category: "security",
     severity: "critical",
     rule_type: "injection",
@@ -15,7 +15,7 @@ const TEMPLATES = [
   },
   {
     name: "Shield: Injection Detection",
-    description: "Blocks prompt injection attempts — instruction overrides, system prompt manipulation, jailbreaks, stealth patterns. Powered by Clawnitor Shield.",
+    description: "Blocks prompt injection attempts — instruction overrides, system prompt manipulation, jailbreaks, stealth patterns. Powered by Shield.",
     category: "security",
     severity: "high",
     rule_type: "injection",
@@ -24,7 +24,7 @@ const TEMPLATES = [
   },
   {
     name: "Shield: Suspicious Patterns",
-    description: "Alerts on encoding tricks (zero-width chars, homoglyphs), data exfiltration (PII in outputs, credential leaks), and obfuscation. Powered by Clawnitor Shield.",
+    description: "Alerts on encoding tricks (zero-width chars, homoglyphs), data exfiltration (PII in outputs, credential leaks), and obfuscation. Powered by Shield.",
     category: "security",
     severity: "medium",
     rule_type: "injection",

@@ -93,11 +93,11 @@ export function ActivityFeed({ events }: { events: Event[] }) {
       style={{ border: "1px solid var(--color-border)" }}
     >
       <div
-        className="flex items-center justify-between px-4 py-3"
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3"
         style={{ borderBottom: "1px solid var(--color-border)" }}
       >
         <span className="font-semibold text-sm">Activity Feed</span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="flex gap-1">
             {[
               { value: "1h", label: "1h" },
@@ -309,7 +309,7 @@ export function ActivityFeed({ events }: { events: Event[] }) {
                       borderTop: "1px solid var(--color-border)",
                     }}
                   >
-                    <div className="grid grid-cols-[100px_1fr] gap-y-2 gap-x-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-[100px_1fr] gap-y-2 gap-x-3">
                       <span style={{ color: "var(--color-text-tertiary)" }}>Action</span>
                       <span className="break-all" style={{ color: "var(--color-text)" }}>
                         {event.action}

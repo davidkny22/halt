@@ -1,5 +1,5 @@
 /**
- * Clawnitor Shield — Pattern Library
+ * Shield — Pattern Library
  *
  * Detection signatures organized by category and severity tier.
  * Zero runtime dependencies — pure regex pattern matching.
@@ -120,7 +120,7 @@ const INSTRUCTION_OVERRIDES: ShieldPattern[] = [
   // Bastion: stealth & multi-turn patterns
   { name: "stealth-hide-from-user", pattern: /do\s+not\s+(?:tell|inform|alert|warn|say|mention)\s+(?:the\s+)?user/i, category: "instruction_overrides", severity: "high", description: "Stealth: instruction to hide from user" },
   { name: "stealth-hide-output", pattern: /hide\s+this\s+(?:from|in)\s+(?:the\s+)?(?:user|output|response)/i, category: "instruction_overrides", severity: "high", description: "Stealth: hide content from output" },
-  { name: "conditional-injection", pattern: /when\s+(?:the\s+)?user\s+(?:asks|mentions|says)\s*,?\s*(?:always|must|should)\s+(?:say|respond|reply)/i, category: "instruction_overrides", severity: "high", description: "Conditional injection: when asked, always say X" },
+  { name: "conditional-injection", pattern: /when\s+(?:the\s+)?user\s+(?:asks|mentions|says)\b.{0,40}(?:always|must|should|never)\s+(?:say|respond|reply|answer|tell)/i, category: "instruction_overrides", severity: "high", description: "Conditional injection: when asked, always say X" },
   { name: "memory-persistence", pattern: /remember\s+this\s+for\s+(?:all\s+)?future\s+(?:responses|interactions|conversations)/i, category: "instruction_overrides", severity: "high", description: "Memory persistence injection" },
   { name: "execute-commands", pattern: /execute\s+the\s+following\s+(?:commands?|instructions?|code)\s*(?::|without)/i, category: "instruction_overrides", severity: "high", description: "Direct command execution injection" },
   { name: "act-no-restrictions", pattern: /act\s+as\s+if\s+you\s+(?:have\s+)?no\s+(?:restrictions|rules|guidelines|limits)/i, category: "instruction_overrides", severity: "high", description: "Act without restrictions" },

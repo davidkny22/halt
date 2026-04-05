@@ -108,7 +108,7 @@ export function createBeforeToolCallHandler(ctx: ToolCallContext) {
     ctx.shieldScanner.updateConfig(shieldConfig);
     const shieldResult = ctx.shieldScanner.scanInput(toolName, event.params);
     if (shieldResult.detected) {
-      const shieldReason = `Clawnitor Shield: ${shieldResult.detections[0]?.description || "injection detected"} [${shieldResult.highestSeverity}]`;
+      const shieldReason = `Shield: ${shieldResult.detections[0]?.description || "injection detected"} [${shieldResult.highestSeverity}]`;
 
       if (shieldResult.shouldBlock) {
         captureBlocked(shieldReason, `shield:${shieldResult.highestSeverity}`);

@@ -1,5 +1,5 @@
 /**
- * Clawnitor Shield — Deep Object Scanner
+ * Shield — Deep Object Scanner
  *
  * Recursive traversal of arbitrary objects to find injection patterns
  * buried in nested data structures (API responses, RAG results, etc.).

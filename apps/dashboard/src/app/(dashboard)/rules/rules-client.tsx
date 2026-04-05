@@ -83,8 +83,74 @@ export function RulesClient({ rules, tier }: { rules: any[]; tier: string }) {
           </p>
         </div>
       ) : (
+        <>
+        {/* Mobile card view */}
+        <div className="md:hidden flex flex-col gap-3">
+          {rules.map((rule: any) => {
+            const isInjection = rule.rule_type === "injection";
+            return (
+              <div
+                key={rule.id}
+                className="rounded-lg p-4"
+                style={{ border: "1px solid var(--color-border)", backgroundColor: "var(--color-surface)" }}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  {isInjection && (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6B4A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  )}
+                  <span className="font-medium text-sm" style={{ color: "var(--color-text)" }}>{rule.name}</span>
+                  {isInjection && rule.config?.shield_tier && (
+                    <span
+                      className="text-[10px] font-bold px-1 py-0.5 rounded"
+                      style={{
+                        backgroundColor: rule.config.shield_tier === "critical" ? "rgba(239, 68, 68, 0.15)" : rule.config.shield_tier === "high" ? "rgba(255, 107, 74, 0.15)" : "rgba(251, 191, 36, 0.15)",
+                        color: rule.config.shield_tier === "critical" ? "#ef4444" : rule.config.shield_tier === "high" ? "#FF6B4A" : "#f59e0b",
+                      }}
+                    >
+                      {rule.config.shield_tier.toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 text-xs mb-2">
+                  <span
+                    className="px-2 py-0.5 rounded"
+                    style={{
+                      backgroundColor: isInjection ? "rgba(255, 107, 74, 0.1)" : "var(--color-bg)",
+                      color: isInjection ? "#FF6B4A" : (typeColors[rule.rule_type] || "var(--color-text-secondary)"),
+                    }}
+                  >
+                    {isInjection ? "shield" : rule.rule_type === "nl" ? "NL" : rule.rule_type}
+                  </span>
+                  <span style={{ color: rule.enabled ? "var(--color-green)" : "var(--color-text-secondary)" }}>
+                    {rule.enabled ? "Active" : "Disabled"}
+                  </span>
+                  <span
+                    className="px-1.5 py-0.5 rounded"
+                    style={{
+                      backgroundColor: "var(--color-bg)",
+                      color: rule.action_mode === "block" ? "var(--color-coral)" : rule.action_mode === "alert" ? "var(--color-sky)" : "var(--color-purple)",
+                    }}
+                  >
+                    {rule.action_mode}
+                  </span>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => handleDelete(rule.id)}
+                    className="text-xs px-2 py-1 rounded"
+                    style={{ color: "var(--color-text-tertiary)" }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop table view */}
         <div
-          className="rounded-lg overflow-hidden"
+          className="hidden md:block rounded-lg overflow-hidden"
           style={{ border: "1px solid var(--color-border)" }}
         >
           <table className="w-full text-sm">
@@ -119,7 +185,7 @@ export function RulesClient({ rules, tier }: { rules: any[]; tier: string }) {
                     </div>
                     <div className="text-[11px] mt-0.5" style={{ color: "var(--color-text-tertiary)" }}>
                       {rule.rule_type === "injection"
-                        ? `Powered by Clawnitor Shield — ${(rule.config?.categories || []).join(", ")}`
+                        ? `Powered by Shield — ${(rule.config?.categories || []).join(", ")}`
                         : formatRuleConfig(rule.rule_type, rule.config)}
                     </div>
                   </td>
@@ -169,6 +235,7 @@ export function RulesClient({ rules, tier }: { rules: any[]; tier: string }) {
             </tbody>
           </table>
         </div>
+        </>
       )}
 
       <TemplateLibrary defaultExpanded={rules.length === 0} />

@@ -224,7 +224,7 @@ export default function AgentDetailPage() {
                   <label className="text-xs font-medium mb-2 block" style={{ color: "var(--color-text-secondary)" }}>
                     Within what time window?
                   </label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     {WINDOW_OPTIONS.map((opt) => (
                       <button
                         key={opt.value}

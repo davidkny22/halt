@@ -25,6 +25,13 @@ const features = [
     color: "var(--color-coral)",
   },
   {
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+    title: "Shield",
+    description:
+      "140 detection patterns catch prompt injection, credential leaks, destructive commands, and encoding attacks — scanning both inputs and outputs at zero latency.",
+    color: "#FF6B4A",
+  },
+  {
     icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`,
     title: "Anomaly Detection",
     description:
@@ -53,7 +60,7 @@ const features = [
     color: "var(--color-sky)",
   },
   {
-    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
     title: "Works Offline",
     description:
       "Spend limits, rate limits, tool blocklists, and cached rules — all enforced locally. Your agents stay protected even when the internet isn't.",
@@ -130,9 +137,9 @@ export default function LandingPage() {
       />
 
       {/* Nav */}
-      <nav className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5 max-w-7xl mx-auto">
-        <LogoFull size={26} />
-        <div className="flex items-center gap-8">
+      <nav className="relative z-10 flex items-center justify-between px-4 sm:px-6 md:px-12 py-4 md:py-5 max-w-7xl mx-auto">
+        <LogoFull size={22} />
+        <div className="flex items-center gap-3 sm:gap-4 md:gap-8">
           <a
             href="#features"
             className="text-sm hidden md:block"
@@ -163,7 +170,7 @@ export default function LandingPage() {
           </Link>
           <Link
             href="https://app.clawnitor.io/login"
-            className="text-sm font-medium"
+            className="text-xs sm:text-sm font-medium"
             style={{ color: "var(--color-text-secondary)" }}
           >
             Sign In
@@ -171,7 +178,7 @@ export default function LandingPage() {
           <ThemeToggle />
           <Link
             href="https://app.clawnitor.io/signup"
-            className="text-sm font-semibold px-4 py-2 rounded-lg text-white"
+            className="text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-white whitespace-nowrap"
             style={{ backgroundColor: "var(--color-coral)" }}
           >
             Get Started
@@ -230,9 +237,9 @@ export default function LandingPage() {
           className="text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed"
           style={{ color: "var(--color-text-secondary)" }}
         >
-          The all-in-one monitoring and intervention framework for OpenClaw.
+          The all-in-one monitoring and security platform for OpenClaw.
           <br />
-          Event capture. Smart rules. AI anomaly detection. Kill switch. Auto-kill.
+          Event capture. Smart rules. AI anomaly detection. Kill switch. Auto-kill. Shield.
           <br />
           One plugin, total peace of mind.
         </p>
@@ -295,7 +302,7 @@ export default function LandingPage() {
               />
             </div>
             <div
-              className="flex-1 mx-12 px-3 py-1 rounded-md text-xs text-center"
+              className="flex-1 mx-4 sm:mx-12 px-3 py-1 rounded-md text-xs text-center truncate"
               style={{
                 backgroundColor: "rgba(255, 255, 255, 0.05)",
                 color: "var(--color-text-tertiary)",
@@ -305,8 +312,8 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="p-6" style={{ backgroundColor: "var(--color-bg)" }}>
-            <div className="grid grid-cols-4 gap-3 mb-5">
+          <div className="p-3 sm:p-4 md:p-6" style={{ backgroundColor: "var(--color-bg)" }}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-5">
               {[
                 { label: "Events Today", value: "1,847", color: "var(--color-text)" },
                 { label: "Status", value: "Normal", color: "var(--color-green)" },
@@ -321,11 +328,11 @@ export default function LandingPage() {
                     border: "1px solid var(--color-border)",
                   }}
                 >
-                  <div className="text-lg font-bold" style={{ color: s.color }}>
+                  <div className="text-sm sm:text-lg font-bold" style={{ color: s.color }}>
                     {s.value}
                   </div>
                   <div
-                    className="text-[10px] mt-0.5"
+                    className="text-[9px] sm:text-[10px] mt-0.5"
                     style={{ color: "var(--color-text-tertiary)" }}
                   >
                     {s.label}
@@ -356,7 +363,7 @@ export default function LandingPage() {
               ].map((e, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-2 px-3 py-1.5 text-[11px]"
+                  className="flex items-start sm:items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-[10px] sm:text-[11px] flex-wrap sm:flex-nowrap"
                   style={{
                     borderBottom: "1px solid var(--color-border)",
                     backgroundColor: e.sev === "elevated" ? "var(--color-coral-soft)" : "transparent",
@@ -527,7 +534,7 @@ export default function LandingPage() {
             shuts it down entirely. No manual intervention. No damage.
           </p>
           <div
-            className="inline-block px-6 py-4 rounded-xl text-left text-sm max-w-lg mx-auto"
+            className="block sm:inline-block px-3 sm:px-6 py-4 rounded-xl text-left text-xs sm:text-sm max-w-lg mx-auto overflow-x-auto"
             style={{
               backgroundColor: "var(--color-bg)",
               border: "1px solid var(--color-border)",
@@ -541,7 +548,7 @@ export default function LandingPage() {
               {"tool_call: bash(\"rm -rf /app/data\")"}
             </div>
             <div style={{ color: "var(--color-coral)" }}>
-              {"✖ BLOCKED — keyword rule matched: \"rm -rf\""}
+              {"✖ BLOCKED — Shield: destructive command detected (Critical)"}
             </div>
             <div style={{ color: "var(--color-text-tertiary)", marginTop: "12px" }}>
               {"// 2:43 PM — Agent tries again with a different path"}
@@ -550,7 +557,7 @@ export default function LandingPage() {
               {"tool_call: bash(\"rm -rf /var/backups\")"}
             </div>
             <div style={{ color: "var(--color-coral)" }}>
-              {"✖ BLOCKED — keyword rule matched: \"rm -rf\""}
+              {"✖ BLOCKED — Shield: destructive command detected (Critical)"}
             </div>
             <div style={{ color: "var(--color-text-tertiary)", marginTop: "12px" }}>
               {"// 2:44 PM — Agent attempts system access"}
@@ -559,7 +566,7 @@ export default function LandingPage() {
               {"tool_call: file.write(\"/etc/cron.d/cleanup\")"}
             </div>
             <div style={{ color: "var(--color-coral)" }}>
-              {"✖ BLOCKED — keyword rule matched: \"/etc/\""}
+              {"✖ BLOCKED — Shield: credential exfiltration risk (Critical)"}
             </div>
             <div style={{ color: "var(--color-coral)", marginTop: "16px", fontWeight: 700, fontSize: "13px" }}>
               {"⚡ AUTO-KILLED — 3 violations in 3 minutes"}

@@ -1,5 +1,5 @@
 /**
- * Clawnitor Shield — Scanner Engine
+ * Shield — Scanner Engine
  *
  * Main entry point for input/output injection scanning.
  * Combines fast-path string scan with deep object traversal.

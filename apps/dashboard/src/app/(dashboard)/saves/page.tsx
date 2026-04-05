@@ -71,7 +71,7 @@ export default async function SavesPage() {
           {saves.map((save: any) => (
             <div
               key={save.id}
-              className="flex items-start gap-4 p-4 rounded-lg"
+              className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg"
               style={{
                 backgroundColor: "var(--color-surface)",
                 border: "1px solid var(--color-border)",

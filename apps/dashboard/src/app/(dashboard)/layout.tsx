@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { getSavesCount } from "@/lib/server-api";
 import { FeedbackWidget } from "@/components/feedback-widget";
 import { DashboardNav } from "@/components/dashboard-nav";
+import { MobileNav } from "@/components/mobile-nav";
 
 const navItems = [
   {
@@ -108,16 +109,20 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen flex flex-col">
       <header
-        className="grid grid-cols-[1fr_auto_1fr] items-center px-6 py-3"
+        className="flex items-center justify-between px-4 md:px-6 py-3"
         style={{ borderBottom: "1px solid var(--color-border)" }}
       >
         <Link href="/dashboard">
           <LogoFull size={22} />
         </Link>
-        <div className="flex justify-center">
+
+        {/* Desktop nav — hidden on mobile */}
+        <div className="hidden md:flex justify-center">
           <DashboardNav items={allNavItems} />
         </div>
-        <div className="flex items-center gap-3 justify-end">
+
+        {/* Desktop right actions — hidden on mobile */}
+        <div className="hidden md:flex items-center gap-3 justify-end">
           {savesCount > 0 && (
             <Link
               href="/saves"
@@ -149,9 +154,23 @@ export default async function DashboardLayout({
           <ThemeToggle />
           <SignOutButton />
         </div>
+
+        {/* Mobile: theme toggle + hamburger */}
+        <div className="flex md:hidden items-center gap-2">
+          <ThemeToggle />
+          <MobileNav
+            items={allNavItems}
+            tier={tier}
+            tierLabel={tierLabel}
+            tierColors={colors}
+            savesCount={savesCount}
+            email={session?.user?.email || undefined}
+            trialDaysLeft={trialDaysLeft}
+          />
+        </div>
       </header>
 
-      <main className="flex-1 px-6 py-6 max-w-7xl mx-auto w-full">
+      <main className="flex-1 px-4 md:px-6 py-4 md:py-6 max-w-7xl mx-auto w-full">
         {children}
       </main>
 

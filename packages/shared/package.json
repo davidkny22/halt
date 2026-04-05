@@ -1,6 +1,6 @@
 {
   "name": "@clawnitor/shared",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Shared types, schemas, and constants for Clawnitor — agent monitoring for OpenClaw",
   "type": "module",
   "main": "./dist/index.js",
