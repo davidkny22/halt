@@ -148,6 +148,9 @@ importers:
       '@clawnitor/shared':
         specifier: workspace:^
         version: link:../shared
+      fastify:
+        specifier: ^5.0.0
+        version: 5.8.2
     devDependencies:
       '@types/node':
         specifier: ^25.5.0

@@ -6,6 +6,7 @@ import { ToolCostCards } from "@/components/tool-cost-cards";
 import { ModelCostCards } from "@/components/model-cost-cards";
 import { CopyBlock } from "@/components/copy-block";
 import { getUserInfo, getStats, getEvents, getSavesCount, getSpend } from "@/lib/server-api";
+import { UpgradeGate } from "@/components/upgrade-gate";
 import Link from "next/link";
 
 function TrendArrow({ trend }: { trend: number }) {
@@ -185,27 +186,33 @@ export default async function DashboardPage() {
             )}
           </div>
 
-          {/* Cost sidebar — right column */}
+          {/* Cost sidebar — right column (Pro+) */}
           <div className="flex flex-col gap-6">
-            {dailySpend.length > 0 ? (
-              <SpendChart data={dailySpend} />
-            ) : (
-              <div
-                className="rounded-lg p-4 text-center"
-                style={{
-                  backgroundColor: "var(--color-surface)",
-                  border: "1px solid var(--color-border)",
-                }}
-              >
-                <span className="text-sm font-semibold block mb-2">7-Day Spend</span>
-                <span className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
-                  No spend data yet
-                </span>
-              </div>
-            )}
-            {byAgent.length > 0 && <AgentCostCards agents={byAgent} />}
-            {byModel.length > 0 && <ModelCostCards models={byModel} />}
-            {byTool.length > 0 && <ToolCostCards tools={byTool} />}
+            <UpgradeGate
+              feature="Cost Analytics"
+              description="Unlock spend trends, per-agent costs, model breakdowns, and top expensive events with Pro."
+              tier={(user as any)?.tier}
+            >
+              {dailySpend.length > 0 ? (
+                <SpendChart data={dailySpend} />
+              ) : (
+                <div
+                  className="rounded-lg p-4 text-center"
+                  style={{
+                    backgroundColor: "var(--color-surface)",
+                    border: "1px solid var(--color-border)",
+                  }}
+                >
+                  <span className="text-sm font-semibold block mb-2">7-Day Spend</span>
+                  <span className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                    No spend data yet
+                  </span>
+                </div>
+              )}
+              {byAgent.length > 0 && <AgentCostCards agents={byAgent} />}
+              {byModel.length > 0 && <ModelCostCards models={byModel} />}
+              {byTool.length > 0 && <ToolCostCards tools={byTool} />}
+            </UpgradeGate>
           </div>
         </div>
       )}

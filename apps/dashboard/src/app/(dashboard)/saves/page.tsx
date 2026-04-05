@@ -1,18 +1,21 @@
-import { getSaves, getSavesCount } from "@/lib/server-api";
+import { getSaves, getSavesCount, getUserInfo } from "@/lib/server-api";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { UpgradeGate } from "@/components/upgrade-gate";
 
 export default async function SavesPage() {
   const session = await auth();
   if (!session) redirect("/login");
 
-  const [savesData, countData] = await Promise.all([
+  const [savesData, countData, user] = await Promise.all([
     getSaves(50),
     getSavesCount(),
+    getUserInfo(),
   ]);
 
   const saves = savesData?.saves ?? [];
   const count = countData?.count ?? 0;
+  const tier = (user as any)?.tier || "free";
 
   return (
     <div>
@@ -22,6 +25,12 @@ export default async function SavesPage() {
           Every time Clawnitor blocked a harmful action to protect your agents.
         </p>
       </div>
+
+      <UpgradeGate
+        feature="Saves Dashboard"
+        description="Unlock the full saves view with impact analysis, rule attribution, and source badges with Pro."
+        tier={tier}
+      >
 
       {/* Summary */}
       <div
@@ -131,6 +140,7 @@ export default async function SavesPage() {
           ))}
         </div>
       )}
+      </UpgradeGate>
     </div>
   );
 }

@@ -7,14 +7,14 @@ const features = [
     icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
     title: "See Everything",
     description:
-      "Every tool call, LLM request, message, and lifecycle event — captured in real-time with zero config.",
+      "Every tool call, LLM request, message, and lifecycle event. Captured in real-time with zero config.",
     color: "var(--color-sky)",
   },
   {
     icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
     title: "Smart Rules",
     description:
-      "Threshold, rate, keyword — or describe what you want in plain English. Each rule: block, alert, or both. You decide per rule.",
+      "Threshold, rate, keyword, or describe what you want in plain English. Each rule: block, alert, or both.",
     color: "var(--color-purple)",
   },
   {
@@ -28,7 +28,7 @@ const features = [
     icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
     title: "Shield",
     description:
-      "140 detection patterns catch prompt injection, credential leaks, destructive commands, and encoding attacks — scanning both inputs and outputs at zero latency.",
+      "180 detection patterns catch prompt injection, credential leaks, destructive commands, and encoding attacks. Scans inputs and outputs at zero latency.",
     color: "#FF6B4A",
   },
   {
@@ -63,7 +63,7 @@ const features = [
     icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
     title: "Works Offline",
     description:
-      "Spend limits, rate limits, tool blocklists, and cached rules — all enforced locally. Your agents stay protected even when the internet isn't.",
+      "Spend limits, rate limits, tool blocklists, and cached rules, all enforced locally. Your agents stay protected even when the internet isn't.",
     color: "var(--color-coral)",
   },
 ];
@@ -77,16 +77,16 @@ const steps = [
   },
   {
     step: "02",
-    title: "Set up with one command",
-    description: "Authenticate, generate your API key, and configure — all in one command.",
+    title: "Configure",
+    description: "Connect to the cloud dashboard, or run in offline mode with rules defined locally.",
     code: "npx clawnitor init",
   },
   {
     step: "03",
-    title: "Sleep peacefully",
+    title: "Your agents are protected",
     description:
-      "Your agents are monitored. You'll know if anything goes wrong.",
-    code: "✓ monitoring...",
+      "Rules enforced before every tool call. Kill switch ready. Injection detection active.",
+    code: "npx clawnitor serve",
   },
 ];
 
@@ -239,10 +239,22 @@ export default function LandingPage() {
         >
           The all-in-one monitoring and security platform for OpenClaw.
           <br />
-          Event capture. Smart rules. AI anomaly detection. Kill switch. Auto-kill. Shield.
+          Kill switch. Auto-kill. Injection detection. Smart rules. Cost tracking.
           <br />
-          One plugin, total peace of mind.
+          One plugin, total control.
         </p>
+
+        <code
+          className="inline-block px-6 py-3 rounded-xl text-sm sm:text-base mb-6"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            fontFamily: "var(--font-mono)",
+            color: "var(--color-coral)",
+          }}
+        >
+          openclaw plugins install @clawnitor/plugin
+        </code>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
           <Link
@@ -380,19 +392,6 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* ═══════════════ SOCIAL PROOF ═══════════════ */}
-      <section
-        className="relative z-10 py-12 text-center"
-        style={{
-          borderTop: "1px solid var(--color-border)",
-          borderBottom: "1px solid var(--color-border)",
-        }}
-      >
-        <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-          Built for solo founders, teams, and companies running autonomous agents
-        </p>
       </section>
 
       {/* ═══════════════ FEATURES ═══════════════ */}
@@ -591,31 +590,30 @@ export default function LandingPage() {
             className="text-base"
             style={{ color: "var(--color-text-secondary)" }}
           >
-            Free forever for basic monitoring. Pro when you need the big claws.
+            Open source locally. Pro when you need the cloud.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
-          {/* Free */}
+          {/* Open Source */}
           <div className="p-6 rounded-2xl" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
-            <h3 className="text-lg font-semibold mb-1">Free</h3>
-            <p className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>Getting started</p>
+            <h3 className="text-lg font-semibold mb-1">Open Source</h3>
+            <p className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>Local, no account</p>
             <div className="mb-5">
-              <span className="text-3xl font-bold">$0</span>
+              <span className="text-3xl font-bold">Free</span>
               <span className="text-xs ml-1" style={{ color: "var(--color-text-secondary)" }}>/forever</span>
             </div>
-            <Link href="https://app.clawnitor.io/signup" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs mb-6" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
-              Get Started Free
-            </Link>
+            <code className="block text-center px-3 py-2.5 rounded-lg text-[10px] mb-6" style={{ backgroundColor: "var(--color-bg)", border: "1px solid var(--color-border)", fontFamily: "var(--font-mono)", color: "var(--color-coral)" }}>
+              openclaw plugins install
+            </code>
             <ul className="flex flex-col gap-2.5 text-xs">
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 agent</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 3 pattern rules</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Email alerts</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 7-day event history</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 team (2 members)</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 manual kill/mo</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Works offline (local failsafe)</li>
-              <li className="flex gap-2" style={{ color: "var(--color-text-tertiary)" }}><span>—</span> No auto-kill or AI detection</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited agents</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited pattern rules</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Injection detection (180 patterns)</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Kill switch + auto-kill</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Spend + rate limits</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Local dashboard</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> MIT licensed</li>
             </ul>
           </div>
 
@@ -637,15 +635,14 @@ export default function LandingPage() {
               Start Free Trial
             </Link>
             <ul className="flex flex-col gap-2.5 text-xs">
-              <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>1 agent included (+$3/ea)</strong></li>
               <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Unlimited kills + auto-kill</strong></li>
               <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>AI anomaly detection</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Cost analytics + spend trends</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Session timelines</strong></li>
               <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Up to 5 NL rules</strong></li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited pattern rules + 10 shared</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 15-min AI evaluation cycle</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 agent (+$3/ea)</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> All alert channels</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 90-day event history</li>
-              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 team (3 members)</li>
               <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 14-day free trial</li>
             </ul>
           </div>

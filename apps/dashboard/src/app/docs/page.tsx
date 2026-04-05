@@ -556,8 +556,8 @@ export default function DocsPage() {
             style={{ border: "1px solid var(--color-border)" }}
           >
             {[
-              { tier: "Free", price: "$0", agents: "1", rules: "3 pattern", history: "7 days", extras: "Email alerts, 1 manual kill/mo, local failsafe, 1 team (2 members)" },
-              { tier: "Pro", price: "$5/mo", agents: "1 (+$3/ea)", rules: "Unlimited pattern + 5 NL", history: "90 days", extras: "Unlimited kill + auto-kill, AI detection (15-min eval), all alerts, 14-day trial" },
+              { tier: "Open Source", price: "Free", agents: "Unlimited", rules: "Unlimited pattern", history: "Local", extras: "Kill switch + auto-kill, injection detection, spend/rate limits, local dashboard" },
+              { tier: "Pro", price: "$5/mo", agents: "1 (+$3/ea)", rules: "Unlimited + 5 NL", history: "90 days", extras: "Cloud dashboard, AI detection, cost analytics, session timelines, all alerts, 14-day trial" },
               { tier: "Team", price: "$19/mo", agents: "5 (+$2/ea)", rules: "Unlimited + 20 NL + shared", history: "1 year", extras: "10 members, 5-min eval, auto-kill, full role management" },
               { tier: "Enterprise", price: "Custom", agents: "Unlimited", rules: "Unlimited", history: "Unlimited", extras: "SSO, audit logs, custom webhooks, custom roles" },
             ].map((t) => (

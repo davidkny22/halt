@@ -28,6 +28,13 @@ import {
   createSubagentHandlers,
 } from "./hooks/lifecycle.js";
 
+// No-op sender for offline mode — same interface as HttpsSender
+class OfflineSender {
+  enqueue() {}
+  start() {}
+  stop() {}
+}
+
 export default function register(api: any) {
   const rawConfig = api.pluginConfig || api.config || {};
   const config = parseConfig(rawConfig);
@@ -54,7 +61,6 @@ export default function register(api: any) {
       tracker = new ViolationTracker(akConfig);
       violationTrackers.set(agentId, tracker);
     } else {
-      // Sync config from backend on each access (config updates every 60s via rule cache)
       const akConfig = ruleCache.getAutoKillConfig(agentId);
       tracker.updateConfig(akConfig);
     }
@@ -63,52 +69,62 @@ export default function register(api: any) {
 
   const cache = new JsonCache();
 
-  const sender = new HttpsSender(config, {
-    onAgentKillStates: (states) => {
-      // Per-agent kill states from HTTPS response
-      for (const [agentId, state] of Object.entries(states)) {
-        if (state.killed && !killState.isKilled(agentId)) {
-          killState.setKilled(state.reason || "Killed by server", agentId);
-        } else if (!state.killed && killState.isKilled(agentId)) {
-          killState.clearKilled(agentId);
-        }
-      }
-    },
-    onKillState: (killed, reason) => {
-      // Backwards-compatible global fallback (only if agent_kill_states not present)
-      if (killed && !killState.isKilled()) {
-        killState.setKilled(reason || "Killed by server (HTTPS fallback)");
-      } else if (!killed && killState.isKilled()) {
-        killState.clearKilled();
-      }
-    },
-    onFlushFail: (events) => {
-      cache.cache(events);
-    },
-  });
-  sender.start();
+  // In offline mode: no cloud transport, events go to local cache only
+  let sender: HttpsSender | OfflineSender;
 
-  const wsClient = new WebSocketClient(config, {
-    onKill: (reason, _ruleId, agentId) => {
-      killState.setKilled(reason, agentId);
-    },
-    onUnkill: (agentId) => {
-      killState.clearKilled(agentId);
-    },
-  });
-  wsClient.start();
+  if (config.offlineMode) {
+    sender = new OfflineSender();
+  } else {
+    sender = new HttpsSender(config, {
+      onAgentKillStates: (states) => {
+        for (const [agentId, state] of Object.entries(states)) {
+          if (state.killed && !killState.isKilled(agentId)) {
+            killState.setKilled(state.reason || "Killed by server", agentId);
+          } else if (!state.killed && killState.isKilled(agentId)) {
+            killState.clearKilled(agentId);
+          }
+        }
+      },
+      onKillState: (killed, reason) => {
+        if (killed && !killState.isKilled()) {
+          killState.setKilled(reason || "Killed by server (HTTPS fallback)");
+        } else if (!killed && killState.isKilled()) {
+          killState.clearKilled();
+        }
+      },
+      onFlushFail: (events) => {
+        cache.cache(events);
+      },
+    });
+    sender.start();
+
+    const wsClient = new WebSocketClient(config, {
+      onKill: (reason, _ruleId, agentId) => {
+        killState.setKilled(reason, agentId);
+      },
+      onUnkill: (agentId) => {
+        killState.clearKilled(agentId);
+      },
+    });
+    wsClient.start();
+  }
+
   ruleCache.start();
 
-  // Periodically flush cached events
-  setInterval(() => {
-    const cached = cache.flush(50);
-    for (const event of cached) sender.enqueue(event);
-  }, 30_000);
+  if (!config.offlineMode) {
+    // Periodically flush cached events to server
+    setInterval(() => {
+      const cached = cache.flush(50);
+      for (const event of cached) (sender as HttpsSender).enqueue(event);
+    }, 30_000);
+
+    // Discover all agents from openclaw.json (fire-and-forget)
+    discoverAgents(config).catch(() => {});
+  }
 
   // Per-agent session tracking: agentId → current session counter
   const agentSessionCounters = new Map<string, number>();
 
-  // Resolve agent ID: prefer ctx.agentId (from OpenClaw), fall back to sessionKey parsing
   function resolveAgentId(event: any, ocCtx?: any): string {
     if (ocCtx?.agentId) return ocCtx.agentId;
     const sk = event?.sessionKey as string | undefined;
@@ -119,11 +135,8 @@ export default function register(api: any) {
     return rawConfig.agentId || "unknown";
   }
 
-  // Resolve session ID: use ctx.sessionId if available, else build from agent + counter
   function resolveSessionId(event: any, ocCtx?: any, agentId?: string): string {
-    // OpenClaw provides a session UUID when session_start fires
     if (ocCtx?.sessionId) return ocCtx.sessionId;
-    // Use sessionKey if available (unique per agent session)
     const sk = event?.sessionKey || ocCtx?.sessionKey;
     if (sk) {
       const aid = agentId || resolveAgentId(event, ocCtx);
@@ -133,7 +146,6 @@ export default function register(api: any) {
     return "default";
   }
 
-  // Mark session boundary on agent_end
   function onAgentEnd(agentId: string) {
     const current = agentSessionCounters.get(agentId) || 0;
     agentSessionCounters.set(agentId, current + 1);
@@ -145,7 +157,7 @@ export default function register(api: any) {
     get sessionId() { return "default"; },
     resolveAgentId,
     resolveSessionId,
-    sender,
+    sender: sender as any,
     rateTracker,
     redactionPatterns: config.redactionPatterns,
     getFailsafe,
@@ -153,9 +165,6 @@ export default function register(api: any) {
     getViolationTracker,
     shieldScanner: new ShieldScanner(),
   };
-
-  // Discover all agents from openclaw.json (fire-and-forget)
-  discoverAgents(config).catch(() => {});
 
   // Register hooks — all handlers receive (event, ocCtx) from OpenClaw
   api.on("before_tool_call", createBeforeToolCallHandler(ctx), { priority: 10 });
@@ -185,7 +194,7 @@ export default function register(api: any) {
   api.on("subagent_spawning", subagent.spawning, { priority: 10 });
   api.on("subagent_ended", subagent.ended, { priority: 10 });
 
-  // Inject visible rules into agent's system prompt (ctx has agentId)
+  // Inject visible rules into agent's system prompt
   api.on("before_prompt_build", (_event: any, ocCtx: any) => {
     const agentId = ocCtx?.agentId;
     const rulesContext = ruleCache.getVisibleRulesContextForAgent(agentId);

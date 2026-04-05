@@ -9,31 +9,30 @@ export default function PricingPage() {
         </Link>
         <h1 className="text-3xl font-bold mb-4">Pricing</h1>
         <p style={{ color: "var(--color-text-secondary)" }}>
-          Free forever for basic monitoring. Pro when you need the big claws.
+          Open source locally. Pro when you need the cloud.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
-        {/* Free */}
+        {/* Open Source */}
         <div className="p-6 rounded-2xl" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
-          <h2 className="text-lg font-semibold mb-1">Free</h2>
-          <p className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>Getting started</p>
+          <h2 className="text-lg font-semibold mb-1">Open Source</h2>
+          <p className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>Local, no account</p>
           <div className="mb-5">
-            <span className="text-3xl font-bold">$0</span>
+            <span className="text-3xl font-bold">Free</span>
             <span className="text-xs ml-1" style={{ color: "var(--color-text-secondary)" }}>/forever</span>
           </div>
-          <Link href="https://app.clawnitor.io/signup" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs mb-6" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
-            Get Started Free
-          </Link>
+          <code className="block text-center px-3 py-2.5 rounded-lg text-[10px] mb-6" style={{ backgroundColor: "var(--color-bg)", border: "1px solid var(--color-border)", fontFamily: "var(--font-mono)", color: "var(--color-coral)" }}>
+            openclaw plugins install
+          </code>
           <ul className="flex flex-col gap-2.5 text-xs">
-            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 agent</li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 3 pattern rules</li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Email alerts</li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 7-day event history</li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 team (2 members)</li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 manual kill/mo</li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Local failsafe (always active)</li>
-            <li className="flex gap-2" style={{ color: "var(--color-text-tertiary)" }}><span>—</span> No auto-kill or AI detection</li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited agents</li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited pattern rules</li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Injection detection (180 patterns)</li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Kill switch + auto-kill</li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Spend + rate limits</li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Local dashboard</li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> MIT licensed</li>
           </ul>
         </div>
 
@@ -55,15 +54,14 @@ export default function PricingPage() {
             Start Free Trial
           </Link>
           <ul className="flex flex-col gap-2.5 text-xs">
-            <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>1 agent included (+$3/ea)</strong></li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Unlimited kill switch + auto-kill</strong></li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Unlimited kills + auto-kill</strong></li>
             <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>AI anomaly detection</strong></li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Cost analytics + spend trends</strong></li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Session timelines</strong></li>
             <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Up to 5 NL rules</strong></li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited pattern rules + 10 shared</li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 15-min AI evaluation cycle</li>
+            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 agent (+$3/ea)</li>
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> All alert channels</li>
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 90-day event history</li>
-            <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 team (3 members)</li>
             <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 14-day free trial</li>
           </ul>
         </div>

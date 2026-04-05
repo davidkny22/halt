@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { SessionTimeline } from "@/components/session-timeline";
+import { UpgradeGate } from "@/components/upgrade-gate";
+import { useSession } from "next-auth/react";
 
 interface AutoKillConfig {
   enabled: boolean;
@@ -31,6 +33,8 @@ type Tab = "overview" | "sessions";
 export default function AgentDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { data: sessionData } = useSession();
+  const userTier = (sessionData as any)?.tier || "free";
   const agentId = params.id as string;
 
   const [config, setConfig] = useState<AgentConfig | null>(null);
@@ -277,9 +281,15 @@ export default function AgentDetailPage() {
         </>
       )}
 
-      {/* Sessions Tab */}
+      {/* Sessions Tab (Pro+) */}
       {activeTab === "sessions" && (
-        <SessionTimeline sessions={sessions} agentId={agentId} />
+        <UpgradeGate
+          feature="Session Timelines"
+          description="Unlock session timelines with tool call sequences, subagent traces, and duration stats with Pro."
+          tier={userTier}
+        >
+          <SessionTimeline sessions={sessions} agentId={agentId} />
+        </UpgradeGate>
       )}
     </div>
   );

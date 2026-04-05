@@ -44,7 +44,15 @@ export class RuleCache {
   }
 
   start() {
-    // Fetch immediately, then every 60s
+    if (this.config.offlineMode) {
+      // Load rules from plugin config (no server fetch)
+      this.rules = this.config.offlineRules.filter((r) => r.enabled);
+      if (this.config.offlineShieldConfig) {
+        this.cachedShieldConfig = this.config.offlineShieldConfig;
+      }
+      return;
+    }
+    // Online: fetch immediately, then every 60s
     this.fetchRules();
     this.fetchTimer = setInterval(() => this.fetchRules(), 60_000);
   }

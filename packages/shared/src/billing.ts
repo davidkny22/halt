@@ -21,6 +21,9 @@ export interface TierFeatures {
   customRoles: boolean;
   auditLogs: boolean;
   sso: boolean;
+  costAnalytics: boolean;
+  sessionTimelines: boolean;
+  savesPage: boolean;
 }
 
 export const TIER_FEATURES: Record<Tier, TierFeatures> = {
@@ -44,6 +47,9 @@ export const TIER_FEATURES: Record<Tier, TierFeatures> = {
     customRoles: false,
     auditLogs: false,
     sso: false,
+    costAnalytics: false,
+    sessionTimelines: false,
+    savesPage: false,
   },
   trial: {
     maxRules: Infinity,
@@ -65,6 +71,9 @@ export const TIER_FEATURES: Record<Tier, TierFeatures> = {
     customRoles: false,
     auditLogs: false,
     sso: false,
+    costAnalytics: true,
+    sessionTimelines: true,
+    savesPage: true,
   },
   paid: {
     maxRules: Infinity,
@@ -86,6 +95,9 @@ export const TIER_FEATURES: Record<Tier, TierFeatures> = {
     customRoles: false,
     auditLogs: false,
     sso: false,
+    costAnalytics: true,
+    sessionTimelines: true,
+    savesPage: true,
   },
   team: {
     maxRules: Infinity,
@@ -107,6 +119,9 @@ export const TIER_FEATURES: Record<Tier, TierFeatures> = {
     customRoles: false,
     auditLogs: false,
     sso: false,
+    costAnalytics: true,
+    sessionTimelines: true,
+    savesPage: true,
   },
   enterprise: {
     maxRules: Infinity,
@@ -128,5 +143,8 @@ export const TIER_FEATURES: Record<Tier, TierFeatures> = {
     customRoles: true,
     auditLogs: true,
     sso: true,
+    costAnalytics: true,
+    sessionTimelines: true,
+    savesPage: true,
   },
 };

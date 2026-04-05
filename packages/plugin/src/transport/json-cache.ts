@@ -64,6 +64,11 @@ export class JsonCache {
     }
   }
 
+  /** Read all cached events without removing them (for report/serve) */
+  readAll(): ClawnitorEvent[] {
+    return this.entries.map((e) => e.payload);
+  }
+
   count(): number {
     return this.entries.length;
   }
