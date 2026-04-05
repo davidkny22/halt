@@ -44,7 +44,7 @@ export default function PricingPage() {
         <p className="text-sm mb-4" style={{ color: "var(--color-text-secondary)" }}>
           14-day free trial of Pro. No credit card required.
         </p>
-        <Link href="/signup" className="inline-block px-8 py-3 rounded-lg font-semibold text-white" style={{ backgroundColor: "var(--color-coral)" }}>
+        <Link href="https://app.clawnitor.io/signup" className="inline-block px-8 py-3 rounded-lg font-semibold text-white" style={{ backgroundColor: "var(--color-coral)" }}>
           Get Started Free
         </Link>
       </div>

@@ -157,6 +157,76 @@ export const alerts = pgTable("alerts", {
     .defaultNow(),
 });
 
+// ── Teams ────────────────────────────────────────────────
+
+export const memberRoleEnum = pgEnum("member_role", ["admin", "member"]);
+
+export const teams = pgTable("teams", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  owner_id: uuid("owner_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  tier: tierEnum("tier").notNull().default("free"),
+  stripe_customer_id: varchar("stripe_customer_id", { length: 255 }),
+  max_agents: integer("max_agents").notNull().default(10),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const teamMembers = pgTable("team_members", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  team_id: uuid("team_id")
+    .notNull()
+    .references(() => teams.id, { onDelete: "cascade" }),
+  user_id: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  role: memberRoleEnum("role").notNull().default("member"),
+  joined_at: timestamp("joined_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const teamInvites = pgTable("team_invites", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  team_id: uuid("team_id")
+    .notNull()
+    .references(() => teams.id, { onDelete: "cascade" }),
+  email: varchar("email", { length: 255 }).notNull(),
+  role: memberRoleEnum("role").notNull().default("member"),
+  token: varchar("token", { length: 64 }).notNull().unique(),
+  expires_at: timestamp("expires_at", { withTimezone: true }).notNull(),
+  accepted_at: timestamp("accepted_at", { withTimezone: true }),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// ── Shared Rules (team-scoped) ──────────────────────────
+
+export const sharedRules = pgTable("shared_rules", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  team_id: uuid("team_id")
+    .notNull()
+    .references(() => teams.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  rule_type: varchar("rule_type", { length: 32 }).notNull(),
+  config: jsonb("config").notNull(),
+  scope: text("scope").array(), // agent_ids this rule applies to, null = all
+  enabled: boolean("enabled").notNull().default(true),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 // ── Baselines (Phase 5) ─────────────────────────────────
 
 export const baselines = pgTable("baselines", {

@@ -20,9 +20,11 @@ export async function billingRoutes(app: FastifyInstance) {
         return reply.status(404).send({ error: "User not found" });
       }
 
+      const { plan } = (request.body as { plan?: "pro" | "team" }) || {};
       const url = await createCheckoutSession(
         user.id,
         user.email,
+        plan || "pro",
         user.stripe_customer_id ?? undefined
       );
 

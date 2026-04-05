@@ -12,31 +12,37 @@ export function getStripe(): Stripe | null {
   return _stripe;
 }
 
-// Price IDs would be configured in Stripe Dashboard
-// These are placeholders — replace with real IDs after Stripe setup
-const PRICE_IDS = {
-  firstAgent: "price_first_agent_monthly", // $5/mo
-  additionalAgent: "price_additional_agent_monthly", // $3/mo
+export const PRICE_IDS = {
+  pro: {
+    firstAgent: "price_1TB4gUL6FFGNUHLlm9r7MSfH", // $5/mo
+    additionalAgent: "price_1TB4gaL6FFGNUHLlQfaWbajT", // $3/mo
+  },
+  team: {
+    base: "price_1TB4grL6FFGNUHLliKe6W6cR", // $29/mo (10 agents included)
+    additionalAgent: "price_1TB4gsL6FFGNUHLlIDamGisi", // $2/mo
+  },
+  // Enterprise: custom pricing (contact sales)
 };
 
 export async function createCheckoutSession(
   userId: string,
   email: string,
+  plan: "pro" | "team" = "pro",
   customerId?: string
 ): Promise<string | null> {
   const stripe = getStripe();
   if (!stripe) return null;
 
+  const priceId = plan === "team" ? PRICE_IDS.team.base : PRICE_IDS.pro.firstAgent;
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: customerId || undefined,
     customer_email: customerId ? undefined : email,
-    line_items: [
-      { price: PRICE_IDS.firstAgent, quantity: 1 },
-    ],
+    line_items: [{ price: priceId, quantity: 1 }],
     success_url: "https://clawnitor.io/settings?billing=success",
     cancel_url: "https://clawnitor.io/settings?billing=cancel",
-    metadata: { userId },
+    metadata: { userId, plan },
   });
 
   return session.url;

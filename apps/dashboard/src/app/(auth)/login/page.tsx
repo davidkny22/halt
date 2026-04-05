@@ -1,12 +1,13 @@
 import { signIn } from "@/auth";
 import Link from "next/link";
+import { LogoMark } from "@/components/logo";
 
 export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="text-4xl mb-3">🦞</div>
+          <div className="flex justify-center mb-3"><LogoMark size={48} /></div>
           <h1 className="text-2xl font-bold">Sign in to Clawnitor</h1>
           <p
             style={{ color: "var(--color-text-secondary)" }}

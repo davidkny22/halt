@@ -1,12 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 export default function SettingsPage() {
+  const { data: session } = useSession();
   const [dataSharing, setDataSharing] = useState(false);
 
+  const tier = (session as any)?.tier || "free";
+  const keyPrefix = (session as any)?.apiKeyPrefix || "clw_live_";
+
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Settings</h1>
 
       {/* Alert Channels */}
@@ -19,7 +24,9 @@ export default function SettingsPage() {
           >
             <div>
               <p className="text-sm font-medium">Email</p>
-              <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>Always enabled</p>
+              <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                {session?.user?.email || "Not configured"}
+              </p>
             </div>
             <span style={{ color: "var(--color-green)" }} className="text-sm">Active</span>
           </div>
@@ -31,14 +38,25 @@ export default function SettingsPage() {
             >
               <div>
                 <p className="text-sm font-medium">{channel}</p>
-                <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>Requires Pro plan</p>
+                <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                  {tier === "free" ? "Requires Pro plan" : "Not configured"}
+                </p>
               </div>
-              <span
-                className="text-xs px-3 py-1 rounded-full font-medium"
-                style={{ backgroundColor: "var(--color-coral-soft)", color: "var(--color-coral)" }}
-              >
-                Upgrade
-              </span>
+              {tier === "free" ? (
+                <span
+                  className="text-xs px-3 py-1 rounded-full font-medium"
+                  style={{ backgroundColor: "var(--color-coral-soft)", color: "var(--color-coral)" }}
+                >
+                  Upgrade
+                </span>
+              ) : (
+                <button
+                  className="text-xs px-3 py-1 rounded-lg font-medium"
+                  style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}
+                >
+                  Configure
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -74,10 +92,45 @@ export default function SettingsPage() {
         </div>
       </section>
 
+      {/* Billing */}
+      <section className="mb-8">
+        <h2 className="text-lg font-semibold mb-4">Billing</h2>
+        <div
+          className="p-4 rounded-lg"
+          style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">
+                Current plan: <span style={{ color: "var(--color-coral)" }}>{tier.charAt(0).toUpperCase() + tier.slice(1)}</span>
+              </p>
+              <p className="text-xs mt-1" style={{ color: "var(--color-text-secondary)" }}>
+                {tier === "free" ? "Upgrade to Pro for kill switch, AI detection, and more." : "Manage your subscription via Stripe."}
+              </p>
+            </div>
+            <button
+              className="text-sm px-4 py-2 rounded-lg font-semibold text-white"
+              style={{ backgroundColor: "var(--color-coral)" }}
+            >
+              {tier === "free" ? "Upgrade to Pro" : "Manage Billing"}
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Account */}
       <section className="mb-8">
         <h2 className="text-lg font-semibold mb-4">Account</h2>
         <div className="flex flex-col gap-3">
+          <div
+            className="p-4 rounded-lg"
+            style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}
+          >
+            <p className="text-sm font-medium mb-1">Email</p>
+            <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
+              {session?.user?.email || "Not signed in"}
+            </p>
+          </div>
           <div
             className="p-4 rounded-lg"
             style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}
@@ -88,7 +141,7 @@ export default function SettingsPage() {
                 className="flex-1 px-3 py-2 rounded text-xs"
                 style={{ backgroundColor: "var(--color-bg)", fontFamily: "var(--font-mono)" }}
               >
-                clw_live_••••••••••••••••
+                {keyPrefix}••••••••••••••••
               </code>
               <button
                 className="px-3 py-2 rounded text-xs font-medium"

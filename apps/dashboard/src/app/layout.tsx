@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import { Providers } from "@/components/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Clawnitor — Agent Monitoring for OpenClaw",
   description:
     "Real-time monitoring, alerting, and kill switch for your OpenClaw agents. Your agents run while you sleep. Clawnitor keeps its claws on them.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -20,7 +24,9 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

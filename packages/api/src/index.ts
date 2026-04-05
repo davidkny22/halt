@@ -11,8 +11,12 @@ import { killServerRoutes } from "./ws/kill-server.js";
 import { killRoutes } from "./routes/kill.js";
 import { statusRoutes } from "./routes/status.js";
 import { billingRoutes } from "./routes/billing.js";
+import { authRoutes } from "./routes/auth.js";
+import { teamsRoutes } from "./routes/teams.js";
 import { startEventProcessor } from "./jobs/event-processor.js";
 import { startAlertDelivery } from "./jobs/alert-delivery.js";
+import { startUsageSyncWorker } from "./jobs/usage-sync.js";
+import { createQueue } from "./jobs/queue.js";
 
 export async function buildApp() {
   const app = Fastify({
@@ -48,6 +52,8 @@ export async function buildApp() {
   await app.register(killRoutes);
   await app.register(statusRoutes);
   await app.register(billingRoutes);
+  await app.register(authRoutes);
+  await app.register(teamsRoutes);
 
   // Health check
   app.get("/health", async () => ({ status: "ok" }));
@@ -62,6 +68,13 @@ async function main() {
   // Start workers
   startEventProcessor();
   startAlertDelivery();
+  startUsageSyncWorker();
+
+  // Schedule usage sync every hour
+  const usageSyncQueue = createQueue("usage-sync");
+  await usageSyncQueue.upsertJobScheduler("usage-sync-hourly", {
+    every: 60 * 60 * 1000, // 1 hour
+  }, { name: "sync" });
 
   await app.listen({ port: config.PORT, host: "0.0.0.0" });
 }

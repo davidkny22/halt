@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogoMark, LogoFull } from "@/components/logo";
 
 const features = [
   {
@@ -111,10 +112,7 @@ export default function LandingPage() {
 
       {/* Nav */}
       <nav className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2.5">
-          <span className="text-2xl">🦞</span>
-          <span className="text-xl font-bold tracking-tight">Clawnitor</span>
-        </div>
+        <LogoFull size={26} />
         <div className="flex items-center gap-8">
           <a
             href="#features"
@@ -138,14 +136,14 @@ export default function LandingPage() {
             FAQ
           </a>
           <Link
-            href="/login"
+            href="https://app.clawnitor.io/login"
             className="text-sm font-medium"
             style={{ color: "var(--color-text-secondary)" }}
           >
             Sign In
           </Link>
           <Link
-            href="/signup"
+            href="https://app.clawnitor.io/signup"
             className="text-sm font-semibold px-4 py-2 rounded-lg text-white"
             style={{ backgroundColor: "var(--color-coral)" }}
           >
@@ -212,7 +210,7 @@ export default function LandingPage() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
           <Link
-            href="/signup"
+            href="https://app.clawnitor.io/signup"
             className="group px-8 py-4 rounded-xl font-semibold text-white text-base inline-flex items-center justify-center gap-2 transition-all"
             style={{
               backgroundColor: "var(--color-coral)",
@@ -543,141 +541,93 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
           {/* Free */}
-          <div
-            className="p-8 rounded-2xl"
-            style={{
-              backgroundColor: "var(--color-surface)",
-              border: "1px solid var(--color-border)",
-            }}
-          >
+          <div className="p-6 rounded-2xl" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
             <h3 className="text-lg font-semibold mb-1">Free</h3>
-            <p
-              className="text-sm mb-6"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
-              Perfect for getting started
-            </p>
-            <div className="mb-6">
-              <span className="text-4xl font-bold">$0</span>
-              <span
-                className="text-sm ml-1"
-                style={{ color: "var(--color-text-secondary)" }}
-              >
-                /forever
-              </span>
+            <p className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>Getting started</p>
+            <div className="mb-5">
+              <span className="text-3xl font-bold">$0</span>
+              <span className="text-xs ml-1" style={{ color: "var(--color-text-secondary)" }}>/forever</span>
             </div>
-            <Link
-              href="/signup"
-              className="block text-center px-6 py-3 rounded-lg font-semibold text-sm mb-8"
-              style={{
-                border: "1px solid var(--color-border)",
-                color: "var(--color-text-secondary)",
-              }}
-            >
+            <Link href="https://app.clawnitor.io/signup" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs mb-6" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
               Get Started Free
             </Link>
-            <ul className="flex flex-col gap-3 text-sm">
-              <li className="flex gap-2">
-                <span style={{ color: "var(--color-green)" }}>✓</span> Full
-                event audit trail
-              </li>
-              <li className="flex gap-2">
-                <span style={{ color: "var(--color-green)" }}>✓</span> 3
-                pattern rules
-              </li>
-              <li className="flex gap-2">
-                <span style={{ color: "var(--color-green)" }}>✓</span> Email
-                alerts
-              </li>
-              <li className="flex gap-2">
-                <span style={{ color: "var(--color-green)" }}>✓</span> 7-day
-                event history
-              </li>
-              <li
-                className="flex gap-2"
-                style={{ color: "var(--color-text-tertiary)" }}
-              >
-                <span>—</span> No kill switch
-              </li>
-              <li
-                className="flex gap-2"
-                style={{ color: "var(--color-text-tertiary)" }}
-              >
-                <span>—</span> No AI anomaly detection
-              </li>
+            <ul className="flex flex-col gap-2.5 text-xs">
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1 agent</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 3 pattern rules</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Email alerts</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 7-day event history</li>
+              <li className="flex gap-2" style={{ color: "var(--color-text-tertiary)" }}><span>—</span> No kill switch</li>
+              <li className="flex gap-2" style={{ color: "var(--color-text-tertiary)" }}><span>—</span> No AI detection</li>
             </ul>
           </div>
 
           {/* Pro */}
-          <div
-            className="p-8 rounded-2xl relative"
-            style={{
-              backgroundColor: "var(--color-surface)",
-              border: "1px solid var(--color-coral)",
-              boxShadow:
-                "0 0 0 1px rgba(255, 107, 74, 0.1), 0 8px 32px -8px rgba(255, 107, 74, 0.15)",
-            }}
-          >
-            <div
-              className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-semibold text-white"
-              style={{ backgroundColor: "var(--color-coral)" }}
-            >
-              14-day free trial
+          <div className="p-6 rounded-2xl relative" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-coral)", boxShadow: "0 0 0 1px rgba(255, 107, 74, 0.1), 0 8px 32px -8px rgba(255, 107, 74, 0.15)" }}>
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-semibold text-white" style={{ backgroundColor: "var(--color-coral)" }}>
+              Recommended
             </div>
             <h3 className="text-lg font-semibold mb-1">Pro</h3>
-            <p
-              className="text-sm mb-6"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
-              Full protection + AI intelligence
-            </p>
-            <div className="mb-6">
-              <span className="text-4xl font-bold">$5</span>
-              <span
-                className="text-sm ml-1"
-                style={{ color: "var(--color-text-secondary)" }}
-              >
-                /mo + $3/agent
-              </span>
+            <p className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>Full protection</p>
+            <div className="mb-5">
+              <span className="text-3xl font-bold">$5</span>
+              <span className="text-xs ml-1" style={{ color: "var(--color-text-secondary)" }}>/mo + $3/agent</span>
             </div>
-            <Link
-              href="/signup"
-              className="block text-center px-6 py-3 rounded-lg font-semibold text-sm text-white mb-8"
-              style={{ backgroundColor: "var(--color-coral)" }}
-            >
+            <Link href="https://app.clawnitor.io/signup" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs text-white mb-6" style={{ backgroundColor: "var(--color-coral)" }}>
               Start Free Trial
             </Link>
-            <ul className="flex flex-col gap-3 text-sm">
-              <li className="flex gap-2">
-                <span style={{ color: "var(--color-green)" }}>✓</span>{" "}
-                Everything in Free
-              </li>
-              <li className="flex gap-2">
-                <span style={{ color: "var(--color-coral)" }}>✓</span>{" "}
-                <strong>Kill switch</strong>
-              </li>
-              <li className="flex gap-2">
-                <span style={{ color: "var(--color-coral)" }}>✓</span>{" "}
-                <strong>AI anomaly detection</strong>
-              </li>
-              <li className="flex gap-2">
-                <span style={{ color: "var(--color-coral)" }}>✓</span>{" "}
-                <strong>Natural language rules</strong>
-              </li>
-              <li className="flex gap-2">
-                <span style={{ color: "var(--color-green)" }}>✓</span>{" "}
-                Unlimited rules
-              </li>
-              <li className="flex gap-2">
-                <span style={{ color: "var(--color-green)" }}>✓</span>{" "}
-                Telegram, Discord, SMS
-              </li>
-              <li className="flex gap-2">
-                <span style={{ color: "var(--color-green)" }}>✓</span> 90-day
-                event history
-              </li>
+            <ul className="flex flex-col gap-2.5 text-xs">
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Everything in Free</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Kill switch</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>AI anomaly detection</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-coral)" }}>✓</span> <strong>Natural language rules</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited rules</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> All alert channels</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 90-day event history</li>
+            </ul>
+          </div>
+
+          {/* Team */}
+          <div className="p-6 rounded-2xl" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
+            <h3 className="text-lg font-semibold mb-1">Team</h3>
+            <p className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>Scale with your team</p>
+            <div className="mb-5">
+              <span className="text-3xl font-bold">$29</span>
+              <span className="text-xs ml-1" style={{ color: "var(--color-text-secondary)" }}>/mo + $2/agent</span>
+            </div>
+            <Link href="https://app.clawnitor.io/signup" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs mb-6" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
+              Start Free Trial
+            </Link>
+            <ul className="flex flex-col gap-2.5 text-xs">
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Everything in Pro</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>10 agents included</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-sky)" }}>✓</span> <strong>Role-based access</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Team dashboard</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Shared rules</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> 1-year event history</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Priority support</li>
+            </ul>
+          </div>
+
+          {/* Enterprise */}
+          <div className="p-6 rounded-2xl" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
+            <h3 className="text-lg font-semibold mb-1">Enterprise</h3>
+            <p className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>Custom everything</p>
+            <div className="mb-5">
+              <span className="text-3xl font-bold">Custom</span>
+            </div>
+            <a href="mailto:david@clawnitor.io" className="block text-center px-4 py-2.5 rounded-lg font-semibold text-xs mb-6" style={{ border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}>
+              Contact Us
+            </a>
+            <ul className="flex flex-col gap-2.5 text-xs">
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Everything in Team</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-purple)" }}>✓</span> <strong>Unlimited agents</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-purple)" }}>✓</span> <strong>SSO / SAML</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-purple)" }}>✓</span> <strong>Audit logs</strong></li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Custom integrations</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Unlimited history</li>
+              <li className="flex gap-2"><span style={{ color: "var(--color-green)" }}>✓</span> Dedicated support + SLA</li>
             </ul>
           </div>
         </div>
@@ -725,7 +675,7 @@ export default function LandingPage() {
           }}
         />
         <div className="relative">
-          <div className="text-6xl mb-6">🦞</div>
+          <div className="mb-6 flex justify-center"><LogoMark size={64} /></div>
           <h2
             className="text-4xl md:text-5xl font-bold tracking-tight mb-4"
             style={{ letterSpacing: "-0.03em" }}
@@ -740,7 +690,7 @@ export default function LandingPage() {
             running safely.
           </p>
           <Link
-            href="/signup"
+            href="https://app.clawnitor.io/signup"
             className="group inline-flex items-center gap-2 px-10 py-4 rounded-xl font-semibold text-white text-lg transition-all"
             style={{
               backgroundColor: "var(--color-coral)",
@@ -762,13 +712,9 @@ export default function LandingPage() {
         style={{ borderTop: "1px solid var(--color-border)" }}
       >
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">🦞</span>
-            <span className="font-semibold">Clawnitor</span>
-            <span
-              className="text-sm ml-2"
-              style={{ color: "var(--color-text-tertiary)" }}
-            >
+          <div className="flex items-center gap-4">
+            <LogoFull size={20} />
+            <span className="text-xs" style={{ color: "var(--color-text-tertiary)" }}>
               Agent monitoring for OpenClaw
             </span>
           </div>
@@ -791,7 +737,7 @@ export default function LandingPage() {
           className="text-center mt-8 text-xs"
           style={{ color: "var(--color-text-tertiary)" }}
         >
-          Built by David Kogan. Run by lobsters. 🦞
+          Built by David Kogan. Run by lobsters.
         </p>
       </footer>
 
