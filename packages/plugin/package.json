@@ -1,6 +1,6 @@
 {
   "name": "@clawnitor/plugin",
-  "version": "1.3.0",
+  "version": "1.4.1",
   "description": "Clawnitor plugin for OpenClaw — agent monitoring, alerting, and kill switch",
   "type": "module",
   "main": "./dist/index.js",
@@ -12,7 +12,8 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "openclaw.plugin.json"
   ],
   "scripts": {
     "build": "tsc",
@@ -43,12 +44,11 @@
   },
   "dependencies": {
     "@clawnitor/shared": "workspace:^",
-    "@clawnitor/cli": "workspace:^",
-    "better-sqlite3": "^11"
+    "@clawnitor/cli": "workspace:^"
   },
   "devDependencies": {
+    "@types/node": "^22",
     "typescript": "^5.7",
-    "vitest": "^3",
-    "@types/better-sqlite3": "^7"
+    "vitest": "^3"
   }
 }

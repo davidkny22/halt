@@ -47,6 +47,27 @@ export async function POST(request: Request) {
     return Response.json(await res.json(), { status: res.status });
   }
 
+  if (action === "activate") {
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(data.agentId)) {
+      return Response.json({ error: "Invalid agent ID" }, { status: 400 });
+    }
+    const res = await fetch(`${API_URL}/api/agents/${data.agentId}/activate`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({}),
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
+  if (action === "get-tools") {
+    const res = await fetch(`${API_URL}/api/tools`, {
+      method: "GET",
+      headers,
+    });
+    return Response.json(await res.json(), { status: res.status });
+  }
+
   if (action === "get-sessions") {
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!UUID_RE.test(data.agentId)) {

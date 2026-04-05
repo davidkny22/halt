@@ -13,6 +13,8 @@ const createRuleBody = z.object({
   name: z.string().min(1).max(255),
   config: ruleConfigSchema,
   action_mode: actionModeSchema.optional(),
+  agent_ids: z.array(z.string().min(1).max(255)).optional(),
+  agent_visible: z.boolean().optional(),
 });
 
 const updateRuleBody = z.object({
@@ -20,6 +22,8 @@ const updateRuleBody = z.object({
   config: ruleConfigSchema.optional(),
   enabled: z.boolean().optional(),
   action_mode: actionModeSchema.optional(),
+  agent_ids: z.array(z.string().min(1).max(255)).nullable().optional(),
+  agent_visible: z.boolean().optional(),
 });
 
 export async function rulesRoutes(app: FastifyInstance) {
@@ -27,11 +31,26 @@ export async function rulesRoutes(app: FastifyInstance) {
     preHandler: [authenticateApiKey],
     handler: async (request, reply) => {
       const db = getDb();
+      const query = request.query as { agent_id?: string };
+
       const rows = await db
         .select()
         .from(rules)
         .where(eq(rules.user_id, request.userId!));
-      return reply.send({ rules: rows });
+
+      // Fetch user's rule visibility setting
+      const [user] = await db.select({ rule_visibility: users.rule_visibility }).from(users).where(eq(users.id, request.userId!));
+      const ruleVisibility = user?.rule_visibility || "per_rule";
+
+      // If agent_id filter provided, return only global rules + rules scoped to this agent
+      if (query.agent_id) {
+        const filtered = rows.filter((r) =>
+          !r.agent_ids || r.agent_ids.length === 0 || r.agent_ids.includes(query.agent_id!)
+        );
+        return reply.send({ rules: filtered, rule_visibility: ruleVisibility });
+      }
+
+      return reply.send({ rules: rows, rule_visibility: ruleVisibility });
     },
   });
 
@@ -104,7 +123,7 @@ export async function rulesRoutes(app: FastifyInstance) {
         }
       }
 
-      const { name, config, action_mode } = parsed.data;
+      const { name, config, action_mode, agent_ids, agent_visible } = parsed.data;
       const [rule] = await db
         .insert(rules)
         .values({
@@ -113,6 +132,8 @@ export async function rulesRoutes(app: FastifyInstance) {
           rule_type: config.type,
           config,
           action_mode: action_mode || "both",
+          agent_ids: agent_ids && agent_ids.length > 0 ? agent_ids : null,
+          agent_visible: agent_visible ?? true,
         })
         .returning();
 
@@ -145,6 +166,12 @@ export async function rulesRoutes(app: FastifyInstance) {
       }
       if (parsed.data.enabled !== undefined) updates.enabled = parsed.data.enabled;
       if (parsed.data.action_mode) updates.action_mode = parsed.data.action_mode;
+      if (parsed.data.agent_ids !== undefined) {
+        updates.agent_ids = parsed.data.agent_ids && parsed.data.agent_ids.length > 0
+          ? parsed.data.agent_ids
+          : null;
+      }
+      if (parsed.data.agent_visible !== undefined) updates.agent_visible = parsed.data.agent_visible;
 
       const [updated] = await db
         .update(rules)

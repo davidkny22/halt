@@ -13,16 +13,50 @@ const typeColors: Record<string, string> = {
   injection: "#FF6B4A",
 };
 
+const FIELD_LABELS: Record<string, string> = {
+  cost_usd: "Spend",
+  tokens_used: "Tokens",
+  duration_ms: "Duration",
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  destructive_commands: "Destructive commands",
+  credential_exfiltration: "Credential theft",
+  instruction_overrides: "Prompt injection",
+  system_prompt_manipulation: "System prompt attacks",
+  encoding_obfuscation: "Encoding tricks",
+  data_exfiltration: "Data exfiltration",
+};
+
+function formatWindow(minutes: number): string {
+  if (minutes < 60) return `${minutes}m`;
+  if (minutes % 1440 === 0) return `${minutes / 1440}d`;
+  if (minutes % 60 === 0) return `${minutes / 60}h`;
+  return `${minutes}m`;
+}
+
 function formatRuleConfig(type: string, config: any): string {
   if (!config) return "";
-  if (type === "threshold") return `${config.field || "cost_usd"} ${config.operator === "lt" ? "<" : ">"} ${config.value} over ${config.windowMinutes}min`;
-  if (type === "rate") return `Max ${config.maxCount} ${config.eventType ? config.eventType.replace("_", " ") + "s" : "events"} per ${config.windowMinutes}min${config.toolName ? ` (${config.toolName})` : ""}`;
+  if (type === "threshold") {
+    const field = FIELD_LABELS[config.field] || config.field;
+    const op = config.operator === "lt" ? "drops below" : "exceeds";
+    const val = config.field === "cost_usd" ? `$${config.value}` : config.value.toLocaleString();
+    return `${field} ${op} ${val} over ${formatWindow(config.windowMinutes)}`;
+  }
+  if (type === "rate") {
+    const what = config.toolName ? config.toolName : config.eventType ? config.eventType.replace("_", " ") + "s" : "events";
+    return `Limit ${config.maxCount} ${what} per ${formatWindow(config.windowMinutes)}`;
+  }
   if (type === "keyword") return `Blocks: ${(config.keywords || []).join(", ")}`;
   if (type === "nl") return config.promptText?.slice(0, 80) + (config.promptText?.length > 80 ? "..." : "");
   return "";
 }
 
-export function RulesClient({ rules, tier }: { rules: any[]; tier: string }) {
+function formatShieldCategories(categories: string[]): string {
+  return (categories || []).map((c) => CATEGORY_LABELS[c] || c).join(", ");
+}
+
+export function RulesClient({ rules, tier, agents }: { rules: any[]; tier: string; agents: any[] }) {
   const [showCreate, setShowCreate] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const router = useRouter();
@@ -119,7 +153,7 @@ export function RulesClient({ rules, tier }: { rules: any[]; tier: string }) {
                       color: isInjection ? "#FF6B4A" : (typeColors[rule.rule_type] || "var(--color-text-secondary)"),
                     }}
                   >
-                    {isInjection ? "shield" : rule.rule_type === "nl" ? "NL" : rule.rule_type}
+                    {isInjection ? "Shield" : rule.rule_type === "nl" ? "Natural language" : rule.rule_type.charAt(0).toUpperCase() + rule.rule_type.slice(1)}
                   </span>
                   <span style={{ color: rule.enabled ? "var(--color-green)" : "var(--color-text-secondary)" }}>
                     {rule.enabled ? "Active" : "Disabled"}
@@ -158,6 +192,7 @@ export function RulesClient({ rules, tier }: { rules: any[]; tier: string }) {
               <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
                 <th className="text-left px-4 py-3 font-medium" style={{ color: "var(--color-text-secondary)" }}>Name</th>
                 <th className="text-left px-4 py-3 font-medium" style={{ color: "var(--color-text-secondary)" }}>Type</th>
+                <th className="text-left px-4 py-3 font-medium" style={{ color: "var(--color-text-secondary)" }}>Scope</th>
                 <th className="text-left px-4 py-3 font-medium" style={{ color: "var(--color-text-secondary)" }}>Status</th>
                 <th className="text-right px-4 py-3 font-medium" style={{ color: "var(--color-text-secondary)" }}>Actions</th>
               </tr>
@@ -183,10 +218,17 @@ export function RulesClient({ rules, tier }: { rules: any[]; tier: string }) {
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] mt-0.5" style={{ color: "var(--color-text-tertiary)" }}>
-                      {rule.rule_type === "injection"
-                        ? `Powered by Shield — ${(rule.config?.categories || []).join(", ")}`
-                        : formatRuleConfig(rule.rule_type, rule.config)}
+                    <div className="text-[11px] mt-0.5 flex items-center gap-2" style={{ color: "var(--color-text-tertiary)" }}>
+                      <span>
+                        {rule.rule_type === "injection"
+                          ? `${formatShieldCategories(rule.config?.categories || [])}`
+                          : formatRuleConfig(rule.rule_type, rule.config)}
+                      </span>
+                      {rule.agent_visible === false && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: "var(--color-surface)" }}>
+                          Silent
+                        </span>
+                      )}
                     </div>
                   </td>
                   <td className="px-4 py-3">
@@ -197,7 +239,14 @@ export function RulesClient({ rules, tier }: { rules: any[]; tier: string }) {
                         color: rule.rule_type === "injection" ? "#FF6B4A" : (typeColors[rule.rule_type] || "var(--color-text-secondary)"),
                       }}
                     >
-                      {rule.rule_type === "injection" ? "shield" : rule.rule_type === "nl" ? "natural language" : rule.rule_type}
+                      {rule.rule_type === "injection" ? "Shield" : rule.rule_type === "nl" ? "Natural language" : rule.rule_type.charAt(0).toUpperCase() + rule.rule_type.slice(1)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-xs" style={{ color: "var(--color-text-tertiary)" }}>
+                      {!rule.agent_ids || rule.agent_ids.length === 0
+                        ? "All agents"
+                        : rule.agent_ids.join(", ")}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -247,6 +296,7 @@ export function RulesClient({ rules, tier }: { rules: any[]; tier: string }) {
             setShowCreate(false);
             router.refresh();
           }}
+          agents={agents}
         />
       )}
     </div>

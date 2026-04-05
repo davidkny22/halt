@@ -35,7 +35,7 @@ Clawnitor hooks into OpenClaw's `before_tool_call`. Every action your agent trie
 - **Cost tracking** — per-agent spend breakdowns, 7-day trend charts, most expensive calls ranked. Know exactly where your money goes.
 - **Decision traces** — visual timeline of every tool call within a session. See what your agent did, in what order, with per-call cost and model info.
 - **Subagent tracking** — subagent spawning/ending captured with attribution. See parent-child relationships in your session timelines.
-- **Offline resilience** — SQLite cache, local failsafe, and cached rules stay active even when the internet isn't.
+- **Offline resilience** — Local cache, local failsafe, and cached rules stay active even when the internet isn't.
 - **Cloud dashboard** — expandable activity feed with sorting and time range filters, spend analytics (per-agent, per-tool, per-model), session tracking with lifecycle management, decision traces with subagent nesting, rules manager, saves history, team management.
 
 ## Quick start
@@ -45,7 +45,11 @@ openclaw plugins install @clawnitor/plugin
 npx clawnitor init
 ```
 
-That's it. `clawnitor init` handles authentication, API key generation, and config — all in one command.
+That's it. `clawnitor init` handles authentication, API key generation, and config — all in one command. All your agents are auto-discovered from `openclaw.json` when the plugin starts. To register agents before they run:
+
+```bash
+npx clawnitor discover
+```
 
 **Or manually:** sign up at [clawnitor.io](https://clawnitor.io), copy your API key, and add it to your `openclaw.json`:
 
@@ -75,7 +79,7 @@ OpenClaw Agent                    Clawnitor Backend
 │ Kill switch    │               └────────┬─────────┘
 │ Local failsafe │                        │
 │ Rule cache     │               ┌────────┴─────────┐
-│ SQLite cache   │               │ Dashboard         │
+│ Local cache   │               │ Dashboard         │
 └────────────────┘               │ app.clawnitor.io  │
                                  └──────────────────┘
 ```

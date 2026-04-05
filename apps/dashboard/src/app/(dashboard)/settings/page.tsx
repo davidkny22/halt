@@ -42,6 +42,8 @@ export default function SettingsPage() {
   const router = useRouter();
   const [dataSharing, setDataSharing] = useState(false);
   const [savingSharing, setSavingSharing] = useState(false);
+  const [ruleVisibility, setRuleVisibility] = useState("per_rule");
+  const [savingVisibility, setSavingVisibility] = useState(false);
   const [rotatingKey, setRotatingKey] = useState(false);
   const [newKey, setNewKey] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -123,6 +125,13 @@ export default function SettingsPage() {
     } finally {
       setRedeemingBeta(false);
     }
+  }
+
+  async function handleRuleVisibility(mode: string) {
+    setSavingVisibility(true);
+    setRuleVisibility(mode);
+    await callAction("set-rule-visibility", { rule_visibility: mode });
+    setSavingVisibility(false);
   }
 
   async function handleToggleDataSharing() {
@@ -383,6 +392,44 @@ export default function SettingsPage() {
                 style={{ left: dataSharing ? "26px" : "4px" }}
               />
             </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Rule Visibility */}
+      <section className="mb-8">
+        <h2 className="text-lg font-semibold mb-4">Rule Transparency</h2>
+        <div
+          className="p-4 rounded-lg"
+          style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}
+        >
+          <p className="text-sm mb-1 font-medium">
+            Agent rule awareness
+            {savingVisibility && <span className="ml-2 text-xs" style={{ color: "var(--color-text-tertiary)" }}>Saving...</span>}
+          </p>
+          <p className="text-xs mb-4" style={{ color: "var(--color-text-secondary)" }}>
+            Controls whether agents can see the rules monitoring them. Visible rules are injected into the agent&apos;s system prompt so it can comply proactively.
+          </p>
+          <div className="flex gap-2">
+            {([
+              { value: "all_visible", label: "All visible", desc: "Every rule is shown to every agent" },
+              { value: "per_rule", label: "Per rule", desc: "Each rule's visibility is set individually" },
+              { value: "all_silent", label: "All silent", desc: "No rules are ever shown to agents" },
+            ] as const).map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => handleRuleVisibility(opt.value)}
+                className="flex-1 px-3 py-2 rounded-lg text-xs font-medium cursor-pointer text-left"
+                style={{
+                  backgroundColor: ruleVisibility === opt.value ? "var(--color-coral-soft)" : "transparent",
+                  color: ruleVisibility === opt.value ? "var(--color-coral)" : "var(--color-text-secondary)",
+                  border: `1px solid ${ruleVisibility === opt.value ? "var(--color-coral)" : "var(--color-border)"}`,
+                }}
+              >
+                <div>{opt.label}</div>
+                <div className="text-[11px] mt-0.5" style={{ color: "var(--color-text-tertiary)", fontWeight: 400 }}>{opt.desc}</div>
+              </button>
+            ))}
           </div>
         </div>
       </section>

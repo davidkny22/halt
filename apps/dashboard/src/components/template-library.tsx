@@ -14,9 +14,10 @@ interface RuleTemplate {
   agent_visible: boolean;
 }
 
-const CATEGORIES = ["safety", "cost", "communication", "compliance"];
+const CATEGORIES = ["security", "safety", "cost", "communication", "compliance"];
 
 const CATEGORY_LABELS: Record<string, string> = {
+  security: "Shield",
   safety: "Safety",
   cost: "Cost Control",
   communication: "Communication",
@@ -37,9 +38,8 @@ const TYPE_COLORS: Record<string, string> = {
   nl: "var(--color-green)",
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-const CACHE_KEY = "clw_rule_templates";
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h
+const CACHE_KEY = "clw_rule_templates_v3";
+const CACHE_TTL = 60 * 60 * 1000; // 1h
 
 export function TemplateLibrary({ defaultExpanded = false }: { defaultExpanded?: boolean }) {
   const [templates, setTemplates] = useState<Record<string, RuleTemplate[]>>({});
@@ -54,21 +54,23 @@ export function TemplateLibrary({ defaultExpanded = false }: { defaultExpanded?:
   }, []);
 
   async function loadTemplates() {
-    // Check localStorage cache
+    // Check localStorage cache — only use if fresh AND has all expected categories
     try {
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < CACHE_TTL) {
+        const hasAllCategories = CATEGORIES.every((c) => Array.isArray(data[c]) && data[c].length > 0);
+        if (Date.now() - timestamp < CACHE_TTL && hasAllCategories) {
           setTemplates(data);
           return;
         }
       }
     } catch {}
 
-    // Fetch from API
+    // Fetch fresh — always go through API directly (public endpoint, no auth needed)
     try {
-      const res = await fetch(`${API_URL}/api/rule-templates`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.clawnitor.io";
+      const res = await fetch(`${apiUrl}/api/rule-templates`, { cache: "no-store" });
       if (res.ok) {
         const { by_category } = await res.json();
         setTemplates(by_category);
@@ -80,8 +82,11 @@ export function TemplateLibrary({ defaultExpanded = false }: { defaultExpanded?:
     } catch {}
   }
 
+  const [error, setError] = useState("");
+
   async function handleInstall(template: RuleTemplate) {
     setInstalling(template.id);
+    setError("");
     try {
       const res = await fetch("/api/rules-action", {
         method: "POST",
@@ -89,15 +94,20 @@ export function TemplateLibrary({ defaultExpanded = false }: { defaultExpanded?:
         body: JSON.stringify({
           action: "create",
           name: template.name,
-          rule_type: template.rule_type,
-          config: template.config,
+          config: { type: template.rule_type, ...template.config },
+          agent_visible: template.agent_visible,
         }),
       });
       if (res.ok) {
         setInstalled((prev) => new Set(prev).add(template.id));
         router.refresh();
+      } else {
+        const data = await res.json();
+        setError(data.message || `Failed to add template (${res.status})`);
       }
-    } catch {}
+    } catch (e) {
+      setError("Failed to add template");
+    }
     setInstalling(null);
   }
 
@@ -132,6 +142,11 @@ export function TemplateLibrary({ defaultExpanded = false }: { defaultExpanded?:
 
       {expanded && (
         <>
+          {error && (
+            <div className="p-3 rounded-lg text-sm mb-4" style={{ backgroundColor: "var(--color-coral-soft)", color: "var(--color-coral)" }}>
+              {error}
+            </div>
+          )}
           {/* Category tabs */}
           <div className="flex gap-1 mb-4">
             {CATEGORIES.map((cat) => (

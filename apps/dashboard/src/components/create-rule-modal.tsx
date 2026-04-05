@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { ToolCombobox } from "./tool-combobox";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 interface Props {
   onClose: () => void;
   onCreated: () => void;
+  agents?: { id: string; name: string; agent_id: string }[];
 }
 
-export function CreateRuleModal({ onClose, onCreated }: Props) {
+export function CreateRuleModal({ onClose, onCreated, agents = [] }: Props) {
   const [name, setName] = useState("");
   const [ruleType, setRuleType] = useState<"threshold" | "rate" | "keyword" | "nl">("threshold");
   const [actionMode, setActionMode] = useState<"block" | "alert" | "both">("both");
@@ -36,6 +38,12 @@ export function CreateRuleModal({ onClose, onCreated }: Props) {
 
   // Rate fields - event type
   const [eventType, setEventType] = useState("");
+
+  // Agent scope
+  const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
+
+  // Visibility
+  const [agentVisible, setAgentVisible] = useState(true);
 
   async function handleCreate() {
     if (!name.trim()) {
@@ -75,7 +83,14 @@ export function CreateRuleModal({ onClose, onCreated }: Props) {
       const res = await fetch("/api/rules-action", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "create", name, config, action_mode: actionMode }),
+        body: JSON.stringify({
+          action: "create",
+          name,
+          config,
+          action_mode: actionMode,
+          agent_visible: agentVisible,
+          ...(selectedAgents.length > 0 ? { agent_ids: selectedAgents } : {}),
+        }),
       });
 
       if (!res.ok) {
@@ -172,6 +187,72 @@ export function CreateRuleModal({ onClose, onCreated }: Props) {
             </p>
           </div>
 
+          {agents.length > 0 && (
+            <div>
+              <label className="text-xs font-medium block mb-1" style={{ color: "var(--color-text-secondary)" }}>Applies to</label>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setSelectedAgents([])}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer"
+                  style={{
+                    backgroundColor: selectedAgents.length === 0 ? "var(--color-coral-soft)" : "var(--color-surface)",
+                    color: selectedAgents.length === 0 ? "var(--color-coral)" : "var(--color-text-secondary)",
+                    border: `1px solid ${selectedAgents.length === 0 ? "var(--color-coral)" : "var(--color-border)"}`,
+                  }}
+                >
+                  All agents
+                </button>
+                {agents.map((a) => (
+                  <button
+                    key={a.agent_id}
+                    onClick={() => {
+                      setSelectedAgents((prev) =>
+                        prev.includes(a.agent_id)
+                          ? prev.filter((id) => id !== a.agent_id)
+                          : [...prev, a.agent_id]
+                      );
+                    }}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer"
+                    style={{
+                      backgroundColor: selectedAgents.includes(a.agent_id) ? "var(--color-coral-soft)" : "var(--color-surface)",
+                      color: selectedAgents.includes(a.agent_id) ? "var(--color-coral)" : "var(--color-text-secondary)",
+                      border: `1px solid ${selectedAgents.includes(a.agent_id) ? "var(--color-coral)" : "var(--color-border)"}`,
+                    }}
+                  >
+                    {a.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div
+                onClick={() => setAgentVisible(!agentVisible)}
+                className="relative w-9 h-5 rounded-full transition-colors"
+                style={{
+                  backgroundColor: agentVisible ? "var(--color-coral)" : "var(--color-border)",
+                }}
+              >
+                <div
+                  className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
+                  style={{ left: agentVisible ? "18px" : "2px" }}
+                />
+              </div>
+              <div>
+                <span className="text-xs font-medium" style={{ color: "var(--color-text)" }}>
+                  {agentVisible ? "Agent sees this rule" : "Silent enforcement"}
+                </span>
+                <p className="text-[11px]" style={{ color: "var(--color-text-tertiary)" }}>
+                  {agentVisible
+                    ? "The agent knows this rule exists and can comply proactively."
+                    : "Rule enforces silently — the agent won't know it's being checked."}
+                </p>
+              </div>
+            </label>
+          </div>
+
           {ruleType === "threshold" && (
             <>
               <div className="grid grid-cols-2 gap-2">
@@ -239,7 +320,7 @@ export function CreateRuleModal({ onClose, onCreated }: Props) {
                 </div>
                 <div>
                   <label className="text-xs block mb-1" style={{ color: "var(--color-text-secondary)" }}>Tool Name (optional)</label>
-                  <input value={toolName} onChange={(e) => setToolName(e.target.value)} placeholder="e.g., send_email" className="w-full px-3 py-2 rounded-lg text-sm" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)", color: "var(--color-text)" }} />
+                  <ToolCombobox value={toolName} onChange={setToolName} placeholder="e.g., send_email" />
                 </div>
               </div>
             </>

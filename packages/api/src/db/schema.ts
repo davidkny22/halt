@@ -17,6 +17,7 @@ export const agentStatusEnum = pgEnum("agent_status", [
   "active",
   "learning",
   "paused",
+  "discovered",
 ]);
 export const eventTypeEnum = pgEnum("event_type", [
   "tool_use",
@@ -48,6 +49,8 @@ export const users = pgTable("users", {
   trial_started_at: timestamp("trial_started_at", { withTimezone: true }),
   beta_expires_at: timestamp("beta_expires_at", { withTimezone: true }),
   beta_code: varchar("beta_code", { length: 32 }),
+  discovered_tools: text("discovered_tools").array(), // tool names from openclaw.json
+  rule_visibility: varchar("rule_visibility", { length: 16 }).notNull().default("per_rule"), // "all_visible" | "per_rule" | "all_silent"
   created_at: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -174,6 +177,7 @@ export const rules = pgTable("rules", {
   enabled: boolean("enabled").notNull().default(true),
   agent_visible: boolean("agent_visible").notNull().default(true),
   action_mode: varchar("action_mode", { length: 16 }).notNull().default("both"),
+  agent_ids: text("agent_ids").array(), // null = all agents, array = scoped
   created_at: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

@@ -7,6 +7,24 @@ import { generateApiKey, hashApiKey } from "../auth/api-key.js";
 import { logAudit } from "./enterprise.js";
 
 export async function accountRoutes(app: FastifyInstance) {
+  // Set rule visibility mode
+  app.put("/api/account/rule-visibility", {
+    preHandler: [authenticateApiKey],
+    handler: async (request, reply) => {
+      const { rule_visibility } = request.body as { rule_visibility: string };
+      if (!["all_visible", "per_rule", "all_silent"].includes(rule_visibility)) {
+        return reply.status(400).send({ error: "Invalid visibility mode" });
+      }
+      const db = getDb();
+      await db
+        .update(users)
+        .set({ rule_visibility, updated_at: new Date() })
+        .where(eq(users.id, request.userId!));
+
+      return reply.send({ rule_visibility });
+    },
+  });
+
   // Toggle data sharing
   app.put("/api/account/data-sharing", {
     preHandler: [authenticateApiKey],

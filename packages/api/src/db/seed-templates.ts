@@ -224,13 +224,16 @@ const TEMPLATES = [
 export async function seedRuleTemplates() {
   const db = getDb();
 
-  // Check if templates already exist
-  const existing = await db.select().from(ruleTemplates).limit(1);
-  if (existing.length > 0) {
-    logger.info("Rule templates already seeded, skipping.");
+  // Check which templates exist by name
+  const existing = await db.select({ name: ruleTemplates.name }).from(ruleTemplates);
+  const existingNames = new Set(existing.map((r) => r.name));
+  const missing = TEMPLATES.filter((t) => !existingNames.has(t.name));
+
+  if (missing.length === 0) {
+    logger.info("All %d rule templates already seeded.", TEMPLATES.length);
     return;
   }
 
-  await db.insert(ruleTemplates).values(TEMPLATES);
-  logger.info("Seeded %d rule templates.", TEMPLATES.length);
+  await db.insert(ruleTemplates).values(missing);
+  logger.info("Seeded %d new rule templates (%d already existed).", missing.length, existingNames.size);
 }

@@ -1,8 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { clawnitorEventSchema } from "@clawnitor/shared";
+import { clawnitorEventSchema, TIER_FEATURES, type Tier } from "@clawnitor/shared";
 import { getDb } from "../db/client.js";
-import { events, agents, baselines, sessions } from "../db/schema.js";
+import { events, agents, baselines, sessions, users } from "../db/schema.js";
 import { authenticateAny as authenticateApiKey } from "../auth/middleware.js";
 import { RateLimiter } from "../util/rate-limiter.js";
 import { IdempotencyChecker } from "../util/idempotency.js";
@@ -63,8 +63,37 @@ export async function eventsRoutes(app: FastifyInstance) {
             .where(and(eq(agents.user_id, userId), inArray(agents.agent_id, uniqueAgentIds)))
         : [];
 
+      const discoveredToActivate: string[] = [];
       for (const agent of existingAgents) {
         agentIdMap.set(agent.agent_id, agent.id);
+        if (agent.status === "discovered") {
+          discoveredToActivate.push(agent.id);
+        }
+      }
+
+      // Promote discovered agents to active when they start sending events (tier-limited)
+      if (discoveredToActivate.length > 0) {
+        const [user] = await db.select().from(users).where(eq(users.id, userId));
+        const tier = (user?.tier || "free") as Tier;
+        const maxAgents = TIER_FEATURES[tier].maxAgents;
+
+        const [{ value: monitoredCount }] = await db
+          .select({ value: count() })
+          .from(agents)
+          .where(and(
+            eq(agents.user_id, userId),
+            sql`${agents.status} != 'discovered'`
+          ));
+
+        const slotsAvailable = Math.max(0, maxAgents - Number(monitoredCount));
+        const toPromote = discoveredToActivate.slice(0, slotsAvailable);
+
+        if (toPromote.length > 0) {
+          await db
+            .update(agents)
+            .set({ status: "active" })
+            .where(inArray(agents.id, toPromote));
+        }
       }
 
       // Register unknown agents (single count query)

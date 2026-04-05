@@ -109,7 +109,7 @@ const faqs = [
   },
   {
     q: "What happens if your backend goes down?",
-    a: "Your agents stay protected. The local failsafe (spend limits, rate limits, tool blocklist) works independently. Events are cached locally in SQLite and flushed when connection restores. No monitoring gaps.",
+    a: "Your agents stay protected. The local failsafe (spend limits, rate limits, tool blocklist) works independently. Events are cached locally and flushed when connection restores. No monitoring gaps.",
   },
   {
     q: "Is my data safe?",

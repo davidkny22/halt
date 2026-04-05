@@ -207,12 +207,16 @@ export default function DocsPage() {
   }
 }`}</CodeBlock>
 
-          <SubHeader>3. Run your agent</SubHeader>
+          <SubHeader>3. Agents are auto-discovered</SubHeader>
           <P>
-            Start your OpenClaw agent normally. Events will appear on your{" "}
-            <a href="https://app.clawnitor.io/dashboard" style={{ color: "var(--color-coral)" }}>dashboard</a> in
-            real-time.
+            When the plugin starts, it reads your <Code>openclaw.json</Code> and registers all agents with Clawnitor. They appear on your{" "}
+            <a href="https://app.clawnitor.io/agents" style={{ color: "var(--color-coral)" }}>agents page</a> as
+            &ldquo;discovered&rdquo; — activate the ones you want to monitor.
           </P>
+          <P>
+            To register agents before running them:
+          </P>
+          <CodeBlock title="Terminal">{`npx clawnitor discover`}</CodeBlock>
 
           {/* ═══════════════ CONFIGURATION ═══════════════ */}
           <SectionHeader id="configuration">Configuration</SectionHeader>
@@ -343,6 +347,16 @@ export default function DocsPage() {
             ))}
           </div>
 
+          <SubHeader>Per-agent scoping</SubHeader>
+          <P>
+            Rules can apply to all agents (default) or be scoped to specific agents. Set the scope when creating a rule — select &ldquo;All agents&rdquo; or pick specific agents. The plugin only fetches rules relevant to its agent, so scoped rules never fire on the wrong agent.
+          </P>
+
+          <SubHeader>Agent-visible rules</SubHeader>
+          <P>
+            Rules can be visible or silent. Visible rules are injected into the agent&apos;s system prompt so it knows what&apos;s being enforced and can comply proactively. Silent rules enforce without the agent&apos;s knowledge. Set per-rule when creating, or override system-wide from Settings (All visible / Per rule / All silent).
+          </P>
+
           <SubHeader>Alert channels</SubHeader>
           <P>
             Free tier: email only. Paid tiers: email, Telegram, Discord, and SMS.
@@ -472,7 +486,7 @@ export default function DocsPage() {
             If the Clawnitor backend is unreachable, the plugin keeps working:
           </P>
           <ul className="text-xs flex flex-col gap-2 mb-4 ml-4" style={{ color: "var(--color-text-secondary)" }}>
-            <li>Events are cached locally in SQLite (up to 50MB / 7 days)</li>
+            <li>Events are cached locally (up to 50MB / 7 days)</li>
             <li>Local failsafe (spend limits, rate limits, tool blocklist) stays active</li>
             <li>Cached rules continue evaluating pre-action</li>
             <li>On reconnect, queued events flush automatically</li>
@@ -503,6 +517,7 @@ export default function DocsPage() {
               { method: "POST", path: "/api/agents/:id/kill", desc: "Kill (pause) agent" },
               { method: "POST", path: "/api/agents/:id/resume", desc: "Resume agent" },
               { method: "GET", path: "/api/stats", desc: "Dashboard stats" },
+              { method: "GET", path: "/api/tools", desc: "Known tools (discovered from config + seen in events)" },
               { method: "GET", path: "/api/spend", desc: "Spend analytics (per-agent, per-day, top events)" },
               { method: "GET", path: "/api/sessions", desc: "List sessions (filter by agent, status)" },
               { method: "GET", path: "/api/sessions/:id", desc: "Session detail" },

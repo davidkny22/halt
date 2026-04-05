@@ -1,6 +1,9 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { homedir } from "node:os";
 import { parseConfig } from "./config.js";
 import { HttpsSender } from "./transport/https-sender.js";
-import { SqliteCache } from "./transport/sqlite-cache.js";
+import { JsonCache } from "./transport/json-cache.js";
 import { WebSocketClient } from "./transport/websocket-client.js";
 import { createRateTracker } from "./severity.js";
 import { killState } from "./kill-switch/kill-state.js";
@@ -30,7 +33,7 @@ export default function register(api: any) {
   const config = parseConfig(rawConfig);
   const rateTracker = createRateTracker();
   const failsafe = new LocalFailsafe(config);
-  const ruleCache = new RuleCache(config);
+  const ruleCache = new RuleCache(config, () => resolvedAgentId);
   const violationTracker = new ViolationTracker({
     enabled: true,
     threshold: 3,
@@ -38,7 +41,7 @@ export default function register(api: any) {
   });
 
   // Initialize SQLite cache for offline resilience
-  const cache = new SqliteCache();
+  const cache = new JsonCache();
 
   // Initialize HTTPS sender
   const sender = new HttpsSender(config, {
@@ -119,6 +122,9 @@ export default function register(api: any) {
     shieldScanner: new ShieldScanner(),
   };
 
+  // Discover all agents from openclaw.json (fire-and-forget)
+  discoverAgents(config).catch(() => {});
+
   // Register hooks
   api.on("before_tool_call", createBeforeToolCallHandler(ctx), {
     priority: 10,
@@ -159,4 +165,52 @@ export default function register(api: any) {
   const subagent = createSubagentHandlers(ctx);
   api.on("subagent_spawning", subagent.spawning, { priority: 10 });
   api.on("subagent_ended", subagent.ended, { priority: 10 });
+
+  // Inject visible rules into agent's system prompt
+  api.on("before_prompt_build", () => {
+    const rulesContext = ruleCache.getVisibleRulesContext();
+    if (!rulesContext) return {};
+    return { appendSystemContext: rulesContext };
+  }, { priority: 10 });
+}
+
+async function discoverAgents(config: { apiKey: string; backendUrl: string }) {
+  try {
+    const configPath = join(homedir(), ".openclaw", "openclaw.json");
+    const raw = readFileSync(configPath, "utf-8");
+    const parsed = JSON.parse(raw);
+    const agentList = parsed?.agents?.list;
+    if (!Array.isArray(agentList) || agentList.length === 0) return;
+
+    const agentIds = agentList
+      .map((a: any) => a?.id)
+      .filter((id: unknown): id is string => typeof id === "string" && id.length > 0);
+
+    if (agentIds.length === 0) return;
+
+    // Extract all tool names from agent deny/allow lists
+    const tools = new Set<string>();
+    for (const agent of agentList) {
+      for (const t of agent?.tools?.deny || []) if (typeof t === "string") tools.add(t);
+      for (const t of agent?.tools?.allow || []) if (typeof t === "string") tools.add(t);
+    }
+
+    const url = `${config.backendUrl}/api/agents/discover`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify({
+        agents: agentIds,
+        tools: tools.size > 0 ? [...tools].sort() : undefined,
+      }),
+      signal: AbortSignal.timeout(10_000),
+    });
+
+    if (!res.ok) return;
+  } catch {
+    // Silent failure — discovery is best-effort
+  }
 }

@@ -14,7 +14,8 @@ Real-time monitoring, smart alerting, and emergency kill switch for your OpenCla
 Clawnitor watches your agents so you don't have to:
 
 - **Event capture** — logs every tool call, LLM request, message, and lifecycle event
-- **Pattern rules** — threshold, rate, and keyword rules (3 free, unlimited on Pro). Each rule: block, alert, or both.
+- **Shield** — built-in injection detection engine. 140 patterns, 6 categories, 3 severity tiers. Blocks destructive commands, credential theft, prompt injection, and more.
+- **Smart rules** — threshold, rate, keyword, and natural language rules. Per-agent or global scoping. Each rule: block, alert, or both.
 - **Kill switch** — instantly pause runaway agents from anywhere. Auto-kill shuts down agents after repeated rule violations.
 - **Cost tracking** — per-agent spend breakdowns, trend charts, most expensive calls
 - **Decision traces** — visual session timelines with lifecycle tracking, subagent nesting, blocked event badges
@@ -26,7 +27,8 @@ Clawnitor watches your agents so you don't have to:
 
 1. Install: `openclaw plugins install @clawnitor/plugin`
 2. Set up: `npx clawnitor init`
-3. Your agents are now monitored
+3. All agents auto-discovered from your `openclaw.json`
+4. Activate agents to monitor from the dashboard
 
 Or manually: sign up at https://clawnitor.io, copy your API key, add to openclaw.json.
 

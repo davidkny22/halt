@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { SqliteCache } from "../transport/sqlite-cache.js";
+import { JsonCache } from "../transport/json-cache.js";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { unlinkSync } from "node:fs";
@@ -20,21 +20,19 @@ function makeEvent(id: string): ClawnitorEvent {
   };
 }
 
-describe("SqliteCache", () => {
-  let cache: SqliteCache;
-  let dbPath: string;
+describe("JsonCache", () => {
+  let cache: JsonCache;
+  let filePath: string;
 
   beforeEach(() => {
-    dbPath = join(tmpdir(), `clawnitor-test-${Date.now()}.db`);
-    cache = new SqliteCache(dbPath);
+    filePath = join(tmpdir(), `clawnitor-test-${Date.now()}.json`);
+    cache = new JsonCache(filePath);
   });
 
   afterEach(() => {
     cache.close();
     try {
-      unlinkSync(dbPath);
-      unlinkSync(dbPath + "-wal");
-      unlinkSync(dbPath + "-shm");
+      unlinkSync(filePath);
     } catch {}
   });
 
@@ -62,7 +60,6 @@ describe("SqliteCache", () => {
   });
 
   it("reports size in bytes", () => {
-    expect(cache.sizeBytes()).toBe(0);
     cache.cache([makeEvent("id-1")]);
     expect(cache.sizeBytes()).toBeGreaterThan(0);
   });
@@ -78,5 +75,17 @@ describe("SqliteCache", () => {
     expect(flushed.event_id).toBe("round-trip");
     expect(flushed.metadata).toEqual({ tool_name: "send_email", cost_usd: 0.05 });
     expect(flushed.severity_hint).toBe("elevated");
+  });
+
+  it("persists to disk and survives reload", () => {
+    cache.cache([makeEvent("persist-1"), makeEvent("persist-2")]);
+    cache.close();
+
+    // Reload from same file
+    const cache2 = new JsonCache(filePath);
+    expect(cache2.count()).toBe(2);
+    const flushed = cache2.flush(10);
+    expect(flushed[0].event_id).toBe("persist-1");
+    cache2.close();
   });
 });

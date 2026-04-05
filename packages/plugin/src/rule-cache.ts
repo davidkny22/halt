@@ -8,6 +8,7 @@ export interface CachedRule {
   config: any;
   enabled: boolean;
   action_mode?: string; // "block" | "alert" | "both"
+  agent_visible?: boolean;
 }
 
 interface RuleCheckResult {
@@ -34,9 +35,12 @@ export class RuleCache {
   private recentEvents: EventRecord[] = [];
   private readonly MAX_RECENT_EVENTS = 500;
   private cachedShieldConfig: ShieldConfig | null = null;
+  private getAgentId?: () => string;
+  private ruleVisibility: string = "per_rule"; // "all_visible" | "per_rule" | "all_silent"
 
-  constructor(config: PluginConfig) {
+  constructor(config: PluginConfig, getAgentId?: () => string) {
     this.config = config;
+    this.getAgentId = getAgentId;
   }
 
   start() {
@@ -54,7 +58,12 @@ export class RuleCache {
 
   private async fetchRules() {
     try {
-      const res = await fetch(`${this.config.backendUrl}/api/rules`, {
+      let url = `${this.config.backendUrl}/api/rules`;
+      const agentId = this.getAgentId?.();
+      if (agentId && agentId !== "unknown") {
+        url += `?agent_id=${encodeURIComponent(agentId)}`;
+      }
+      const res = await fetch(url, {
         headers: {
           Authorization: `Bearer ${this.config.apiKey}`,
         },
@@ -63,6 +72,7 @@ export class RuleCache {
       if (res.ok) {
         const data = await res.json();
         this.rules = (data.rules || []).filter((r: CachedRule) => r.enabled);
+        this.ruleVisibility = data.rule_visibility || "per_rule";
         this.cachedShieldConfig = null; // Rebuild on next getShieldConfig()
       }
     } catch {
@@ -219,6 +229,28 @@ export class RuleCache {
 
   getRuleCount(): number {
     return this.rules.length;
+  }
+
+  getVisibleRulesContext(): string | null {
+    if (this.ruleVisibility === "all_silent") return null;
+
+    const visible = this.ruleVisibility === "all_visible"
+      ? this.rules
+      : this.rules.filter((r) => r.agent_visible !== false);
+    if (visible.length === 0) return null;
+
+    const lines = ["# Clawnitor — Active Monitoring Rules", ""];
+    lines.push("The following rules are enforced by Clawnitor. Violating a rule may result in your action being blocked, an alert being sent to the user, or your session being terminated.");
+    lines.push("");
+
+    for (const rule of visible) {
+      const action = rule.action_mode === "block" ? "blocks the action"
+        : rule.action_mode === "alert" ? "alerts the user"
+        : "blocks the action and alerts the user";
+      lines.push(`- **${rule.name}** (${rule.rule_type}) — ${action}`);
+    }
+
+    return lines.join("\n");
   }
 
   getShieldConfig(): ShieldConfig {

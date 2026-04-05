@@ -165,6 +165,9 @@ export async function billingRoutes(app: FastifyInstance) {
         })
         .where(eq(users.id, user.id));
 
+      // Seed Shield rules for trial users
+      seedShieldRules(user.id).catch(() => {});
+
       return reply.send({ tier: "trial", trial_started_at: new Date().toISOString() });
     },
   });
